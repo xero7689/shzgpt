@@ -8,7 +8,7 @@ import CopyAllIcon from '@mui/icons-material/CopyAll';
 import { useState } from 'react';
 
 const CodeBlock = (props) => {
-    const { codeString, language = 'bash' } = props;
+    const { codeString, language } = props;
 
     const [copySuccess, setCopySuccess] = useState(false);
 

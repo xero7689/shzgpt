@@ -3,7 +3,7 @@ import { Typography } from '@mui/material';
 import CodeBlock from "./CodeBlock";
 
 function separateCodeBlocks(rawString) {
-    const pattern = /```([^\n]+)\n([\s\S]+?)\n```/g;
+    const pattern = /```([^\n]+)?\n([\s\S]+?)\n```/g;
     let match, lastIndex = 0;
     const blocks = [];
     while ((match = pattern.exec(rawString))) {
