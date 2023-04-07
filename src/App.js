@@ -48,6 +48,8 @@ function App() {
   // Settings of Chat Interface
   const appBarRef = useRef(null);
   const chatInterfaceRef = useRef(null);
+  const chatContentRef = useRef(null);
+
   const [appBarHeight, setAppBarHeight] = useState(0);
   const [innerHeight, setInnerHeight] = useState(window.innerHeight);
   const [chatInterfaceHeight, setChatInterfaceHeight] = useState(0);
@@ -69,6 +71,10 @@ function App() {
     messageRef.current.value = "";
   }
 
+  /** 
+   * Prevent Default Form Action
+   * For example: `Enter` click event will trigger the submit form 
+   */
   function handleSubmit(event) {
     event.preventDefault();
     // handle form submission here
@@ -80,6 +86,9 @@ function App() {
     };
   }
 
+  /**
+   * GPT API Query Effect
+   */
   useEffect(() => {
     async function chat() {
       const last_role = chatHistory[chatHistory.length - 1].role;
@@ -95,6 +104,20 @@ function App() {
     chat();
   }, [chatHistory]);
 
+  /**
+   * Scroll to the bottom of view once history being change
+   */
+  useEffect(() => {
+    chatContentRef.current.scrollTo({
+      top: chatContentRef.current.scrollHeight,
+      behavior: 'smooth'
+    });
+  }, [chatHistory]);
+
+
+  /**
+   * Effect that calculate the size of AppBar and Content
+   */
   useEffect(() => {
     if (chatInterfaceRef.current && appBarRef.current) {
       setAppBarHeight(appBarRef.current.offsetHeight);
@@ -103,6 +126,9 @@ function App() {
     }
   }, [innerHeight]);
 
+  /**
+   * Effect that change the App height dynamically if resizing
+   */
   useEffect(() => {
     const handleResize = () => setInnerHeight(window.innerHeight);
     window.addEventListener('resize', handleResize);
@@ -117,7 +143,7 @@ function App() {
         <Box display="flex" sx={{ backgroundColor: '#1f2129' }}>
           {/* <GPTSidePanel></GPTSidePanel> */}
           <Box ref={chatInterfaceRef} flexGrow={1} display="flex" flexDirection="column" sx={{ height: chatInterfaceHeight, marginTop: "64px" }}>
-            <Box className="ChatContent" flexGrow={1} display="flex" flexDirection="column" gap={4}
+            <Box ref={chatContentRef} className="ChatContent" flexGrow={1} display="flex" flexDirection="column" gap={4}
               sx={{
                 overflow: "auto"
               }}
@@ -142,11 +168,13 @@ function App() {
               <TextField
                 inputRef={messageRef}
                 id="outlined-basic"
+                variant="filled"
                 onChange={(e) => setRequestMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
                 autoComplete="off"
                 autoCorrect="off"
-                placeholder="Send a message..."
+                label="Send a message..."
+                InputLabelProps={{ style: { color: '#e9e9fd' } }}
                 sx={{
                   width: "100%",
                   backgroundColor: "#282930",
