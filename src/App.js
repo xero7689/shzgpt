@@ -11,6 +11,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import SendIcon from '@mui/icons-material/Send';
+import CircularProgress from '@mui/material/CircularProgress';
 
 
 function formatUserMessage(userMessage) {
@@ -54,6 +55,9 @@ function App() {
   const [innerHeight, setInnerHeight] = useState(window.innerHeight);
   const [chatInterfaceHeight, setChatInterfaceHeight] = useState(0);
 
+  const [queryInProgress, setQueryInProgress] = useState(false);
+
+  // Settings of Chat History
   const messageRef = useRef();
   const [requestMessage, setRequestMessage] = useState("");
   const [chatHistory, setChatHistory] = useState([
@@ -93,12 +97,13 @@ function App() {
     async function chat() {
       const last_role = chatHistory[chatHistory.length - 1].role;
       if (last_role === 'user') {
+        setQueryInProgress(prev=>!prev);
         const response = await openai.createChatCompletion({
           model: "gpt-3.5-turbo",
           messages: formatChatHistory(chatHistory),
         });
+        setQueryInProgress(prev=>!prev);
         setChatHistory(prevHistory => [...prevHistory, formatResponseMessage(response)]); //
-        console.log(formatResponseMessage(response));
       }
     }
     chat();
@@ -155,6 +160,9 @@ function App() {
                   </MessageBox>
                 )
               })}
+            </Box>
+            <Box display={queryInProgress ? "flex" : "none"} pl={4}>
+              <CircularProgress size={20}></CircularProgress>
             </Box>
             <Box
               className="InputGroup"
