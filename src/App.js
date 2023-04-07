@@ -97,12 +97,12 @@ function App() {
     async function chat() {
       const last_role = chatHistory[chatHistory.length - 1].role;
       if (last_role === 'user') {
-        setQueryInProgress(prev=>!prev);
+        setQueryInProgress(prev => !prev);
         const response = await openai.createChatCompletion({
           model: "gpt-3.5-turbo",
           messages: formatChatHistory(chatHistory),
         });
-        setQueryInProgress(prev=>!prev);
+        setQueryInProgress(prev => !prev);
         setChatHistory(prevHistory => [...prevHistory, formatResponseMessage(response)]); //
       }
     }
@@ -148,7 +148,7 @@ function App() {
         <Box display="flex" sx={{ backgroundColor: '#1f2129' }}>
           {/* <GPTSidePanel></GPTSidePanel> */}
           <Box ref={chatInterfaceRef} flexGrow={1} display="flex" flexDirection="column" sx={{ height: chatInterfaceHeight, marginTop: "64px" }}>
-            <Box ref={chatContentRef} className="ChatContent" flexGrow={1} display="flex" flexDirection="column" gap={4}
+            <Box ref={chatContentRef} className="ChatContent" flexGrow={1} display="flex" flexDirection="column" gap={5}
               sx={{
                 overflow: "auto"
               }}
