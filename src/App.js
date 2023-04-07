@@ -182,13 +182,15 @@ function App() {
                 autoComplete="off"
                 autoCorrect="off"
                 label="Send a message..."
+                multiline
+                maxRows={1}
                 InputLabelProps={{ style: { color: '#e9e9fd' } }}
                 sx={{
                   width: "100%",
                   backgroundColor: "#282930",
-                  input: {
+                  textArea: {
                     color: "#bdbec2",
-                  },
+                  }
                 }}
               />
               <Button variant="contained" endIcon={<SendIcon />}
