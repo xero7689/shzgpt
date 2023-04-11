@@ -1,5 +1,9 @@
+import React from 'react';
+import { useMemo } from 'react';
+
 import Box from '@mui/material/Box';
 import { Typography } from '@mui/material';
+
 import CodeBlock from "./CodeBlock";
 
 function separateCodeBlocks(rawString) {
@@ -24,15 +28,14 @@ function separateCodeBlocks(rawString) {
 
 function ParseContent(props) {
     const { isUser, content } = props;
-    const blocks = separateCodeBlocks(content);
+    const blocks = useMemo(() => separateCodeBlocks(content), [content]);
+
     return (
         <Box display="flex" flexDirection="column">
             {blocks.map((block, index) => {
                 if (block.type === "code") {
                     return (
-                        <Box key={index}>
-                            <CodeBlock codeString={block.content} language={block.language}></CodeBlock>
-                        </Box>
+                        <CodeBlock key={index} codeString={block.content} language={block.language}></CodeBlock>
                     )
                 }
                 return (
@@ -40,7 +43,7 @@ function ParseContent(props) {
                         key={index}
                     >
                         <Typography>
-                            { isUser ? block.content.trim() : block.content}
+                            {isUser ? block.content.trim() : block.content}
                         </Typography>
                     </Box>
                 )
@@ -50,7 +53,7 @@ function ParseContent(props) {
 
 }
 
-export default function MessageBox(props) {
+const MessageBox = React.memo(function MessageBox(props) {
     const { timestamp, role, content } = props;
 
     const isUser = role === "user";
@@ -58,14 +61,28 @@ export default function MessageBox(props) {
     const timeString = new Date(timestamp);
 
     return (
-        <Box display={isSystem ? "none" : "flex"} justifyContent={isUser ? "flex-end" : "flex-start"} gap={1}>
-            <Box display="flex" maxWidth="60%"
+        <Box
+            display="flex"
+            sx={{
+                justifyContent: {
+                    xs: 'flest-start',
+                    md: isUser ? "flex-end" : "flex-start"
+                },
+                display: {
+                    xs: isSystem ? "none" : "block",
+                    md: isSystem ? "none" : "flex"
+                }
+            }}
+            gap={1} >
+            <Box display="flex" maxWidth="100%"
                 sx={{
                     borderRadius: "12px",
                     border: isUser ? "0.5px solid #6fa49c" : "0.5px solid #616266",
                     backgroundColor: isUser ? "#1f242d" : "#282930",
                     whiteSpace: 'pre-line',
-                    order: isUser ? 2 : 1,
+                    order: {
+                        md: isUser ? 2 : 1,
+                    }
                 }}
                 textAlign="left"
                 px={3}
@@ -74,13 +91,17 @@ export default function MessageBox(props) {
             >
                 <ParseContent isUser={isUser} content={content}></ParseContent>
             </Box>
-            <Box display="flex" flexDirection="column" justifyContent="flex-end"
+            <Box display="flex" flexDirection="column" justifyContent="flex-end" alignItems={{ xs: "end" }}
                 sx={{
-                    order: isUser ? 1 : 2
+                    order: {
+                        md: isUser ? 1 : 2
+                    }
                 }}
             >
                 <Typography sx={{ color: "grey" }} fontSize="14px" fontWeight="light" fontStyle='oblique'>{timeString.toLocaleTimeString()}</Typography>
             </Box>
-        </Box>
+        </Box >
     )
-}
+});
+
+export default MessageBox;

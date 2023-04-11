@@ -23,6 +23,7 @@ const CodeBlock = (props) => {
                 display="flex"
                 justifyContent="space-between"
                 alignItems="center"
+                overflow="auto"
                 sx={{
                     backgroundColor: "#3E3E43",
                     borderRadius: "4px",
@@ -43,19 +44,25 @@ const CodeBlock = (props) => {
                     <Typography color="#bdbec2" fontSize={12}>Copy Code</Typography>
                 </Button>
             </Box>
-            <SyntaxHighlighter
-                language={language}
-                style={gruvboxDark}
-                showLineNumbers
-                wrapLongLines
-                customStyle={{
-                    margin: 0,
-                    paddingTop: '24px',
-                    paddingBottom: '24px'
-                }}
-            >
-                {codeString}
-            </SyntaxHighlighter>
+            <Box sx={{ width: "100%", overflow: 'auto'}}>
+                <SyntaxHighlighter
+                    language={language}
+                    style={gruvboxDark}
+                    showLineNumbers
+                    wrapLines={true}
+                    wrapLongLines={true}
+                    customStyle={{
+                        margin: 0,
+                        paddingTop: '24px',
+                        paddingBottom: '24px',
+                    }}
+                    lineProps={{
+                        overflow:"auto"
+                    }}
+                >
+                    {codeString}
+                </SyntaxHighlighter>
+            </Box>
         </Box>
 
     );

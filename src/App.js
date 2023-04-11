@@ -199,7 +199,6 @@ function App() {
                   backgroundColor: "#5b61ed",
                   color: "#e9e9fd"
                 }}
-
                 onClick={handleSendMessageButton}
               >
                 Send
