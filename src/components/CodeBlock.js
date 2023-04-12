@@ -49,8 +49,6 @@ const CodeBlock = (props) => {
                     language={language}
                     style={gruvboxDark}
                     showLineNumbers
-                    wrapLines={true}
-                    wrapLongLines={true}
                     customStyle={{
                         margin: 0,
                         paddingTop: '24px',

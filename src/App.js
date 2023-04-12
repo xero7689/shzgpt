@@ -25,19 +25,19 @@ function App() {
   const inputFormProps = { handleInputChange, handleSendMessage, setNeedScroll, messageRef };
 
   return (
-    <div className="App" style={{ height: "100vh", overflow: 'auto' }}>
-      <Box display="flex" flexDirection="column" height="100%">
+    <div className="App" style={{ height: "100%" }}>
+      <Box display="flex" height="100%" flexDirection="column" >
         <GPTAppBar ref={appBarRef}></GPTAppBar>
-        <Box display="flex" sx={{ backgroundColor: '#1f2129' }}>
+        <Box display="flex" height="100%" sx={{ backgroundColor: '#1f2129' }}>
           {/* <GPTSidePanel></GPTSidePanel> */}
           <Container>
             <Box ref={chatInterfaceRef} flexGrow={1} display="flex" flexDirection="column" sx={{ height: chatInterfaceHeight, marginTop: "64px" }}>
-              <Box ref={chatContentRef} className="ChatContent" flexGrow={1} display="flex" flexDirection="column" gap={5}
+              <Box ref={chatContentRef} className="ChatContent" flexGrow={1} display="flex" flexDirection="column" gap={5} pt={2}
                 sx={{
                   overflow: "auto",
                   '&::-webkit-scrollbar': {
                     display: 'none'
-                  }
+                  },
                 }}
               >
                 {chatHistory.map(item => {
