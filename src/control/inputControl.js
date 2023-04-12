@@ -14,7 +14,7 @@ delete configuration.baseOptions.headers['User-Agent'];
 export default function useInputControl(setNeedScroll, chatHistory, setChatHistory) {
     const messageRef = useRef();
     const [requestMessage, setRequestMessage] = useState("");
-    const [queryError, setqueryError] = useState(null);
+    const [queryError, setQueryError] = useState(null);
     const [queryInProgress, setQueryInProgress] = useState(false);
 
 
@@ -23,6 +23,9 @@ export default function useInputControl(setNeedScroll, chatHistory, setChatHisto
     }
 
     async function handleSendMessage() {
+        if (queryInProgress) {
+            return;
+        }
         const userMessage = formatUserMessage(requestMessage)
         const queryMessages = [...chatHistory, userMessage];
         setChatHistory(prevHistory => [...prevHistory, userMessage]);
@@ -36,7 +39,7 @@ export default function useInputControl(setNeedScroll, chatHistory, setChatHisto
                 setChatHistory(prevHistory => [...prevHistory, formatResponseMessage(response)]); //
             }
         } catch (err) {
-            setqueryError(err);
+            setQueryError(err);
         }
         setQueryInProgress(false);
         setNeedScroll(pre=>!pre);

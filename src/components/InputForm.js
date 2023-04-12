@@ -4,7 +4,7 @@ import SendIcon from '@mui/icons-material/Send';
 
 export default function InputForm(props) {
     const { setNeedScroll, handleInputChange, handleSendMessage, messageRef } = props;
-    
+
     function handleSubmit(event) {
         event.preventDefault();
         // handle form submission here
@@ -12,8 +12,16 @@ export default function InputForm(props) {
 
     const handleKeyDown = (event) => {
         if (event.key === "Enter") {
-            handleSendMessage()
-            setNeedScroll(prev=>!prev)
+            if (event.shiftKey) {
+                // Do line break here!
+            } else {
+                event.preventDefault();
+                if (messageRef.current.value.trim() === '') {
+                    return;
+                } 
+                handleSendMessage()
+                setNeedScroll(prev => !prev)
+            }
         };
     }
     return (
@@ -22,6 +30,7 @@ export default function InputForm(props) {
             component="form"
             autoComplete="off"
             display="flex"
+            alignItems="center"
             onSubmit={handleSubmit}
             py={2}
             gap={2}
@@ -30,13 +39,13 @@ export default function InputForm(props) {
                 inputRef={messageRef}
                 id="outlined-basic"
                 variant="filled"
-                onChange={ handleInputChange }
+                onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 autoComplete="off"
                 autoCorrect="off"
                 label="Send a message..."
                 multiline
-                maxRows={1}
+                maxRows={4}
                 InputLabelProps={{ style: { color: '#e9e9fd' } }}
                 sx={{
                     width: "100%",
