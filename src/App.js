@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box } from '@mui/material';
+import { Box, Container } from '@mui/material';
 
 import useInputControl from './control/inputControl';
 import { useAppEffect } from './effects/appEffect';
@@ -30,23 +30,27 @@ function App() {
         <GPTAppBar ref={appBarRef}></GPTAppBar>
         <Box display="flex" sx={{ backgroundColor: '#1f2129' }}>
           {/* <GPTSidePanel></GPTSidePanel> */}
-          <Box ref={chatInterfaceRef} flexGrow={1} display="flex" flexDirection="column" sx={{ height: chatInterfaceHeight, marginTop: "64px" }}>
-            <Box ref={chatContentRef} className="ChatContent" flexGrow={1} display="flex" flexDirection="column" gap={5}
-              sx={{
-                overflow: "auto"
-              }}
-              p={4}
-            >
-              {chatHistory.map(item => {
-                return (
-                  <MessageBox key={item.timestamp} timestamp={item.timestamp} role={item.role} content={item.content}>
-                  </MessageBox>
-                )
-              })}
-              <LoadingBox queryInProgress={queryInProgress} />
+          <Container>
+            <Box ref={chatInterfaceRef} flexGrow={1} display="flex" flexDirection="column" sx={{ height: chatInterfaceHeight, marginTop: "64px" }}>
+              <Box ref={chatContentRef} className="ChatContent" flexGrow={1} display="flex" flexDirection="column" gap={5}
+                sx={{
+                  overflow: "auto",
+                  '&::-webkit-scrollbar': {
+                    display: 'none'
+                  }
+                }}
+              >
+                {chatHistory.map(item => {
+                  return (
+                    <MessageBox key={item.timestamp} timestamp={item.timestamp} role={item.role} content={item.content}>
+                    </MessageBox>
+                  )
+                })}
+                <LoadingBox queryInProgress={queryInProgress} />
+              </Box>
+              <InputForm {...inputFormProps} />
             </Box>
-            <InputForm {...inputFormProps} />
-          </Box>
+          </Container>
         </Box>
       </Box>
     </div>
