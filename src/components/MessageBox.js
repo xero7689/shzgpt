@@ -40,7 +40,7 @@ function ParseContent(props) {
                 }
                 return (
                     <Box key={index}>
-                        <Typography sx={{ lineHeight: "1.75", maxWidth:"79ch" }}>
+                        <Typography sx={{ lineHeight: "1.75", maxWidth: "79ch" }}>
                             {isUser ? block.content.trim() : block.content}
                         </Typography>
                     </Box>
@@ -63,7 +63,6 @@ const MessageBox = React.memo(function MessageBox(props) {
             display="flex"
             sx={{
                 justifyContent: {
-                    xs: 'flest-start',
                     md: isUser ? "flex-end" : "flex-start"
                 },
                 display: {
@@ -71,8 +70,9 @@ const MessageBox = React.memo(function MessageBox(props) {
                     md: isSystem ? "none" : "flex"
                 },
             }}
-            gap={1} >
-            <Box display="flex" maxWidth="100%"
+            gap={1}
+        >
+            <Box display="flex"
                 sx={{
                     borderRadius: "12px",
                     border: isUser ? "0.5px solid #6fa49c" : "0.5px solid #616266",
@@ -81,10 +81,21 @@ const MessageBox = React.memo(function MessageBox(props) {
                     order: {
                         md: isUser ? 2 : 1,
                     },
+                    marginLeft: {
+                        xs: isUser ? "auto" : 0,
+                        md: 0
+                    },
                 }}
+                maxWidth="fit-content"
                 textAlign="left"
-                px={3}
-                py={2}
+                px={{
+                    xs: 2,
+                    md: 3
+                }}
+                py={{
+                    xs: 1,
+                    md: 2
+                }}
                 color={isUser ? "#6fa49c" : "#bdbec2"}
             >
                 <ParseContent isUser={isUser} content={content}></ParseContent>
@@ -93,7 +104,11 @@ const MessageBox = React.memo(function MessageBox(props) {
                 sx={{
                     order: {
                         md: isUser ? 1 : 2
-                    }
+                    },
+                }}
+                mt={{
+                    xs: 1,
+                    md: 0
                 }}
             >
                 <Typography sx={{ color: "grey" }} fontSize="14px" fontWeight="light" fontStyle='oblique'>{timeString.toLocaleTimeString()}</Typography>

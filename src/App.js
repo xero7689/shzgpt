@@ -32,7 +32,7 @@ function App() {
           {/* <GPTSidePanel></GPTSidePanel> */}
           <Container>
             <Box ref={chatInterfaceRef} flexGrow={1} display="flex" flexDirection="column" sx={{ height: chatInterfaceHeight, marginTop: "64px" }}>
-              <Box ref={chatContentRef} className="ChatContent" flexGrow={1} display="flex" flexDirection="column" gap={5} pt={2}
+              <Box ref={chatContentRef} className="ChatContent" flexGrow={1} display="flex" flexDirection="column" gap={4} pt={2}
                 sx={{
                   overflow: "auto",
                   '&::-webkit-scrollbar': {
