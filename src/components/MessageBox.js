@@ -31,7 +31,7 @@ function ParseContent(props) {
     const blocks = useMemo(() => separateCodeBlocks(content), [content]);
 
     return (
-        <Box display="flex" flexDirection="column">
+        <Box sx={{ overflow: "auto" }} display="flex" flexDirection="column">
             {blocks.map((block, index) => {
                 if (block.type === "code") {
                     return (
@@ -39,10 +39,8 @@ function ParseContent(props) {
                     )
                 }
                 return (
-                    <Box
-                        key={index}
-                    >
-                        <Typography>
+                    <Box key={index}>
+                        <Typography sx={{ lineHeight: "1.75", maxWidth:"79ch" }}>
                             {isUser ? block.content.trim() : block.content}
                         </Typography>
                     </Box>
@@ -71,7 +69,7 @@ const MessageBox = React.memo(function MessageBox(props) {
                 display: {
                     xs: isSystem ? "none" : "block",
                     md: isSystem ? "none" : "flex"
-                }
+                },
             }}
             gap={1} >
             <Box display="flex" maxWidth="100%"
@@ -82,7 +80,7 @@ const MessageBox = React.memo(function MessageBox(props) {
                     whiteSpace: 'pre-line',
                     order: {
                         md: isUser ? 2 : 1,
-                    }
+                    },
                 }}
                 textAlign="left"
                 px={3}
