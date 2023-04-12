@@ -23,7 +23,7 @@ export default function InputForm(props) {
             autoComplete="off"
             display="flex"
             onSubmit={handleSubmit}
-            p={4}
+            py={2}
             gap={2}
         >
             <TextField
