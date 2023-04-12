@@ -4,6 +4,7 @@ import { Configuration, OpenAIApi } from "openai";
 import GPTAppBar from './components/gptAppBar';
 import GPTSidePanel from './components/gptSidePanel';
 import MessageBox from './components/MessageBox';
+import fetchMessage from "./fetchers/gpt";
 
 import { useState, useEffect, useRef } from 'react';
 
@@ -68,11 +69,36 @@ function App() {
     },
   ]);
 
+  // Settings of API Query
+  // const [response, setResponse] = useState();
+  const [queryError, setqueryError] = useState(null);
 
-  function handleSendMessageButton() {
+
+  async function handleSendMessageButton() {
+    console.log("[Handle Button Click]")
+
     const userMessage = formatUserMessage(requestMessage)
+    const queryMessages = [...chatHistory, userMessage];
     setChatHistory(prevHistory => [...prevHistory, userMessage]);
     messageRef.current.value = "";
+
+    const last_role = queryMessages[queryMessages.length - 1].role;
+    console.log(`[Last Role]${last_role}`);
+    console.log(queryMessages);
+    try {
+      if (last_role === 'user') {
+        console.log("Querying API...")
+        setQueryInProgress(true);
+        const response = await fetchMessage(formatChatHistory(queryMessages));
+        setChatHistory(prevHistory => [...prevHistory, formatResponseMessage(response)]); //
+      }
+    } catch(err) {
+      console.log(`Error Happen! ${err}`);
+      setqueryError(err);
+    }
+    console.log("Querying finished")
+    console.log(chatHistory);
+    setQueryInProgress(false);
   }
 
   /** 
@@ -89,25 +115,6 @@ function App() {
       handleSendMessageButton()
     };
   }
-
-  /**
-   * GPT API Query Effect
-   */
-  useEffect(() => {
-    async function chat() {
-      const last_role = chatHistory[chatHistory.length - 1].role;
-      if (last_role === 'user') {
-        setQueryInProgress(prev => !prev);
-        const response = await openai.createChatCompletion({
-          model: "gpt-3.5-turbo",
-          messages: formatChatHistory(chatHistory),
-        });
-        setQueryInProgress(prev => !prev);
-        setChatHistory(prevHistory => [...prevHistory, formatResponseMessage(response)]); //
-      }
-    }
-    chat();
-  }, [chatHistory]);
 
   /**
    * Scroll to the bottom of view once history being change
