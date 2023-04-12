@@ -1,152 +1,19 @@
 
-import { Configuration, OpenAIApi } from "openai";
+import { Box, Skeleton, CircularProgress } from '@mui/material';
+
+import useInputControl from './control/inputControl';
+import { useAppEffect } from './effects/appEffect';
 
 import GPTAppBar from './components/gptAppBar';
 import GPTSidePanel from './components/gptSidePanel';
 import MessageBox from './components/MessageBox';
-import fetchMessage from "./fetchers/gpt";
-
-import { useState, useEffect, useRef } from 'react';
-
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import SendIcon from '@mui/icons-material/Send';
-import CircularProgress from '@mui/material/CircularProgress';
-
-
-function formatUserMessage(userMessage) {
-  const timestamp = Date.now();
-  return {
-    "timestamp": timestamp,
-    "role": "user",
-    "content": userMessage
-  }
-}
-
-function formatResponseMessage(response) {
-  const timestamp = Date.now();
-  return {
-    "timestamp": timestamp,
-    "role": "assistant",
-    "content": response.data.choices[0].message.content,
-  }
-}
-
-function formatChatHistory(history) {
-  // Format chat history used to query API
-  return history.map(({ role, content }) => ({ role, content }));
-}
+import InputForm from './components/InputForm';
+import LoadingBox from './components/LoadingBox';
 
 function App() {
-  const configuration = new Configuration({
-    apiKey: "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",
-  });
-  delete configuration.baseOptions.headers['User-Agent'];
-
-  const openai = new OpenAIApi(configuration);
-  const systemMessage = "You're a helpful assistance.";
-
-  // Settings of Chat Interface
-  const appBarRef = useRef(null);
-  const chatInterfaceRef = useRef(null);
-  const chatContentRef = useRef(null);
-
-  const [appBarHeight, setAppBarHeight] = useState(0);
-  const [innerHeight, setInnerHeight] = useState(window.innerHeight);
-  const [chatInterfaceHeight, setChatInterfaceHeight] = useState(0);
-
-  const [queryInProgress, setQueryInProgress] = useState(false);
-
-  // Settings of Chat History
-  const messageRef = useRef();
-  const [requestMessage, setRequestMessage] = useState("");
-  const [chatHistory, setChatHistory] = useState([
-    {
-      timestamp: Date.now(),
-      "role": "system",
-      "content": systemMessage
-    },
-  ]);
-
-  // Settings of API Query
-  // const [response, setResponse] = useState();
-  const [queryError, setqueryError] = useState(null);
-
-
-  async function handleSendMessageButton() {
-    console.log("[Handle Button Click]")
-
-    const userMessage = formatUserMessage(requestMessage)
-    const queryMessages = [...chatHistory, userMessage];
-    setChatHistory(prevHistory => [...prevHistory, userMessage]);
-    messageRef.current.value = "";
-
-    const last_role = queryMessages[queryMessages.length - 1].role;
-    console.log(`[Last Role]${last_role}`);
-    console.log(queryMessages);
-    try {
-      if (last_role === 'user') {
-        console.log("Querying API...")
-        setQueryInProgress(true);
-        const response = await fetchMessage(formatChatHistory(queryMessages));
-        setChatHistory(prevHistory => [...prevHistory, formatResponseMessage(response)]); //
-      }
-    } catch(err) {
-      console.log(`Error Happen! ${err}`);
-      setqueryError(err);
-    }
-    console.log("Querying finished")
-    console.log(chatHistory);
-    setQueryInProgress(false);
-  }
-
-  /** 
-   * Prevent Default Form Action
-   * For example: `Enter` click event will trigger the submit form 
-   */
-  function handleSubmit(event) {
-    event.preventDefault();
-    // handle form submission here
-  }
-
-  const handleKeyDown = (event) => {
-    if (event.key === "Enter") {
-      handleSendMessageButton()
-    };
-  }
-
-  /**
-   * Scroll to the bottom of view once history being change
-   */
-  useEffect(() => {
-    chatContentRef.current.scrollTo({
-      top: chatContentRef.current.scrollHeight,
-      behavior: 'smooth'
-    });
-  }, [chatHistory]);
-
-
-  /**
-   * Effect that calculate the size of AppBar and Content
-   */
-  useEffect(() => {
-    if (chatInterfaceRef.current && appBarRef.current) {
-      setAppBarHeight(appBarRef.current.offsetHeight);
-      const chatInterfaceHeight = window.innerHeight - appBarRef.current.offsetHeight;
-      setChatInterfaceHeight(chatInterfaceHeight);
-    }
-  }, [innerHeight]);
-
-  /**
-   * Effect that change the App height dynamically if resizing
-   */
-  useEffect(() => {
-    const handleResize = () => setInnerHeight(window.innerHeight);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  });
-
+  const {handleInputChange, handleSendMessage, chatHistory, requestMessage, messageRef, queryError, queryInProgress} = useInputControl();
+  const { chatInterfaceHeight, appBarRef, chatInterfaceRef, chatContentRef} = useAppEffect(chatHistory);
+  const inputFormProps = { handleInputChange, handleSendMessage, messageRef};
 
   return (
     <div className="App" style={{ height: "100vh", overflow: 'auto' }}>
@@ -167,50 +34,9 @@ function App() {
                   </MessageBox>
                 )
               })}
+              <LoadingBox queryInProgress={queryInProgress} />
             </Box>
-            <Box display={queryInProgress ? "flex" : "none"} pl={4}>
-              <CircularProgress size={20}></CircularProgress>
-            </Box>
-            <Box
-              className="InputGroup"
-              component="form"
-              autoComplete="off"
-              display="flex"
-              onSubmit={handleSubmit}
-              p={4}
-              gap={2}
-            >
-              <TextField
-                inputRef={messageRef}
-                id="outlined-basic"
-                variant="filled"
-                onChange={(e) => setRequestMessage(e.target.value)}
-                onKeyDown={handleKeyDown}
-                autoComplete="off"
-                autoCorrect="off"
-                label="Send a message..."
-                multiline
-                maxRows={1}
-                InputLabelProps={{ style: { color: '#e9e9fd' } }}
-                sx={{
-                  width: "100%",
-                  backgroundColor: "#282930",
-                  textArea: {
-                    color: "#bdbec2",
-                  }
-                }}
-              />
-              <Button variant="contained" endIcon={<SendIcon />}
-                sx={{
-                  fontWeight: "bold",
-                  backgroundColor: "#5b61ed",
-                  color: "#e9e9fd"
-                }}
-                onClick={handleSendMessageButton}
-              >
-                Send
-              </Button>
-            </Box>
+            <InputForm {...inputFormProps}/>
           </Box>
         </Box>
       </Box>
