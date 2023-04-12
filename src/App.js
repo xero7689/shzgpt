@@ -1,5 +1,5 @@
-
-import { Box, Skeleton, CircularProgress } from '@mui/material';
+import { useState } from 'react';
+import { Box } from '@mui/material';
 
 import useInputControl from './control/inputControl';
 import { useAppEffect } from './effects/appEffect';
@@ -11,9 +11,18 @@ import InputForm from './components/InputForm';
 import LoadingBox from './components/LoadingBox';
 
 function App() {
-  const {handleInputChange, handleSendMessage, chatHistory, requestMessage, messageRef, queryError, queryInProgress} = useInputControl();
-  const { chatInterfaceHeight, appBarRef, chatInterfaceRef, chatContentRef} = useAppEffect(chatHistory);
-  const inputFormProps = { handleInputChange, handleSendMessage, messageRef};
+  const systemMessage = "You're a helpful assistance.";
+  const [chatHistory, setChatHistory] = useState([
+    {
+      timestamp: Date.now(),
+      "role": "system",
+      "content": systemMessage
+    },
+  ]);
+
+  const { chatInterfaceHeight, appBarRef, chatInterfaceRef, chatContentRef, setNeedScroll } = useAppEffect();
+  const { handleInputChange, handleSendMessage, requestMessage, messageRef, queryError, queryInProgress } = useInputControl(setNeedScroll, chatHistory, setChatHistory);
+  const inputFormProps = { handleInputChange, handleSendMessage, setNeedScroll, messageRef };
 
   return (
     <div className="App" style={{ height: "100vh", overflow: 'auto' }}>
@@ -36,7 +45,7 @@ function App() {
               })}
               <LoadingBox queryInProgress={queryInProgress} />
             </Box>
-            <InputForm {...inputFormProps}/>
+            <InputForm {...inputFormProps} />
           </Box>
         </Box>
       </Box>

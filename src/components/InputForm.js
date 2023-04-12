@@ -3,7 +3,7 @@ import SendIcon from '@mui/icons-material/Send';
 
 
 export default function InputForm(props) {
-    const { handleInputChange, handleSendMessage, messageRef } = props;
+    const { setNeedScroll, handleInputChange, handleSendMessage, messageRef } = props;
     
     function handleSubmit(event) {
         event.preventDefault();
@@ -13,6 +13,7 @@ export default function InputForm(props) {
     const handleKeyDown = (event) => {
         if (event.key === "Enter") {
             handleSendMessage()
+            setNeedScroll(prev=>!prev)
         };
     }
     return (

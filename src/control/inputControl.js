@@ -9,20 +9,14 @@ const configuration = new Configuration({
 });
 delete configuration.baseOptions.headers['User-Agent'];
 
-const systemMessage = "You're a helpful assistance.";
 
-export default function useInputControl() {
+
+export default function useInputControl(setNeedScroll, chatHistory, setChatHistory) {
     const messageRef = useRef();
     const [requestMessage, setRequestMessage] = useState("");
     const [queryError, setqueryError] = useState(null);
     const [queryInProgress, setQueryInProgress] = useState(false);
-    const [chatHistory, setChatHistory] = useState([
-        {
-            timestamp: Date.now(),
-            "role": "system",
-            "content": systemMessage
-        },
-    ]);
+
 
     const handleInputChange = (event) => {
         setRequestMessage(event.target.value);
@@ -45,7 +39,8 @@ export default function useInputControl() {
             setqueryError(err);
         }
         setQueryInProgress(false);
+        setNeedScroll(pre=>!pre);
     }
 
-    return {handleInputChange, handleSendMessage, chatHistory, requestMessage, messageRef, queryError, queryInProgress};
+    return {handleInputChange, handleSendMessage, requestMessage, messageRef, queryError, queryInProgress};
 }
