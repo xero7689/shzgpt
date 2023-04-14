@@ -3,6 +3,7 @@ import { Configuration } from "openai";
 
 import { formatUserMessage, formatChatHistory, formatResponseMessage } from '../formatter/MessageFormatter';
 import fetchMessage from "../fetchers/gpt";
+import { postChat } from '../fetchers/storage';
 
 const configuration = new Configuration({
     apiKey: "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",
@@ -11,7 +12,7 @@ delete configuration.baseOptions.headers['User-Agent'];
 
 
 
-export default function useInputControl(setNeedScroll, chatHistory, setChatHistory) {
+export default function useInputControl(setNeedScroll, chatHistory, setChatHistory, currentChatRoom) {
     const messageRef = useRef();
     const [requestMessage, setRequestMessage] = useState("");
     const [queryError, setQueryError] = useState(null);
@@ -31,19 +32,24 @@ export default function useInputControl(setNeedScroll, chatHistory, setChatHisto
         setChatHistory(prevHistory => [...prevHistory, userMessage]);
         messageRef.current.value = "";
 
+        await postChat(currentChatRoom, userMessage.role, userMessage.content);
+
+
         const last_role = queryMessages[queryMessages.length - 1].role;
         try {
             if (last_role === 'user') {
                 setQueryInProgress(true);
                 const response = await fetchMessage(formatChatHistory(queryMessages));
-                setChatHistory(prevHistory => [...prevHistory, formatResponseMessage(response)]); //
+                const formatedResponse = formatResponseMessage(response);
+                setChatHistory(prevHistory => [...prevHistory, formatedResponse]); //
+                await postChat(currentChatRoom, formatedResponse.role, formatedResponse.content);
             }
         } catch (err) {
             setQueryError(err);
         }
         setQueryInProgress(false);
-        setNeedScroll(pre=>!pre);
+        setNeedScroll(pre => !pre);
     }
 
-    return {handleInputChange, handleSendMessage, requestMessage, messageRef, queryError, queryInProgress};
+    return { handleInputChange, handleSendMessage, requestMessage, messageRef, queryError, queryInProgress };
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Box, Container } from '@mui/material';
 
 import useInputControl from './control/inputControl';
@@ -12,6 +12,7 @@ import LoadingBox from './components/LoadingBox';
 
 function App() {
   const systemMessage = "You're a helpful assistance.";
+  const [currentChatRoom, setCurrentChatRoom] = useState();
   const [chatHistory, setChatHistory] = useState([
     {
       timestamp: Date.now(),
@@ -20,8 +21,14 @@ function App() {
     },
   ]);
 
+  useEffect(() => {
+  }, [chatHistory])
+
+  useEffect(() => {
+  }, [currentChatRoom])
+
   const { chatInterfaceHeight, appBarRef, chatInterfaceRef, chatContentRef, setNeedScroll } = useAppEffect();
-  const { handleInputChange, handleSendMessage, requestMessage, messageRef, queryError, queryInProgress } = useInputControl(setNeedScroll, chatHistory, setChatHistory);
+  const { handleInputChange, handleSendMessage, requestMessage, messageRef, queryError, queryInProgress } = useInputControl(setNeedScroll, chatHistory, setChatHistory, currentChatRoom);
   const inputFormProps = { handleInputChange, handleSendMessage, setNeedScroll, messageRef };
 
   return (
@@ -29,7 +36,7 @@ function App() {
       <Box display="flex" height="100%" flexDirection="column" >
         <GPTAppBar ref={appBarRef}></GPTAppBar>
         <Box display="flex" height="100%" sx={{ backgroundColor: '#1f2129' }}>
-          {/* <GPTSidePanel></GPTSidePanel> */}
+          <GPTSidePanel setChatHistory={setChatHistory} setCurrentChatRoom={setCurrentChatRoom}></GPTSidePanel>
           <Container maxWidth="md">
             <Box ref={chatInterfaceRef} flexGrow={1} display="flex" flexDirection="column" sx={{ height: chatInterfaceHeight, marginTop: "64px" }}>
               <Box ref={chatContentRef} className="ChatContent" flexGrow={1} display="flex" flexDirection="column" gap={4} pt={4} py={3}

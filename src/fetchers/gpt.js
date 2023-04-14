@@ -10,7 +10,6 @@ delete configuration.baseOptions.headers['User-Agent'];
 const openai = new OpenAIApi(configuration);
 
 const fetchMessage = async (messages) => {
-    console.log("[gpt.js][Fetch Message]");
     const response = await openai.createChatCompletion({
         model: "gpt-3.5-turbo",
         messages: messages
