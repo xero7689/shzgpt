@@ -60,7 +60,6 @@ const MessageBox = React.memo(function MessageBox(props) {
 
     return (
         <Box
-            display="flex"
             sx={{
                 justifyContent: {
                     md: isUser ? "flex-end" : "flex-start"
@@ -85,6 +84,7 @@ const MessageBox = React.memo(function MessageBox(props) {
                         xs: isUser ? "auto" : 0,
                         md: 0
                     },
+                    overflow: "auto",
                 }}
                 maxWidth="fit-content"
                 textAlign="left"
