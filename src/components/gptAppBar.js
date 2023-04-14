@@ -30,7 +30,6 @@ function GPTAppBar(props, ref) {
                     noWrap
                     component="div"
                     fontWeight="bold"
-                    sx={{ display: { xs: 'none', sm: 'block' } }}
                 >
                     SHZ GPT
                 </Typography>

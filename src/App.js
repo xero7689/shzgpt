@@ -30,9 +30,9 @@ function App() {
         <GPTAppBar ref={appBarRef}></GPTAppBar>
         <Box display="flex" height="100%" sx={{ backgroundColor: '#1f2129' }}>
           {/* <GPTSidePanel></GPTSidePanel> */}
-          <Container>
+          <Container maxWidth="md">
             <Box ref={chatInterfaceRef} flexGrow={1} display="flex" flexDirection="column" sx={{ height: chatInterfaceHeight, marginTop: "64px" }}>
-              <Box ref={chatContentRef} className="ChatContent" flexGrow={1} display="flex" flexDirection="column" gap={4} pt={2}
+              <Box ref={chatContentRef} className="ChatContent" flexGrow={1} display="flex" flexDirection="column" gap={4} pt={4} py={3}
                 sx={{
                   overflow: "auto",
                   '&::-webkit-scrollbar': {
