@@ -20,12 +20,14 @@ function App() {
       "content": systemMessage
     },
   ]);
+  const [toggleSidePanel, setToggleSidePanel] = useState(false);
 
   useEffect(() => {
   }, [chatHistory])
 
   useEffect(() => {
   }, [currentChatRoom])
+
 
   const { chatInterfaceHeight, appBarRef, chatInterfaceRef, chatContentRef, setNeedScroll } = useAppEffect();
   const { handleInputChange, handleSendMessage, requestMessage, messageRef, queryError, queryInProgress } = useInputControl(setNeedScroll, chatHistory, setChatHistory, currentChatRoom);
@@ -34,9 +36,20 @@ function App() {
   return (
     <div className="App" style={{ height: "100%" }}>
       <Box display="flex" height="100%" flexDirection="column" >
-        <GPTAppBar ref={appBarRef}></GPTAppBar>
-        <Box display="flex" height="100%" sx={{ backgroundColor: '#1f2129' }}>
-          <GPTSidePanel setChatHistory={setChatHistory} setCurrentChatRoom={setCurrentChatRoom}></GPTSidePanel>
+        <GPTAppBar ref={appBarRef} setToggleSidePanel={setToggleSidePanel}></GPTAppBar>
+        <Box display="flex" height="100%"
+          flexDirection={{
+            xs: "column",
+            md: "row"
+          }}
+          position={{
+            md: "static"
+          }}
+          sx={{
+            backgroundColor: '#1f2129',
+          }}
+        >
+          <GPTSidePanel setChatHistory={setChatHistory} setCurrentChatRoom={setCurrentChatRoom} toggleSidePanel={toggleSidePanel} />
           <Container maxWidth="md">
             <Box ref={chatInterfaceRef} flexGrow={1} display="flex" flexDirection="column" sx={{ height: chatInterfaceHeight, marginTop: "64px" }}>
               <Box ref={chatContentRef} className="ChatContent" flexGrow={1} display="flex" flexDirection="column" gap={4} pt={4} py={3}

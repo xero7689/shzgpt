@@ -7,6 +7,14 @@ import { IconButton } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 
 function GPTAppBar(props, ref) {
+
+    const { setToggleSidePanel } = props;
+
+    const handleClick = () => {
+        setToggleSidePanel(toggle=>!toggle);
+        console.log("Handle Click!")
+    }
+
     return (
         <AppBar position="fixed"
             sx={{
@@ -20,6 +28,7 @@ function GPTAppBar(props, ref) {
                     edge="start"
                     color="inherit"
                     aria-label="open drawer"
+                    onClick={handleClick}
                     sx={{ mr: 2 }}
                 >
                     <MenuIcon />

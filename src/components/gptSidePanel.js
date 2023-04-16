@@ -4,19 +4,22 @@ import Box from '@mui/material/Box';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 
 import { TextField, Button, Typography, Divider } from '@mui/material';
+import ChatIcon from '@mui/icons-material/Chat';
 
 import { getChatRoom, getChatHistory, createChatRoom, postChat } from '../fetchers/storage';
 
 const GPTSidePanel = (props) => {
-    const { setChatHistory, setCurrentChatRoom } = props;
+    const { setChatHistory, setCurrentChatRoom, toggleSidePanel } = props;
 
     const newChatRoomRef = useRef();
     const [chatRooms, setChatRooms] = useState([]);
     const [newChatRoomName, setNewChatRoomName] = useState("");
     const [newChatRoomNameInput, setNewChatRoomNameInput] = useState("");
+
 
     useEffect(() => {
         async function fetchChatRoom() {
@@ -70,7 +73,17 @@ const GPTSidePanel = (props) => {
     }
 
     return (
-        <Box display="flex" flexDirection="column" justifyContent="space-between" p={3} sx={{ bgcolor: '#282d30', marginTop: "64px" }}>
+        <Box
+            display= {toggleSidePanel ? "flex" : "none"}
+            flexDirection="column"
+            justifyContent="space-between"
+            p={2}
+            sx={{ bgcolor: '#282d30', marginTop: "64px" }}
+            maxHeight={{
+                xs: "200px",
+                md: "100%"
+            }}
+        >
             <Box flexGrow={1} sx={{ overflow: "auto" }}>
                 <nav aria-label="secondary mailbox folders">
                     <List>
@@ -78,6 +91,9 @@ const GPTSidePanel = (props) => {
                             return (
                                 <ListItem disablePadding key={index}>
                                     <ListItemButton onClick={() => handleOnClickRoom(item)}>
+                                        <ListItemIcon sx={{ minWidth: "36px" }}>
+                                            <ChatIcon sx={{ color: "#d4d5d5" }} />
+                                        </ListItemIcon>
                                         <ListItemText primary={<Typography fontWeight="bold" color="#d4d5d5">{item.name}</Typography>} />
                                     </ListItemButton>
                                 </ListItem>
@@ -107,7 +123,7 @@ const GPTSidePanel = (props) => {
                     }}
                     onClick={handleSubmitNewChatRoom}
                 >
-                    <Typography fontSize={14} fontWeight="bold" color="#eeeeee">New Chat</Typography>
+                    <Typography fontSize={14} fontWeight="bold" color="#48545b">New Chat</Typography>
                 </Button>
             </Box>
         </Box>
