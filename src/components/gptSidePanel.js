@@ -78,7 +78,7 @@ const GPTSidePanel = (props) => {
             flexDirection="column"
             justifyContent="space-between"
             p={2}
-            sx={{ bgcolor: '#282d30', marginTop: "64px" }}
+            sx={{ bgcolor: '#282d30', marginTop: "64px", borderRight: "0.8px solid #48545b" }}
             maxHeight={{
                 xs: "200px",
                 md: "100%"
@@ -113,7 +113,10 @@ const GPTSidePanel = (props) => {
                     variant='outlined'
                     sx={{
                         input: {
-                            color: "#bdbec2",
+                            color: "#7b8a93",
+                        },
+                        fieldset: {
+                            borderColor: "#7b8a93"
                         }
                     }}
                 />
