@@ -52,8 +52,8 @@ const GPTSidePanel = (props) => {
             id: response.id,
             name: response.name
         });
-
-        postChat(response.id, "system", "You're a helpful assistance.");
+        await postChat(response.id, "system", "You're a helpful assistance.");
+        setChatHistory([]);
     }
 
     function convertData(data) {
@@ -88,7 +88,7 @@ const GPTSidePanel = (props) => {
             justifyContent="space-between"
             px={2}
             pb={3}
-            sx={{ backgroundColor: "background.paper", marginTop: "64px", borderRight: "1px solid", borderColor: "primary.border" }}
+            sx={{ backgroundColor: "primary.main", marginTop: "64px", borderRight: "1px solid", borderColor: "primary.border" }}
             maxHeight={{
                 xs: "200px",
                 md: "100%"
@@ -103,7 +103,6 @@ const GPTSidePanel = (props) => {
                 </IconButton>
             </Box>
             <Box flexGrow={1} sx={{ overflow: "auto" }}>
-
                 <nav aria-label="secondary mailbox folders">
                     <List>
                         {chatRooms.map((item, index) => {
@@ -111,9 +110,9 @@ const GPTSidePanel = (props) => {
                                 <ListItem disablePadding key={index}>
                                     <ListItemButton onClick={() => handleOnClickRoom(item)}>
                                         <ListItemIcon sx={{ minWidth: "36px" }}>
-                                            <ChatIcon sx={{ color: "primary.contrastText" }} color="secondary" />
+                                            <ChatIcon sx={{ color: "primary.contrastText" }} color="secondary" fontSize='small'/>
                                         </ListItemIcon>
-                                        <ListItemText primary={<Typography color="primary.contrastText">{item.name}</Typography>} />
+                                        <ListItemText primary={<Typography color="primary.contrastText" fontSize="small">{item.name}</Typography>} />
                                     </ListItemButton>
                                 </ListItem>
                             )
@@ -145,7 +144,7 @@ const GPTSidePanel = (props) => {
                     }}
                     onClick={handleSubmitNewChatRoom}
                 >
-                    <Typography fontSize={14} fontWeight="bold" color="#primary.contrastText">New Chat</Typography>
+                    <Typography fontSize={14} fontWeight="bold" color="secondary.contrastText">New Chat</Typography>
                 </Button>
             </Box>
         </Box>

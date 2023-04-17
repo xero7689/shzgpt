@@ -52,7 +52,6 @@ export default function InputForm(props) {
                 InputLabelProps={{ style: { color: theme.palette.primary.contrastText } }}
                 sx={{
                     width: "100%",
-                    backgroundColor: theme.palette.primary.main,
                     textArea: {
                         color: theme.palette.primary.contrastText,
                     }
@@ -62,7 +61,7 @@ export default function InputForm(props) {
                 sx={{
                     fontWeight: "bold",
                     backgroundColor: theme.palette.thirdary.main,
-                    color: theme.palette.primary.contrastText
+                    color: theme.palette.thirdary.contrastText
                 }}
                 onClick={handleSendMessage}
             >

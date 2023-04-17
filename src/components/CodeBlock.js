@@ -2,13 +2,13 @@ import { Code } from '@mui/icons-material';
 import Box from '@mui/material/Box';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { Typography } from '@mui/material';
-import { atomOneDark, gruvboxDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { tomorrow, gruvboxDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import Button from '@mui/material/Button';
 import CopyAllIcon from '@mui/icons-material/CopyAll';
 import { useState } from 'react';
 
 const CodeBlock = (props) => {
-    const { codeString, language } = props;
+    const { codeString, language, colorMode } = props;
 
     const [copySuccess, setCopySuccess] = useState(false);
 
@@ -46,7 +46,7 @@ const CodeBlock = (props) => {
             <Box sx={{ width: "100%", overflow: 'auto'}}>
                 <SyntaxHighlighter
                     language={language}
-                    style={gruvboxDark}
+                    style={ colorMode=="light" ? tomorrow : gruvboxDark}
                     showLineNumbers
                     customStyle={{
                         margin: 0,

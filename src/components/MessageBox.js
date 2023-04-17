@@ -28,7 +28,7 @@ function separateCodeBlocks(rawString) {
 }
 
 function ParseContent(props) {
-    const { isUser, content } = props;
+    const { isUser, content, colorMode } = props;
     const blocks = useMemo(() => separateCodeBlocks(content), [content]);
 
     return (
@@ -36,7 +36,7 @@ function ParseContent(props) {
             {blocks.map((block, index) => {
                 if (block.type === "code") {
                     return (
-                        <CodeBlock key={index} codeString={block.content} language={block.language}></CodeBlock>
+                        <CodeBlock key={index} codeString={block.content} language={block.language} colorMode={colorMode}></CodeBlock>
                     )
                 }
                 return (
@@ -53,7 +53,7 @@ function ParseContent(props) {
 }
 
 const MessageBox = React.memo(function MessageBox(props) {
-    const { timestamp, role, content } = props;
+    const { timestamp, role, content, colorMode } = props;
     const theme = useTheme();
 
     const isUser = role === "user";
@@ -78,7 +78,7 @@ const MessageBox = React.memo(function MessageBox(props) {
                     borderRadius: "12px",
                     border: isUser ? `0.5px solid` : `0.5px solid`,
                     borderColor: theme.palette.primary.border,
-                    backgroundColor: isUser ? theme.palette.primary.main : theme.palette.primary.main,
+                    backgroundColor: isUser ? theme.palette.background.paper : theme.palette.background.paper,
                     whiteSpace: 'pre-line',
                     order: {
                         md: isUser ? 2 : 1,
@@ -101,7 +101,7 @@ const MessageBox = React.memo(function MessageBox(props) {
                 }}
                 color={isUser ? theme.palette.primary.contrastText : theme.palette.primary.contrastText}
             >
-                <ParseContent isUser={isUser} content={content}></ParseContent>
+                <ParseContent isUser={isUser} content={content} colorMode={colorMode}></ParseContent>
             </Box>
             <Box display="flex" flexDirection="column" justifyContent="flex-end" alignItems={{ xs: "end" }}
                 sx={{

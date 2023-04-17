@@ -31,12 +31,16 @@ const Search = styled('div')(({ theme }) => ({
 
 
 function GPTAppBar(props, ref) {
-    const { setToggleSidePanel } = props;
+    const { setToggleSidePanel, setColorMode } = props;
     const theme = useTheme();
 
     const handleClick = () => {
         setToggleSidePanel(toggle => !toggle);
         console.log("Handle Click!")
+    }
+
+    const handleSwitchColorMode = () => {
+        setColorMode(preMode => preMode === "light" ? "dark" : "light");
     }
 
     return (
@@ -52,14 +56,16 @@ function GPTAppBar(props, ref) {
                 <Box display="flex" justifyContent="space-between" width="100%">
                     <Box display="flex" alignItems="center">
                         <IconButton
-                            color="inherit"
-                            aria-label="open drawer"
+                            sx={{
+                                color: "primary.contrastText"
+                            }}
                             onClick={handleClick}
                         >
                             <MenuIcon fontSize='small' />
                         </IconButton>
 
                         <Typography
+                            color="primary.contrastText"
                             variant="h6"
                             noWrap
                             component="div"
@@ -100,13 +106,15 @@ function GPTAppBar(props, ref) {
                         </Search>
                     </Box>
                     <Box sx={{ display: { xs: 'flex' } }}>
-                        <IconButton color="inherit">
-                            {theme.palette.mode === 'dark' ? <Brightness7Icon fontSize="small" /> : <Brightness4Icon fontSize="small"/>}
+                        <IconButton sx={{ color: "primary.contrastText" }} onClick={handleSwitchColorMode}>
+                            {theme.palette.mode === 'dark' ? <Brightness7Icon fontSize="small" /> : <Brightness4Icon fontSize="small" />}
                         </IconButton>
                         <IconButton
                             aria-label="show more"
                             aria-haspopup="true"
-                            color="inherit"
+                            sx={{
+                                color: "primary.contrastText"
+                            }}
                         >
                             <SettingsIcon fontSize='small' />
                         </IconButton>
