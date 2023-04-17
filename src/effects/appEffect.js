@@ -28,7 +28,7 @@ export const useAppEffect = () => {
     useEffect(() => {
         if (chatInterfaceRef.current && appBarRef.current) {
             setAppBarHeight(appBarRef.current.offsetHeight);
-            const chatInterfaceHeight = window.innerHeight - appBarRef.current.offsetHeight;
+            const chatInterfaceHeight = window.innerHeight - appBarRef.current.offsetHeight + 1;
             setChatInterfaceHeight(chatInterfaceHeight);
         }
     }, [innerHeight]);
