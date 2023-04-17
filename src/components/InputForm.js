@@ -1,9 +1,11 @@
 import { Box, Button, TextField } from '@mui/material';
+import { useTheme } from '@emotion/react';
 import SendIcon from '@mui/icons-material/Send';
 
 
 export default function InputForm(props) {
     const { setNeedScroll, handleInputChange, handleSendMessage, messageRef } = props;
+    const theme = useTheme();
 
     function handleSubmit(event) {
         event.preventDefault();
@@ -26,13 +28,14 @@ export default function InputForm(props) {
     }
     return (
         <Box
+
             className="InputGroup"
             component="form"
             autoComplete="off"
             display="flex"
             alignItems="center"
             onSubmit={handleSubmit}
-            py={2}
+            p={2}
             gap={2}
         >
             <TextField
@@ -46,20 +49,20 @@ export default function InputForm(props) {
                 label="Send a message..."
                 multiline
                 maxRows={4}
-                InputLabelProps={{ style: { color: '#e9e9fd' } }}
+                InputLabelProps={{ style: { color: theme.palette.primary.contrastText } }}
                 sx={{
                     width: "100%",
-                    backgroundColor: "#282930",
+                    backgroundColor: theme.palette.primary.main,
                     textArea: {
-                        color: "#bdbec2",
+                        color: theme.palette.primary.contrastText,
                     }
                 }}
             />
             <Button variant="contained" endIcon={<SendIcon />}
                 sx={{
                     fontWeight: "bold",
-                    backgroundColor: "#5b61ed",
-                    color: "#e9e9fd"
+                    backgroundColor: theme.palette.thirdary.main,
+                    color: theme.palette.primary.contrastText
                 }}
                 onClick={handleSendMessage}
             >

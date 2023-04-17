@@ -32,7 +32,7 @@ export default function useInputControl(setNeedScroll, chatHistory, setChatHisto
         setChatHistory(prevHistory => [...prevHistory, userMessage]);
         messageRef.current.value = "";
 
-        await postChat(currentChatRoom, userMessage.role, userMessage.content);
+        await postChat(currentChatRoom.id, userMessage.role, userMessage.content);
 
 
         const last_role = queryMessages[queryMessages.length - 1].role;
@@ -43,7 +43,7 @@ export default function useInputControl(setNeedScroll, chatHistory, setChatHisto
                 const response = await fetchMessage(history.length > 20 ? history.slice(-10) : history);
                 const formatedResponse = formatResponseMessage(response);
                 setChatHistory(prevHistory => [...prevHistory, formatedResponse]); //
-                await postChat(currentChatRoom, formatedResponse.role, formatedResponse.content);
+                await postChat(currentChatRoom.id, formatedResponse.role, formatedResponse.content);
             }
         } catch (err) {
             setQueryError(err);

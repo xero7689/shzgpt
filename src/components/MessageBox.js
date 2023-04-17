@@ -1,6 +1,7 @@
 import React from 'react';
 import { useMemo } from 'react';
 
+import { useTheme } from '@emotion/react';
 import Box from '@mui/material/Box';
 import { Typography } from '@mui/material';
 
@@ -53,6 +54,7 @@ function ParseContent(props) {
 
 const MessageBox = React.memo(function MessageBox(props) {
     const { timestamp, role, content } = props;
+    const theme = useTheme();
 
     const isUser = role === "user";
     const isSystem = role === "system";
@@ -74,8 +76,9 @@ const MessageBox = React.memo(function MessageBox(props) {
             <Box display="flex"
                 sx={{
                     borderRadius: "12px",
-                    border: isUser ? "0.5px solid #6fa49c" : "0.5px solid #616266",
-                    backgroundColor: isUser ? "#1f242d" : "#282930",
+                    border: isUser ? `0.5px solid` : `0.5px solid`,
+                    borderColor: theme.palette.primary.border,
+                    backgroundColor: isUser ? theme.palette.primary.main : theme.palette.primary.main,
                     whiteSpace: 'pre-line',
                     order: {
                         md: isUser ? 2 : 1,
@@ -96,7 +99,7 @@ const MessageBox = React.memo(function MessageBox(props) {
                     xs: 1,
                     md: 2
                 }}
-                color={isUser ? "#6fa49c" : "#bdbec2"}
+                color={isUser ? theme.palette.primary.contrastText : theme.palette.primary.contrastText}
             >
                 <ParseContent isUser={isUser} content={content}></ParseContent>
             </Box>

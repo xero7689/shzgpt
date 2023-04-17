@@ -7,13 +7,16 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 
-import { TextField, Button, Typography, Divider } from '@mui/material';
+import { TextField, Button, Typography, Divider, IconButton } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import ChatIcon from '@mui/icons-material/Chat';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 
 import { getChatRoom, getChatHistory, createChatRoom, postChat } from '../fetchers/storage';
 
 const GPTSidePanel = (props) => {
     const { setChatHistory, setCurrentChatRoom, toggleSidePanel } = props;
+    const theme = useTheme();
 
     const newChatRoomRef = useRef();
     const [chatRooms, setChatRooms] = useState([]);
@@ -45,7 +48,10 @@ const GPTSidePanel = (props) => {
         const response = await createChatRoom(newChatRoomNameInput);
         setChatRooms(preChatroom => [...preChatroom, response]);
         setNewChatRoomName(response.name);
-        setCurrentChatRoom(response.id);
+        setCurrentChatRoom({
+            id: response.id,
+            name: response.name
+        });
 
         postChat(response.id, "system", "You're a helpful assistance.");
     }
@@ -68,23 +74,36 @@ const GPTSidePanel = (props) => {
     const handleOnClickRoom = async (roomInfo) => {
         setChatHistory([]);
         const response = await getChatHistory(roomInfo.id);
-        setCurrentChatRoom(roomInfo.id);
+        setCurrentChatRoom({
+            id: roomInfo.id,
+            name: roomInfo.name
+        });
         setChatHistory(convertData(response));
     }
 
     return (
         <Box
-            display= {toggleSidePanel ? "flex" : "none"}
+            display={toggleSidePanel ? "flex" : "none"}
             flexDirection="column"
             justifyContent="space-between"
-            p={2}
-            sx={{ bgcolor: '#282d30', marginTop: "64px", borderRight: "0.8px solid #48545b" }}
+            px={2}
+            pb={3}
+            sx={{ backgroundColor: "background.paper", marginTop: "64px", borderRight: "1px solid", borderColor: "primary.border" }}
             maxHeight={{
                 xs: "200px",
                 md: "100%"
             }}
         >
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Typography color="primary.contrastText" fontSize="small" fontWeight="bold">
+                    CHATROOM
+                </Typography>
+                <IconButton>
+                    <MoreHorizIcon sx={{ color: "primary.contrastText" }} />
+                </IconButton>
+            </Box>
             <Box flexGrow={1} sx={{ overflow: "auto" }}>
+
                 <nav aria-label="secondary mailbox folders">
                     <List>
                         {chatRooms.map((item, index) => {
@@ -92,9 +111,9 @@ const GPTSidePanel = (props) => {
                                 <ListItem disablePadding key={index}>
                                     <ListItemButton onClick={() => handleOnClickRoom(item)}>
                                         <ListItemIcon sx={{ minWidth: "36px" }}>
-                                            <ChatIcon sx={{ color: "#d4d5d5" }} />
+                                            <ChatIcon sx={{ color: "primary.contrastText" }} color="secondary" />
                                         </ListItemIcon>
-                                        <ListItemText primary={<Typography fontWeight="bold" color="#d4d5d5">{item.name}</Typography>} />
+                                        <ListItemText primary={<Typography color="primary.contrastText">{item.name}</Typography>} />
                                     </ListItemButton>
                                 </ListItem>
                             )
@@ -109,24 +128,24 @@ const GPTSidePanel = (props) => {
                     inputRef={newChatRoomRef}
                     onChange={handleOnChange}
                     label="Set Chatroom Name.."
-                    InputLabelProps={{ style: { color: '#939fa5' } }}
+                    InputLabelProps={{ style: { color: theme.palette.primary.contrastText } }}
                     variant='outlined'
                     sx={{
                         input: {
-                            color: "#7b8a93",
+                            color: "primary.contrastText",
                         },
                         fieldset: {
-                            borderColor: "#7b8a93"
+                            borderColor: "primary.border"
                         }
                     }}
                 />
                 <Button variant='contained'
                     sx={{
-                        bgcolor: "#939fa5"
+                        bgcolor: "secondary.main"
                     }}
                     onClick={handleSubmitNewChatRoom}
                 >
-                    <Typography fontSize={14} fontWeight="bold" color="#48545b">New Chat</Typography>
+                    <Typography fontSize={14} fontWeight="bold" color="#primary.contrastText">New Chat</Typography>
                 </Button>
             </Box>
         </Box>

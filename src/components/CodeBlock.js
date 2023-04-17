@@ -2,7 +2,7 @@ import { Code } from '@mui/icons-material';
 import Box from '@mui/material/Box';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { Typography } from '@mui/material';
-import { gruvboxDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { atomOneDark, gruvboxDark } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import Button from '@mui/material/Button';
 import CopyAllIcon from '@mui/icons-material/CopyAll';
 import { useState } from 'react';
@@ -18,30 +18,29 @@ const CodeBlock = (props) => {
     }
 
     return (
-        <Box>
+        <Box border="1px solid" borderColor="info.border">
             <Box
                 display="flex"
                 justifyContent="space-between"
                 alignItems="center"
                 overflow="auto"
                 sx={{
-                    backgroundColor: "#3E3E43",
+                    backgroundColor: "info.main",
                     borderRadius: "4px",
                     borderBottomLeftRadius: 0,
                     borderBottomRightRadius: 0,
                 }}
                 px={2}
-                py={1}
             >
                 <Box
                     display="flex"
                     gap={1}
                 >
                     <Code></Code>
-                    <Typography fontSize={14} fontWeight="bold">{language}</Typography>
+                    <Typography fontSize={14} fontWeight="bold" color="info.contrastText">{language}</Typography>
                 </Box>
-                <Button variant="text" size="small" startIcon={<CopyAllIcon />} onClick={handleCopyClick}>
-                    <Typography color="#bdbec2" fontSize={12}>Copy Code</Typography>
+                <Button variant="text" size="small" startIcon={<CopyAllIcon sx={{ color: "primary.contrastText"}}/>} onClick={handleCopyClick}>
+                    <Typography color="primary.contrastText" fontSize={12}>Copy Code</Typography>
                 </Button>
             </Box>
             <Box sx={{ width: "100%", overflow: 'auto'}}>

@@ -11,27 +11,28 @@ import { IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import MenuIcon from '@mui/icons-material/Menu';
 import SettingsIcon from '@mui/icons-material/Settings';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import { useTheme } from '@mui/material/styles';
 
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
     borderRadius: theme.shape.borderRadius,
-    backgroundColor: alpha(theme.palette.common.white, 0.05),
+    backgroundColor: alpha(theme.palette.common.white, 0.1),
     '&:hover': {
         backgroundColor: alpha(theme.palette.common.white, 0.15),
     },
-    marginRight: theme.spacing(2),
     marginLeft: 0,
     width: '100%',
     [theme.breakpoints.up('sm')]: {
-        marginLeft: theme.spacing(3),
         width: 'auto',
     },
 }));
 
 
 function GPTAppBar(props, ref) {
-
     const { setToggleSidePanel } = props;
+    const theme = useTheme();
 
     const handleClick = () => {
         setToggleSidePanel(toggle => !toggle);
@@ -40,70 +41,76 @@ function GPTAppBar(props, ref) {
 
     return (
         <AppBar position="fixed"
+            elevation={0}
             sx={{
-                backgroundColor: '#1d1f27'
+                borderBottom: "1px solid",
+                borderColor: theme.palette.primary.border
             }}
             ref={ref}
         >
             <Toolbar>
-                <IconButton
-                    size="large"
-                    edge="start"
-                    color="inherit"
-                    aria-label="open drawer"
-                    onClick={handleClick}
-                    sx={{ mr: 2 }}
-                >
-                    <MenuIcon />
-                </IconButton>
+                <Box display="flex" justifyContent="space-between" width="100%">
+                    <Box display="flex" alignItems="center">
+                        <IconButton
+                            color="inherit"
+                            aria-label="open drawer"
+                            onClick={handleClick}
+                        >
+                            <MenuIcon fontSize='small' />
+                        </IconButton>
 
-                <Typography
-                    variant="h6"
-                    noWrap
-                    component="div"
-                    fontWeight="bold"
-                >
-                    SHZ GPT
-                </Typography>
-
-                <Search>
-                    <TextField
-                        size="small"
-                        InputLabelProps={{
-                            style: {
-                                color: '#939fa5'
-                            }
-                        }}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <SearchIcon sx={{ color: "#7e7f87" }} />
-                                </InputAdornment>
-                            ),
-                        }}
-                        variant='outlined'
-                        sx={{
-                            input: {
-                                color: '#bdbec2'
-                            },
-                            fieldset: {
-                                borderColor: "#7e7f87"
-                            },
-                        }}
-                    >
-                        Search
-                    </TextField>
-                </Search>
-                <Box sx={{ flexGrow: 1 }} />
-                <Box sx={{ display: { xs: 'flex'} }}>
-                    <IconButton
-                        size="large"
-                        aria-label="show more"
-                        aria-haspopup="true"
-                        color="inherit"
-                    >
-                        <SettingsIcon />
-                    </IconButton>
+                        <Typography
+                            variant="h6"
+                            noWrap
+                            component="div"
+                            fontWeight="bold"
+                            ml={2}
+                        >
+                            SHZ GPT
+                        </Typography>
+                    </Box>
+                    <Box>
+                        <Search>
+                            <TextField
+                                size="small"
+                                InputLabelProps={{
+                                    style: {
+                                        color: '#939fa5'
+                                    }
+                                }}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <SearchIcon sx={{ color: "primary.contrastText" }} />
+                                        </InputAdornment>
+                                    ),
+                                }}
+                                variant='outlined'
+                                sx={{
+                                    input: {
+                                        color: '#bdbec2'
+                                    },
+                                    fieldset: {
+                                        borderColor: "primary.border"
+                                    },
+                                }}
+                            >
+                                Search
+                            </TextField>
+                        </Search>
+                    </Box>
+                    <Box sx={{ display: { xs: 'flex' } }}>
+                        <IconButton color="inherit">
+                            {theme.palette.mode === 'dark' ? <Brightness7Icon fontSize="small" /> : <Brightness4Icon fontSize="small"/>}
+                        </IconButton>
+                        <IconButton
+                            aria-label="show more"
+                            aria-haspopup="true"
+                            color="inherit"
+                        >
+                            <SettingsIcon fontSize='small' />
+                        </IconButton>
+                    </Box>
                 </Box>
             </Toolbar>
         </AppBar>

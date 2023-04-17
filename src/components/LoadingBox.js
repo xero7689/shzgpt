@@ -6,7 +6,7 @@ export default function LoadingBox(props) {
 
     return (
         <Box display={queryInProgress ? "flex" : "none"} alignItems="flex-end" gap={2}>
-            <Skeleton sx={{ backgroundColor: "#282930", border: "0.5px solid #616266" }} animation="wave" variant="rounded" width={270} height={70} />
+            <Skeleton sx={{ backgroundColor: "primary.main", border: "0.5px solid", borderColor: "primary.border" }} animation="wave" variant="rounded" width={270} height={70} />
             <CircularProgress size={20}></CircularProgress>
         </Box>
     )
