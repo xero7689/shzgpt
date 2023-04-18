@@ -66,6 +66,10 @@ function GPTAppBar(props, ref) {
                         </IconButton>
 
                         <Typography
+                            display={{
+                                xs: "none",
+                                sm: "block"
+                            }}
                             color="primary.contrastText"
                             variant="h6"
                             noWrap

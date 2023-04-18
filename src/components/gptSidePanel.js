@@ -83,15 +83,36 @@ const GPTSidePanel = (props) => {
 
     return (
         <Box
+            position={{
+                xs: "fixed",
+                sm: "static"
+            }}
+            zIndex={9999}
             display={toggleSidePanel ? "flex" : "none"}
             flexDirection="column"
             justifyContent="space-between"
             px={2}
             pb={3}
-            sx={{ backgroundColor: "primary.main", borderRight: "1px solid", borderColor: "primary.border" }}
+            sx={{ 
+                backgroundColor: "primary.main", 
+                borderRight: "1px solid", 
+                borderColor: "primary.border" 
+            }}
             maxHeight={{
-                xs: "200px",
+                xs: "50%",
                 md: "100%"
+            }}
+            width={{
+                xs: "auto",
+                sm: "auto"
+            }}
+            boxShadow={{
+                xs: 5,
+                sm: 0
+            }}
+            borderRadius={{
+                xs: "12px",
+                sm: "0"
             }}
         >
             <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -120,7 +141,7 @@ const GPTSidePanel = (props) => {
                     </List>
                 </nav>
             </Box>
-            <Divider />
+            <Divider sx={{ my: 2}} variant='middle'/>
             <Box display="flex" flexDirection="column" gap={1}>
                 <TextField
                     size="small"
