@@ -20,7 +20,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Container from '@mui/material/Container';
 
 
-import { lightTheme, darkTheme, getDesignTokens } from './theme';
+import { getDesignTokens } from './theme';
 
 function App() {
   const systemMessage = "You're a helpful assistance.";
