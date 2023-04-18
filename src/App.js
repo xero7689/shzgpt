@@ -17,6 +17,7 @@ import IconButton from '@mui/material/IconButton';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import Container from '@mui/material/Container';
 
 
 import { lightTheme, darkTheme, getDesignTokens } from './theme';
@@ -79,21 +80,25 @@ function App() {
                 <MoreVertIcon sx={{ color: "primary.contrastText" }} />
               </IconButton>
             </Box>
-            <Box ref={chatContentRef} className="ChatContent" flexGrow={1} px={4} display="flex" flexDirection="column" gap={4} pt={4} py={3}
-              sx={{
-                overflow: "auto",
-                '&::-webkit-scrollbar': {
-                  display: 'none'
-                },
-              }}
-            >
-              {chatHistory.map(item => {
-                return (
-                  <MessageBox key={item.timestamp} timestamp={item.timestamp} role={item.role} content={item.content} colorMode={colorMode}>
-                  </MessageBox>
-                )
-              })}
-              <LoadingBox queryInProgress={queryInProgress} />
+            <Box flexGrow={1} sx={{ overflow: "auto"}}>
+              <Container maxWidth="md">
+                <Box ref={chatContentRef} className="ChatContent" px={4} display="flex" flexDirection="column" gap={4} pt={4} py={3}
+                  sx={{
+                    overflow: "auto",
+                    '&::-webkit-scrollbar': {
+                      display: 'none'
+                    },
+                  }}
+                >
+                  {chatHistory.map(item => {
+                    return (
+                      <MessageBox key={item.timestamp} timestamp={item.timestamp} role={item.role} content={item.content} colorMode={colorMode}>
+                      </MessageBox>
+                    )
+                  })}
+                  <LoadingBox queryInProgress={queryInProgress} />
+                </Box>
+              </Container>
             </Box>
             <InputForm {...inputFormProps} />
           </Box>
