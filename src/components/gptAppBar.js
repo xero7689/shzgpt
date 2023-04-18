@@ -44,7 +44,8 @@ function GPTAppBar(props, ref) {
     }
 
     return (
-        <AppBar position="fixed"
+        <AppBar
+            position='static'
             elevation={0}
             sx={{
                 borderBottom: "1px solid",

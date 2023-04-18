@@ -65,7 +65,7 @@ function App() {
           }}
         >
           <GPTSidePanel setChatHistory={setChatHistory} setCurrentChatRoom={setCurrentChatRoom} toggleSidePanel={toggleSidePanel} />
-          <Box ref={chatInterfaceRef} flexGrow={1} display="flex" flexDirection="column" sx={{ backgroundColor: "background.default", height: chatInterfaceHeight, marginTop: "64px" }}>
+          <Box ref={chatInterfaceRef} flexGrow={1} display="flex" flexDirection="column" sx={{ backgroundColor: "background.default", height: chatInterfaceHeight }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" backgroundColor="primary.main" px={2}>
               <Box display="flex">
                 <IconButton>

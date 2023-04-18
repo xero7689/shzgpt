@@ -88,7 +88,7 @@ const GPTSidePanel = (props) => {
             justifyContent="space-between"
             px={2}
             pb={3}
-            sx={{ backgroundColor: "primary.main", marginTop: "64px", borderRight: "1px solid", borderColor: "primary.border" }}
+            sx={{ backgroundColor: "primary.main", borderRight: "1px solid", borderColor: "primary.border" }}
             maxHeight={{
                 xs: "200px",
                 md: "100%"
