@@ -10,12 +10,12 @@ import ListItemText from '@mui/material/ListItemText';
 import { TextField, Button, Typography, Divider, IconButton } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import ChatIcon from '@mui/icons-material/Chat';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import CloseIcon from '@mui/icons-material/Close';
 
 import { getChatRoom, getChatHistory, createChatRoom, postChat } from '../fetchers/storage';
 
 const GPTSidePanel = (props) => {
-    const { setChatHistory, setCurrentChatRoom, toggleSidePanel } = props;
+    const { setChatHistory, setCurrentChatRoom, toggleSidePanel, setToggleSidePanel } = props;
     const theme = useTheme();
 
     const newChatRoomRef = useRef();
@@ -93,10 +93,10 @@ const GPTSidePanel = (props) => {
             justifyContent="space-between"
             px={2}
             pb={3}
-            sx={{ 
-                backgroundColor: "primary.main", 
-                borderRight: "1px solid", 
-                borderColor: "primary.border" 
+            sx={{
+                backgroundColor: "primary.main",
+                borderRight: "1px solid",
+                borderColor: "primary.border"
             }}
             maxHeight={{
                 xs: "50%",
@@ -111,14 +111,28 @@ const GPTSidePanel = (props) => {
                 md: "0"
             }}
         >
-            <Box display="flex" justifyContent="space-between" alignItems="center">
-                <Typography color="primary.contrastText" fontSize="small" fontWeight="bold">
+            <Box display="flex" justifyContent="space-between" alignItems="center"
+                pt={{
+                    xs: 1,
+                    sm: 3
+                }} pb={{
+                    xs: 1,
+                    sm: 3
+                }}
+            >
+                <Typography color="primary.contrastText" fontSize="normal" fontWeight="bold">
                     CHATROOM
                 </Typography>
-                <IconButton>
-                    <MoreHorizIcon sx={{ color: "primary.contrastText" }} />
+                <IconButton sx={{
+                    display: {
+                        xs: "block",
+                        sm: "none"
+                    }
+                }} onClick={() => setToggleSidePanel(false)}>
+                    <CloseIcon fontSize="small" sx={{ color: "primary.contrastText" }} />
                 </IconButton>
             </Box>
+            <Divider sx={{ my: 0 }} />
             <Box flexGrow={1} sx={{ overflow: "auto" }}>
                 <nav aria-label="secondary mailbox folders">
                     <List>
@@ -127,7 +141,7 @@ const GPTSidePanel = (props) => {
                                 <ListItem disablePadding key={index}>
                                     <ListItemButton onClick={() => handleOnClickRoom(item)}>
                                         <ListItemIcon sx={{ minWidth: "36px" }}>
-                                            <ChatIcon sx={{ color: "primary.contrastText" }} color="secondary" fontSize='small'/>
+                                            <ChatIcon sx={{ color: "primary.contrastText" }} color="secondary" fontSize='small' />
                                         </ListItemIcon>
                                         <ListItemText primary={<Typography color="primary.contrastText" fontSize="small">{item.name}</Typography>} />
                                     </ListItemButton>
@@ -137,7 +151,7 @@ const GPTSidePanel = (props) => {
                     </List>
                 </nav>
             </Box>
-            <Divider sx={{ my: 2}} variant='middle'/>
+            <Divider sx={{ my: 2 }} variant='middle' />
             <Box display="flex" flexDirection="column" gap={1}>
                 <TextField
                     size="small"

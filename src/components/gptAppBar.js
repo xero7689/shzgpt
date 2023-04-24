@@ -36,7 +36,6 @@ function GPTAppBar(props, ref) {
 
     const handleClick = () => {
         setToggleSidePanel(toggle => !toggle);
-        console.log("Handle Click!")
     }
 
     const handleSwitchColorMode = () => {

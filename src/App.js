@@ -50,57 +50,59 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box display="flex" height="100%" flexDirection="column">
-        <GPTAppBar ref={appBarRef} setColorMode={setColorMode} setToggleSidePanel={setToggleSidePanel}></GPTAppBar>
-        <Box display="flex" height="100%"
-          flexDirection={{
-            xs: "column",
-            md: "row"
-          }}
-          position={{
-            md: "static"
-          }}
-          sx={{
-            backgroundColor: 'background.default',
-          }}
-        >
-          <GPTSidePanel setChatHistory={setChatHistory} setCurrentChatRoom={setCurrentChatRoom} toggleSidePanel={toggleSidePanel} />
-          <Box ref={chatInterfaceRef} flexGrow={1} display="flex" flexDirection="column" sx={{ backgroundColor: "background.default", height: chatInterfaceHeight }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" backgroundColor="primary.main" px={2}>
-              <Box display="flex">
+      <Box display="flex" maxHeight="100vh">
+        <GPTSidePanel setChatHistory={setChatHistory} setCurrentChatRoom={setCurrentChatRoom} toggleSidePanel={toggleSidePanel} setToggleSidePanel={setToggleSidePanel} />
+        <Box flexGrow={1} display="flex" height="100%" flexDirection="column">
+          <GPTAppBar ref={appBarRef} setColorMode={setColorMode} setToggleSidePanel={setToggleSidePanel}></GPTAppBar>
+          <Box display="flex" height="100%"
+            flexDirection={{
+              xs: "column",
+              md: "row"
+            }}
+            position={{
+              md: "static"
+            }}
+            sx={{
+              backgroundColor: 'background.default',
+            }}
+          >
+            <Box ref={chatInterfaceRef} flexGrow={1} display="flex" flexDirection="column" sx={{ backgroundColor: "background.default", height: chatInterfaceHeight }}>
+              <Box display="flex" justifyContent="space-between" alignItems="center" backgroundColor="primary.main" px={2}>
+                <Box display="flex">
+                  <IconButton>
+                    <ArrowBackIcon fontSize="small" sx={{ color: "primary.contrastText" }}></ArrowBackIcon>
+                  </IconButton>
+                  <IconButton>
+                    <ArrowForwardIcon fontSize="small" sx={{ color: "primary.contrastText" }}></ArrowForwardIcon>
+                  </IconButton>
+                </Box>
+                <Typography variant="subtitle2" fontWeight="bold" pl={2} color="primary.contrastText">{currentChatRoom.name}</Typography>
                 <IconButton>
-                  <ArrowBackIcon fontSize="small" sx={{ color: "primary.contrastText" }}></ArrowBackIcon>
-                </IconButton>
-                <IconButton>
-                  <ArrowForwardIcon fontSize="small" sx={{ color: "primary.contrastText" }}></ArrowForwardIcon>
+                  <MoreVertIcon sx={{ color: "primary.contrastText" }} />
                 </IconButton>
               </Box>
-              <Typography variant="subtitle2" fontWeight="bold" pl={2} color="primary.contrastText">{currentChatRoom.name}</Typography>
-              <IconButton>
-                <MoreVertIcon sx={{ color: "primary.contrastText" }} />
-              </IconButton>
+              <Box flexGrow={1} sx={{ overflow: "auto" }}>
+                <Container maxWidth="md">
+                  <Box ref={chatContentRef} className="ChatContent" px={4} display="flex" flexDirection="column" gap={4} pt={4} py={3}
+                    sx={{
+                      overflow: "auto",
+                      '&::-webkit-scrollbar': {
+                        display: 'none'
+                      },
+                    }}
+                  >
+                    {chatHistory.map(item => {
+                      return (
+                        <MessageBox key={item.timestamp} timestamp={item.timestamp} role={item.role} content={item.content} colorMode={colorMode}>
+                        </MessageBox>
+                      )
+                    })}
+                    <LoadingBox queryInProgress={queryInProgress} />
+                  </Box>
+                </Container>
+              </Box>
+              <InputForm {...inputFormProps} />
             </Box>
-            <Box flexGrow={1} sx={{ overflow: "auto"}}>
-              <Container maxWidth="md">
-                <Box ref={chatContentRef} className="ChatContent" px={4} display="flex" flexDirection="column" gap={4} pt={4} py={3}
-                  sx={{
-                    overflow: "auto",
-                    '&::-webkit-scrollbar': {
-                      display: 'none'
-                    },
-                  }}
-                >
-                  {chatHistory.map(item => {
-                    return (
-                      <MessageBox key={item.timestamp} timestamp={item.timestamp} role={item.role} content={item.content} colorMode={colorMode}>
-                      </MessageBox>
-                    )
-                  })}
-                  <LoadingBox queryInProgress={queryInProgress} />
-                </Box>
-              </Container>
-            </Box>
-            <InputForm {...inputFormProps} />
           </Box>
         </Box>
       </Box>
