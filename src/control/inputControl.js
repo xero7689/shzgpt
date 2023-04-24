@@ -40,7 +40,12 @@ export default function useInputControl(setNeedScroll, chatHistory, setChatHisto
             if (last_role === 'user') {
                 setQueryInProgress(true);
                 const history = formatChatHistory(queryMessages)
-                const response = await fetchMessage(history.length > 20 ? history.slice(-10) : history);
+
+                const slice_history = history.slice(-5);
+                slice_history.unshift(history[1]);
+                const fetchHistory = history.length > 10 ? slice_history : history
+
+                const response = await fetchMessage(fetchHistory);
                 const formatedResponse = formatResponseMessage(response);
                 setChatHistory(prevHistory => [...prevHistory, formatedResponse]); //
                 await postChat(currentChatRoom.id, formatedResponse.role, formatedResponse.content);

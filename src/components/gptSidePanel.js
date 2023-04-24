@@ -85,7 +85,7 @@ const GPTSidePanel = (props) => {
         <Box
             position={{
                 xs: "fixed",
-                sm: "static"
+                md: "static"
             }}
             zIndex={9999}
             display={toggleSidePanel ? "flex" : "none"}
@@ -102,17 +102,13 @@ const GPTSidePanel = (props) => {
                 xs: "50%",
                 md: "100%"
             }}
-            width={{
-                xs: "auto",
-                sm: "auto"
-            }}
             boxShadow={{
                 xs: 5,
-                sm: 0
+                md: 0
             }}
             borderRadius={{
                 xs: "12px",
-                sm: "0"
+                md: "0"
             }}
         >
             <Box display="flex" justifyContent="space-between" alignItems="center">
