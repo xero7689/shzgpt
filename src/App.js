@@ -13,6 +13,8 @@ import GPTSidePanel from './components/gptSidePanel';
 import MessageBox from './components/MessageBox';
 import InputForm from './components/InputForm';
 import LoadingBox from './components/LoadingBox';
+import { PromptsList } from './features/promptsList';
+
 import IconButton from '@mui/material/IconButton';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -50,7 +52,7 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box display="flex" maxHeight="100vh">
+      <Box display="flex" maxHeight="100vh" maxWidth="100vw">
         <GPTSidePanel setChatHistory={setChatHistory} setCurrentChatRoom={setCurrentChatRoom} toggleSidePanel={toggleSidePanel} setToggleSidePanel={setToggleSidePanel} />
         <Box flexGrow={1} display="flex" height="100%" flexDirection="column">
           <GPTAppBar ref={appBarRef} setColorMode={setColorMode} setToggleSidePanel={setToggleSidePanel}></GPTAppBar>
@@ -105,6 +107,7 @@ function App() {
             </Box>
           </Box>
         </Box>
+        <PromptsList></PromptsList>
       </Box>
     </ThemeProvider>
   );
