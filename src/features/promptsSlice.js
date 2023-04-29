@@ -1,5 +1,6 @@
 import { createSlice, nanoid } from "@reduxjs/toolkit";
 
+const prompt_topics = ["Education", "Programming"];
 
 const initialState = {
     prompts: [
@@ -25,23 +26,29 @@ const promptsSlice = createSlice(
         name: 'prompts',
         initialState,
         reducers: {
-            promptsAdded: {
+            promptAdded: {
                 reducer(state, action) {
                     state.prompts.push(action.payload)
-                }
-            },
-            prepare(title, content) {
-                return {
-                    payload: {
-                        id: nanoid(),
-                        title,
-                        content
+                },
+                prepare(title, content) {
+                    return {
+                        payload: {
+                            id: nanoid(),
+                            topic: "test",
+                            title,
+                            content
+                        }
                     }
                 }
-            }
+            },
         }
     }
 )
 
-export const { promptsAdded } = promptsSlice.actions;
+export const { promptAdded } = promptsSlice.actions;
 export default promptsSlice.reducer;
+
+export const selectAllPrompts = state => state.prompts;
+
+export const selectPromptById = (state, promptId) =>
+    state.prompts.find(prompt => prompt.id === promptId);

@@ -14,6 +14,7 @@ import MessageBox from './components/MessageBox';
 import InputForm from './components/InputForm';
 import LoadingBox from './components/LoadingBox';
 import { PromptsList } from './features/promptsList';
+import { AddPromptForm } from './features/AddPromptForm';
 
 import IconButton from '@mui/material/IconButton';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -35,6 +36,7 @@ function App() {
     },
   ]);
   const [toggleSidePanel, setToggleSidePanel] = useState(false);
+  const [togglePrompts, setTogglePrompts] = useState(false);
   const [colorMode, setColorMode] = useState("light");
 
   const theme = React.useMemo(() => createTheme(getDesignTokens(colorMode)), [colorMode]);
@@ -107,7 +109,17 @@ function App() {
             </Box>
           </Box>
         </Box>
-        <PromptsList></PromptsList>
+        <Box display="flex" sx={{ backgroundColor: "primary.main", border: "1px solid", borderColor: "primary.border" }}>
+          <Box display="flex" alignItems="center">
+            <IconButton sx={{ padding: "0px", height: "100%", borderRadius: "0px" }} onClick={() => setTogglePrompts(pre => !pre)}>
+              <MoreVertIcon fontSize='small' />
+            </IconButton>
+          </Box>
+          <Box minWidth="250px" display={togglePrompts ? "flex": "none"} flexDirection="column" px={1} py={2} sx={{border: "1px solid", borderColor:"primary.border"}}>
+            <PromptsList></PromptsList>
+            <AddPromptForm></AddPromptForm>
+          </Box>
+        </Box>
       </Box>
     </ThemeProvider>
   );

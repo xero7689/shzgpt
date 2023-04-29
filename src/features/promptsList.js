@@ -1,6 +1,7 @@
 import React from 'react';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
+import { selectAllPrompts } from './promptsSlice';
 import { Box, Divider, Typography, Collapse, List, ListItem, ListItemButton, ListItemText, ListItemIcon } from '@mui/material';
 import GroupsIcon from '@mui/icons-material/Groups';
 
@@ -52,8 +53,8 @@ const PromptItem = (props) => {
     )
 }
 
-export const PromptsList = () => {
-    const prompts = useSelector(state => state.prompts);
+export const PromptsList = (props) => {
+    const prompts = useSelector(selectAllPrompts);
 
     const renderedPosts = prompts.prompts.map((prompt, index) => (
         <PromptItem key={index} prompt={prompt} />
@@ -61,20 +62,13 @@ export const PromptsList = () => {
 
     return (
         <Box
-            display="flex"
             flexDirection="column"
-            px={2}
-            py={2}
-            sx={{
-                backgroundColor: "primary.main",
-                borderLeft: "1px solid",
-                borderColor: "primary.border"
-            }}
+            flexGrow={1}
         >
             <Box>
-                <Typography color="primary.contrastText" fontSize="normal" fontWeight="bold" textAlign="center">Prompts</Typography>
+                <Typography color="primary.contrastText" fontSize="medium" fontWeight="bold" textAlign="center">Prompts</Typography>
             </Box>
-            <Divider></Divider>
+            <Divider sx={{marginTop: "16px"}}></Divider>
             <Box component="nav">
                 <List>
                     {renderedPosts}
