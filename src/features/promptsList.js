@@ -1,8 +1,8 @@
 import React from 'react';
-import { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { selectAllPrompts } from './promptsSlice';
-import { Box, Divider, Typography, Collapse, List, ListItem, ListItemButton, ListItemText, ListItemIcon } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectAllPrompts, fetchPrompts } from './promptsSlice';
+import { Box, Divider, Typography, Collapse, List, ListItem, ListItemButton, ListItemText, ListItemIcon, CircularProgress } from '@mui/material';
 import GroupsIcon from '@mui/icons-material/Groups';
 
 const PromptItem = (props) => {
@@ -22,13 +22,13 @@ const PromptItem = (props) => {
     }
 
     return (
-        <ListItem key="index" display="flex" flexDirection="column" color="primary.contrastText"
+        <ListItem key="index" color="primary.contrastText"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={handleMouseClick}
         >
             <ListItemButton>
-                <Typography variant='subtitle' color="primary.contrastText">{prompt.title}</Typography>
+                <Typography variant='subtitle' color="primary.contrastText">{prompt.name}</Typography>
                 {showContent &&
                     <Box sx={{
                         position: 'absolute',
@@ -54,11 +54,32 @@ const PromptItem = (props) => {
 }
 
 export const PromptsList = (props) => {
+    const dispatch = useDispatch();
     const prompts = useSelector(selectAllPrompts);
+    const fetchError = useSelector(state => state.prompts.error);
 
-    const renderedPosts = prompts.prompts.map((prompt, index) => (
-        <PromptItem key={index} prompt={prompt} />
-    ));
+    const fetchPromptStatus = useSelector(state => state.prompts.status);
+
+    useEffect(() => {
+        if (fetchPromptStatus === 'idle') {
+            dispatch(fetchPrompts());
+        }
+    }, [fetchPromptStatus, dispatch])
+
+    let renderedPosts;
+
+    if (fetchPromptStatus === 'loading') {
+        renderedPosts = <CircularProgress />;
+    } else if (fetchPromptStatus === 'succeeded') {
+        renderedPosts = prompts.prompts.map((prompt, index) => {
+            return (
+                <PromptItem key={index} prompt={prompt} />
+            )
+        });
+    } else if (fetchPromptStatus === 'failed') {
+        renderedPosts = <Box>{fetchError}</Box>
+    }
+
 
     return (
         <Box
@@ -68,7 +89,7 @@ export const PromptsList = (props) => {
             <Box>
                 <Typography color="primary.contrastText" fontSize="medium" fontWeight="bold" textAlign="center">Prompts</Typography>
             </Box>
-            <Divider sx={{marginTop: "16px"}}></Divider>
+            <Divider sx={{ marginTop: "16px" }}></Divider>
             <Box component="nav">
                 <List>
                     {renderedPosts}

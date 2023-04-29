@@ -1,25 +1,21 @@
-import { createSlice, nanoid } from "@reduxjs/toolkit";
+import { createSlice, nanoid, createAsyncThunk } from "@reduxjs/toolkit";
+import { getPromptsList } from "../fetchers/storage";
+import { create } from "@mui/material/styles/createTransitions";
 
 const prompt_topics = ["Education", "Programming"];
 
 const initialState = {
-    prompts: [
-        {
-            id: 0,
-            topic: "role",
-            title: "AWS Architector",
-            content: "I want you to act like an AWS professional Architector",
-        },
-        {
-            id: 1,
-            topic: "role",
-            title: "English Refinement",
-            content: "You will act as an English teacher and I will provide you with a sentence to refine using common grammar, like a native speaker"
-        }
-    ],
+    prompts: [],
     status: 'idle',
     error: null
 }
+
+export const fetchPrompts = createAsyncThunk('posts/fetchPrompts', async () => {
+    const response = await getPromptsList();
+    console.log("in fetch prompts");
+    console.log(response.results);
+    return response.results;
+});
 
 const promptsSlice = createSlice(
     {
@@ -28,19 +24,24 @@ const promptsSlice = createSlice(
         reducers: {
             promptAdded: {
                 reducer(state, action) {
+                    console.log(action.payload);
                     state.prompts.push(action.payload)
                 },
-                prepare(title, content) {
-                    return {
-                        payload: {
-                            id: nanoid(),
-                            topic: "test",
-                            title,
-                            content
-                        }
-                    }
-                }
             },
+        },
+        extraReducers(builder) {
+            builder
+                .addCase(fetchPrompts.pending, (state, action) => {
+                    state.status = 'loading';
+                })
+                .addCase(fetchPrompts.fulfilled, (state, action) => {
+                    state.status = 'succeeded';
+                    state.prompts = action.payload;
+                })
+                .addCase(fetchPrompts.rejected, (state, action) => {
+                    state.status = 'failed';
+                    state.error = action.error.message;
+                })
         }
     }
 )
