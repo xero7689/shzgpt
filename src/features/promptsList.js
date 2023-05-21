@@ -2,6 +2,7 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectAllPrompts, fetchPrompts } from './promptsSlice';
+import { fetchPromptTopic } from './promptTopicSlice';
 import { Box, Divider, Typography, Collapse, List, ListItem, ListItemButton, ListItemText, ListItemIcon, CircularProgress } from '@mui/material';
 import GroupsIcon from '@mui/icons-material/Groups';
 
@@ -59,12 +60,19 @@ export const PromptsList = (props) => {
     const fetchError = useSelector(state => state.prompts.error);
 
     const fetchPromptStatus = useSelector(state => state.prompts.status);
+    const fetchPromptTopicStatus = useSelector(state => state.promptTopic.status);
 
     useEffect(() => {
         if (fetchPromptStatus === 'idle') {
             dispatch(fetchPrompts());
         }
     }, [fetchPromptStatus, dispatch])
+
+    useEffect(() => {
+        if (fetchPromptTopicStatus === 'idle') {
+            dispatch(fetchPromptTopic());
+        }
+    }, [fetchPromptTopicStatus, dispatch])
 
     let renderedPosts;
 

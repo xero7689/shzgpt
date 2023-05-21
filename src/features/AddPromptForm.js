@@ -1,42 +1,64 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 
-import { Box, Typography, TextField, Button } from '@mui/material';
-import { nanoid } from '@reduxjs/toolkit';
+import { addNewPrompt } from './promptsSlice';
+import { selectAllPromptTopic } from './promptTopicSlice';
 
-import { promptAdded } from './promptsSlice';
+import { Box, Typography, TextField, Button, FormControl, Select, MenuItem } from '@mui/material';
+
 
 export const AddPromptForm = () => {
-    const [title, setTitle] = useState('');
+    const [name, setName] = useState('');
     const [content, setContent] = useState('');
+
+    const promptTopic = useSelector(selectAllPromptTopic);
+
+    const [addRequestStatus, setAddRequestStatus] = useState('idle');
 
     const dispatch = useDispatch();
 
-    const onSavePromptClicked = () => {
-        if (title && content) {
-            dispatch(promptAdded(title, content))
-            setTitle('')
-            setContent('')
-        }
-        setTitle('');
-        setContent('');
-    }
-    const canSave = Boolean(title) && Boolean(content)
+    const canSave = [name, content].every(Boolean) && addRequestStatus === 'idle';
+    const onSavePromptClicked = async () => {
+        if (canSave) {
+            try {
+                setAddRequestStatus('pending');
+                await dispatch(addNewPrompt({ name, content })).unwrap();
+                setName('')
+                setContent('')
 
-    const onTitleChanged = e => setTitle(e.target.value);
+            } catch (err) {
+                console.error("Failed to save the prompts: ", err);
+            } finally {
+                setAddRequestStatus('idle');
+            }
+            setName('');
+            setContent('');
+        }
+    }
+
+    const onNameChanged = e => setName(e.target.value);
     const onContentChanged = e => setContent(e.target.value);
 
     return (
         <Box display="flex" flexDirection="column" p={1}>
             <Box component="form" display="flex" flexDirection="column" gap={1}>
+                <Select>
+                    { promptTopic.promptTopic.map((topic, index) => {
+                        return (
+                            <MenuItem key={index} value={topic.id}>
+                                {topic.name}
+                            </MenuItem>
+                        )
+                    }) }
+                </Select>
                 <TextField
                     type="text"
                     size="small"
-                    label="Prompt Title..."
-                    id="promptTitle"
-                    name="promptTitle"
-                    value={title}
-                    onChange={onTitleChanged}
+                    label="Prompt Name..."
+                    id="promptName"
+                    name="promptName"
+                    value={name}
+                    onChange={onNameChanged}
                 />
                 <TextField
                     id="promptContent"

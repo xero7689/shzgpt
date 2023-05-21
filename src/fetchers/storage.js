@@ -1,4 +1,4 @@
-const localIP = "10.178.1.206"
+const localIP = "127.0.0.1"
 
 export const getChatRoom = async () => {
     const response = await fetch(`http://${localIP}:8000/api/chatroom/`);
@@ -47,5 +47,32 @@ export const postChat = async (chatroom_id, role, content) => {
             return data;
         })
         .catch((error) => console.log(error))
+    return response;
+}
+
+export const getPromptTopic = async () => {
+    const response = await fetch(`http://${localIP}:8000/api/prompt-topic/`)
+    .then((response) => (response.json()))
+    .catch((error) => console.log(error));
+    return response;
+}
+
+export const getPromptsList = async () => {
+    const response = await fetch(`http://${localIP}:8000/api/prompts/`)
+    .then((response) => { return response.json() })
+    .catch((error) => console.log(error));
+    return response;
+}
+
+export const postNewPrompt = async (initialPrompt) => {
+    const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(initialPrompt),
+    }
+
+    const response = await fetch(`http://${localIP}:8000/api/prompts/`, requestOptions)
+        .then((response) => (response.json()))
+        .catch((error) => console.log(error));
     return response;
 }

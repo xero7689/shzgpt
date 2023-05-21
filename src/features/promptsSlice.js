@@ -1,33 +1,30 @@
-import { createSlice, nanoid, createAsyncThunk } from "@reduxjs/toolkit";
-import { getPromptsList } from "../fetchers/storage";
-import { create } from "@mui/material/styles/createTransitions";
-
-const prompt_topics = ["Education", "Programming"];
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { getPromptsList, postNewPrompt } from "../fetchers/storage";
 
 const initialState = {
     prompts: [],
+    promptTopic: [],
     status: 'idle',
     error: null
 }
 
-export const fetchPrompts = createAsyncThunk('posts/fetchPrompts', async () => {
+export const fetchPrompts = createAsyncThunk('prompts/fetchPrompts', async () => {
     const response = await getPromptsList();
-    console.log("in fetch prompts");
-    console.log(response.results);
     return response.results;
 });
+
+export const addNewPrompt = createAsyncThunk('prompts/addNewPrompt',
+    async initialPrompt => {
+        const response = await postNewPrompt(initialPrompt);
+        return response;
+    }
+)
 
 const promptsSlice = createSlice(
     {
         name: 'prompts',
         initialState,
         reducers: {
-            promptAdded: {
-                reducer(state, action) {
-                    console.log(action.payload);
-                    state.prompts.push(action.payload)
-                },
-            },
         },
         extraReducers(builder) {
             builder
@@ -41,6 +38,9 @@ const promptsSlice = createSlice(
                 .addCase(fetchPrompts.rejected, (state, action) => {
                     state.status = 'failed';
                     state.error = action.error.message;
+                })
+                .addCase(addNewPrompt.fulfilled, (state, action) => {
+                    state.prompts.push(action.payload);
                 })
         }
     }
