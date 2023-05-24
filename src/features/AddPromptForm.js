@@ -23,8 +23,8 @@ export const AddPromptForm = () => {
             try {
                 setAddRequestStatus('pending');
                 await dispatch(addNewPrompt({ name, content })).unwrap();
-                setName('')
-                setContent('')
+                setName('');
+                setContent('');
 
             } catch (err) {
                 console.error("Failed to save the prompts: ", err);
@@ -42,7 +42,7 @@ export const AddPromptForm = () => {
     return (
         <Box display="flex" flexDirection="column" p={1}>
             <Box component="form" display="flex" flexDirection="column" gap={1}>
-                <Select>
+                <Select defaultValue=''>
                     { promptTopic.promptTopic.map((topic, index) => {
                         return (
                             <MenuItem key={index} value={topic.id}>
