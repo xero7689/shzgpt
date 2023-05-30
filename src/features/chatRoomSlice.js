@@ -6,8 +6,11 @@ import {
   getChatRoom,
   createChatRoom,
 } from "../fetchers/storage";
-import { convertDjangoChatHistory } from '../formatter/djangoResponseConvert';
-import { formatChatHistory, formatResponseMessage } from "../formatter/MessageFormatter";
+import { convertDjangoChatHistory } from "../formatter/djangoResponseConvert";
+import {
+  formatChatHistory,
+  formatResponseMessage,
+} from "../formatter/MessageFormatter";
 
 const initialState = {
   currentChatRoomInfo: {
@@ -19,7 +22,7 @@ const initialState = {
   status: {
     fetchGPTStatus: "idle",
     fetchChatRoomStatus: "idle",
-    fetchChatHistoryStatus: "idle"
+    fetchChatHistoryStatus: "idle",
   },
 };
 
@@ -28,23 +31,23 @@ export const fetchGPTMessage = createAsyncThunk(
   async (args, { dispatch, getState }) => {
     const state = getState();
     const history = formatChatHistory(state.chatHistory.currentChatRoomHistory);
-   
+
     // Handle Too Long History
     const slice_history = history.slice(-5);
     slice_history.unshift(history[1]);
-    
+
     // Prime Too Long History
     const fetchHistory = history.length > 10 ? slice_history : history;
-    
+
     const response = await fetchMessage(fetchHistory);
     const formatedResponse = formatResponseMessage(response);
     dispatch(addHistoryMessage(formatedResponse));
 
     const postChatArgs = {
-      chatRoomId: state.chatHistory.currentChatRoomInfo.id, 
-      role: formatedResponse.role, 
-      newMessage: formatedResponse.content
-    }
+      chatRoomId: state.chatHistory.currentChatRoomInfo.id,
+      role: formatedResponse.role,
+      newMessage: formatedResponse.content,
+    };
     dispatch(postNewMessage(postChatArgs));
   }
 );
@@ -61,7 +64,7 @@ export const fetchChatHistory = createAsyncThunk(
   "chatRoom/fetchChatHistory",
   async (rommId, { dispatch, getState }) => {
     const response = await getChatHistory(rommId);
-    dispatch(historyUpdated(convertDjangoChatHistory(response)))
+    dispatch(historyUpdated(convertDjangoChatHistory(response)));
     return response;
   }
 );
@@ -98,7 +101,7 @@ const chatRoomSlice = createSlice({
     },
     currentChatRoomUpdated(state, action) {
       state.currentChatRoomInfo = action.payload;
-    }
+    },
   },
   extraReducers(builder) {
     builder
@@ -135,16 +138,33 @@ const chatRoomSlice = createSlice({
       .addCase(fetchChatRoom.rejected, (state, action) => {
         state.status.fetchChatRoomStatus = "failed";
         state.error = action.error.message;
-      })
+      });
   },
 });
 
-export const { historyUpdated, chatRoomsUpdated, addHistoryMessage, currentChatRoomUpdated } = chatRoomSlice.actions;
+export const {
+  historyUpdated,
+  chatRoomsUpdated,
+  addHistoryMessage,
+  currentChatRoomUpdated,
+} = chatRoomSlice.actions;
 
 export default chatRoomSlice.reducer;
 
-export const selectAllChatHistory = state => state.chatHistory.currentChatRoomHistory;
-export const selectLastRoleOfHistory = state => state.chatHistory.currentChatRoomHistory.slice(-1).role;
+export const selectAllChatHistory = (state) =>
+  state.chatHistory.currentChatRoomHistory;
+export const selectLastRoleOfHistory = (state) =>
+  state.chatHistory.currentChatRoomHistory.slice(-1).role;
 
-export const selectChatHistoryStatus = state => state.chatHistory.status.fetchChatHistoryStatus;
-export const selectCurrentChatRoomInfo = state => state.chatHistory.currentChatRoomInfo;
+export const selectAllChatRooms = state => state.chatHistory.chatRooms;
+// export const selectAllChatRooms = (state) => {
+//   const sortedChatRooms = [...state.chatHistory.chatRooms].sort((a, b) => {
+//     return new Date(b.last_used_time) - new Date(a.last_used_time);
+//   })
+//   return sortedChatRooms;
+// };
+
+export const selectChatHistoryStatus = (state) =>
+  state.chatHistory.status.fetchChatHistoryStatus;
+export const selectCurrentChatRoomInfo = (state) =>
+  state.chatHistory.currentChatRoomInfo;
