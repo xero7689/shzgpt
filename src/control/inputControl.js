@@ -1,61 +1,70 @@
-import { useState, useRef } from 'react';
+import { useState, useRef } from "react";
 import { Configuration } from "openai";
 
-import { formatUserMessage, formatChatHistory, formatResponseMessage } from '../formatter/MessageFormatter';
-import fetchMessage from "../fetchers/gpt";
-import { postChat } from '../fetchers/storage';
+import { formatUserMessage } from "../formatter/MessageFormatter";
+
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addHistoryMessage,
+  postNewMessage,
+  fetchGPTMessage,
+  selectCurrentChatRoomInfo,
+} from "../features/chatRoomSlice";
 
 const configuration = new Configuration({
-    apiKey: "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",
+  apiKey: "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",
 });
-delete configuration.baseOptions.headers['User-Agent'];
+delete configuration.baseOptions.headers["User-Agent"];
 
+export default function useInputControl() {
+  const messageRef = useRef();
+  const [requestMessage, setRequestMessage] = useState("");
+  const [queryError, setQueryError] = useState(null);
+  const [queryInProgress, setQueryInProgress] = useState(false);
 
+  const dispatch = useDispatch();
+  const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
 
-export default function useInputControl(setNeedScroll, chatHistory, setChatHistory, currentChatRoom) {
-    const messageRef = useRef();
-    const [requestMessage, setRequestMessage] = useState("");
-    const [queryError, setQueryError] = useState(null);
-    const [queryInProgress, setQueryInProgress] = useState(false);
+  const handleInputChange = (event) => {
+    setRequestMessage(event.target.value);
+  };
 
-
-    const handleInputChange = (event) => {
-        setRequestMessage(event.target.value);
+  async function handleSendMessage() {
+    if (queryInProgress) {
+      return;
     }
+    const userMessage = formatUserMessage(requestMessage);
 
-    async function handleSendMessage() {
-        if (queryInProgress) {
-            return;
-        }
-        const userMessage = formatUserMessage(requestMessage)
-        const queryMessages = [...chatHistory, userMessage];
-        setChatHistory(prevHistory => [...prevHistory, userMessage]);
-        messageRef.current.value = "";
+    dispatch(addHistoryMessage(userMessage));
 
-        await postChat(currentChatRoom.id, userMessage.role, userMessage.content);
+    messageRef.current.value = "";
 
+    // Post Use Input Chat to Server
+    dispatch(
+      postNewMessage({
+        chatRoomId: currentChatRoomInfo.id,
+        role: userMessage.role,
+        newMessage: userMessage.content,
+      })
+    );
 
-        const last_role = queryMessages[queryMessages.length - 1].role;
-        try {
-            if (last_role === 'user') {
-                setQueryInProgress(true);
-                const history = formatChatHistory(queryMessages)
-
-                const slice_history = history.slice(-5);
-                slice_history.unshift(history[1]);
-                const fetchHistory = history.length > 10 ? slice_history : history
-
-                const response = await fetchMessage(fetchHistory);
-                const formatedResponse = formatResponseMessage(response);
-                setChatHistory(prevHistory => [...prevHistory, formatedResponse]); //
-                await postChat(currentChatRoom.id, formatedResponse.role, formatedResponse.content);
-            }
-        } catch (err) {
-            setQueryError(err);
-        }
-        setQueryInProgress(false);
-        setNeedScroll(pre => !pre);
+    // queryMessage should change to state.currentChatRoomHistory
+    try {
+      setQueryInProgress(true);
+      await dispatch(fetchGPTMessage());
+    } catch (err) {
+      setQueryError(err);
     }
+    setQueryInProgress(false);
+    //setNeedScroll((pre) => !pre);
+  }
 
-    return { handleInputChange, handleSendMessage, requestMessage, messageRef, queryError, queryInProgress };
+  return {
+    handleInputChange,
+    handleSendMessage,
+    requestMessage,
+    messageRef,
+    queryError,
+    queryInProgress,
+  };
 }

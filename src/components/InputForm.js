@@ -4,7 +4,7 @@ import SendIcon from '@mui/icons-material/Send';
 
 
 export default function InputForm(props) {
-    const { setNeedScroll, handleInputChange, handleSendMessage, messageRef } = props;
+    const { handleInputChange, handleSendMessage, messageRef } = props;
     const theme = useTheme();
 
     function handleSubmit(event) {
@@ -22,7 +22,6 @@ export default function InputForm(props) {
                     return;
                 } 
                 handleSendMessage()
-                setNeedScroll(prev => !prev)
             }
         };
     }

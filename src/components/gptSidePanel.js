@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import { useDispatch } from 'react-redux';
+import { currentChatRoomUpdated, fetchChatHistory, fetchChatRoom } from '../features/chatRoomSlice';
 
 import Box from '@mui/material/Box';
 import List from '@mui/material/List';
@@ -12,10 +14,10 @@ import { useTheme } from '@mui/material/styles';
 import ChatIcon from '@mui/icons-material/Chat';
 import CloseIcon from '@mui/icons-material/Close';
 
-import { getChatRoom, getChatHistory, createChatRoom, postChat } from '../fetchers/storage';
+import { getChatRoom, createChatRoom, postChat } from '../fetchers/storage';
 
 const GPTSidePanel = (props) => {
-    const { setChatHistory, setCurrentChatRoom, toggleSidePanel, setToggleSidePanel } = props;
+    const { toggleSidePanel, setToggleSidePanel } = props;
     const theme = useTheme();
 
     const newChatRoomRef = useRef();
@@ -23,21 +25,26 @@ const GPTSidePanel = (props) => {
     const [newChatRoomName, setNewChatRoomName] = useState("");
     const [newChatRoomNameInput, setNewChatRoomNameInput] = useState("");
 
+    const dispatch = useDispatch();
+
 
     useEffect(() => {
-        async function fetchChatRoom() {
+        async function triggerFetchChatRoom() {
             const response = await getChatRoom();
             setChatRooms(response.results);
         }
-        fetchChatRoom();
-    }, [])
+        triggerFetchChatRoom();
+
+        // Redux Async Thunk getChatroom
+        dispatch(fetchChatRoom());
+    }, [dispatch])
 
     useEffect(() => {
-        async function fetchChatRoom() {
+        async function triggerFetchChatRoom() {
             const response = await getChatRoom();
             setChatRooms(response.results);
         }
-        fetchChatRoom();
+        triggerFetchChatRoom();
     }, [newChatRoomName])
 
     const handleOnChange = (event) => {
@@ -48,37 +55,19 @@ const GPTSidePanel = (props) => {
         const response = await createChatRoom(newChatRoomNameInput);
         setChatRooms(preChatroom => [...preChatroom, response]);
         setNewChatRoomName(response.name);
-        setCurrentChatRoom({
-            id: response.id,
-            name: response.name
-        });
         await postChat(response.id, "system", "You're a helpful assistance.");
-        setChatHistory([]);
-    }
-
-    function convertData(data) {
-        if (data.length === 0) return data;
-
-        return data.map(({ role, content, created_at }) => {
-            const date = new Date(created_at);
-            const timestamp = date.getTime();
-
-            return {
-                timestamp,
-                role,
-                content,
-            };
-        }).sort((a, b) => a.timestamp - b.timestamp);;
     }
 
     const handleOnClickRoom = async (roomInfo) => {
-        setChatHistory([]);
-        const response = await getChatHistory(roomInfo.id);
-        setCurrentChatRoom({
+        // Async Thunk getChatHistory 
+        dispatch(fetchChatHistory(roomInfo.id));
+
+        // Set Chatroom to Redux Storage Here ?
+        const currentChatRoomInfo = {
             id: roomInfo.id,
             name: roomInfo.name
-        });
-        setChatHistory(convertData(response));
+        }
+        dispatch(currentChatRoomUpdated(currentChatRoomInfo));
     }
 
     return (

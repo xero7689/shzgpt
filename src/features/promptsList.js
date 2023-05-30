@@ -4,7 +4,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { selectAllPrompts, fetchPrompts } from './promptsSlice';
 import { fetchPromptTopic } from './promptTopicSlice';
 import { Box, Divider, Typography, Collapse, List, ListItem, ListItemButton, ListItemText, ListItemIcon, CircularProgress } from '@mui/material';
-import GroupsIcon from '@mui/icons-material/Groups';
 
 const PromptItem = (props) => {
     const [showContent, setShowContent] = useState(false);

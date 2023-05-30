@@ -10,18 +10,6 @@ export const useAppEffect = () => {
     const [innerHeight, setInnerHeight] = useState(window.innerHeight);
     const [chatInterfaceHeight, setChatInterfaceHeight] = useState(0);
 
-    const [needScroll, setNeedScroll] = useState(false);
-
-    /**
-     * Scroll to the bottom of view once history being change
-     */
-    useEffect(() => {
-        chatContentRef.current.scrollTo({
-            top: chatContentRef.current.scrollHeight,
-            behavior: 'smooth'
-        });
-    }, [needScroll]);
-
     /**
      * Effect that calculate the size of AppBar and Content
      */
@@ -42,5 +30,5 @@ export const useAppEffect = () => {
         return () => window.removeEventListener('resize', handleResize);
     });
 
-    return {appBarHeight, innerHeight, chatInterfaceHeight, appBarRef, chatInterfaceRef, chatContentRef, setNeedScroll};
+    return {appBarHeight, innerHeight, chatInterfaceHeight, appBarRef, chatInterfaceRef, chatContentRef};
 }
