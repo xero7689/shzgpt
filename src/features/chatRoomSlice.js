@@ -80,8 +80,20 @@ export const addNewChatRoom = createAsyncThunk(
 export const fetchChatRoom = createAsyncThunk(
   "chatRoom/fetchChatRoom",
   async (args, { dispatch, getState }) => {
+    const state = getState();
     const response = await getChatRoom();
     dispatch(chatRoomsUpdated(response.results));
+
+    // Initialize current chatroom
+    if (!state.chatHistory.currentChatRoomInfo.id) {
+      const latest_used_chatroom = response.results.reduce((prev, current) => {
+        return new Date(prev.last_used_time) > new Date(current.last_used_time)
+          ? prev
+          : current;
+      });
+      dispatch(currentChatRoomUpdated(latest_used_chatroom));
+      dispatch(fetchChatHistory(latest_used_chatroom.id));
+    }
     return response;
   }
 );
@@ -157,12 +169,6 @@ export const selectLastRoleOfHistory = (state) =>
   state.chatHistory.currentChatRoomHistory.slice(-1).role;
 
 export const selectAllChatRooms = state => state.chatHistory.chatRooms;
-// export const selectAllChatRooms = (state) => {
-//   const sortedChatRooms = [...state.chatHistory.chatRooms].sort((a, b) => {
-//     return new Date(b.last_used_time) - new Date(a.last_used_time);
-//   })
-//   return sortedChatRooms;
-// };
 
 export const selectChatHistoryStatus = (state) =>
   state.chatHistory.status.fetchChatHistoryStatus;

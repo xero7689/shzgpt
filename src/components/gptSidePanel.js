@@ -1,10 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  addNewChatRoom,
   currentChatRoomUpdated,
   fetchChatHistory,
   fetchChatRoom,
+  postNewMessage,
   selectAllChatRooms,
+  selectCurrentChatRoomInfo,
 } from "../features/chatRoomSlice";
 
 import Box from "@mui/material/Box";
@@ -32,28 +35,32 @@ const GPTSidePanel = (props) => {
   const theme = useTheme();
 
   const newChatRoomRef = useRef();
-  // const [chatRooms, setChatRooms] = useState([]);
-  const [newChatRoomName, setNewChatRoomName] = useState("");
   const [newChatRoomNameInput, setNewChatRoomNameInput] = useState("");
 
   const chatRooms = useSelector(selectAllChatRooms);
+  const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(fetchChatRoom());
-  }, [dispatch]);
-
   useEffect(() => {}, [chatRooms]);
+  useEffect(() => {}, [currentChatRoomInfo]);
 
   const handleOnChange = (event) => {
     setNewChatRoomNameInput(event.target.value);
   };
 
   const handleSubmitNewChatRoom = async () => {
-    const response = await createChatRoom(newChatRoomNameInput);
-    // setChatRooms(preChatroom => [...preChatroom, response]);
-    setNewChatRoomName(response.name);
-    await postChat(response.id, "system", "You're a helpful assistance.");
+    const response = await dispatch(addNewChatRoom(newChatRoomNameInput));
+    const chatRoomInfo = response.payload;
+    dispatch(
+      postNewMessage({
+        chatRoomId: chatRoomInfo.id,
+        role: "system",
+        newMessage: "You're a helpful assistance.",
+      })
+    );
+    dispatch(fetchChatRoom());
+    dispatch(fetchChatHistory(chatRoomInfo.id));
+    dispatch(currentChatRoomUpdated(chatRoomInfo));
   };
 
   const handleOnClickRoom = async (roomInfo) => {
