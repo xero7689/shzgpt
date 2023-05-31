@@ -1,10 +1,20 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useMemo } from "react";
 
 import { useTheme } from "@emotion/react";
-import Box from "@mui/material/Box";
-import { Typography } from "@mui/material";
-import Collapse from "@mui/material/Collapse";
+import {
+  Box,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Cox,
+  Typography,
+  Button,
+  MenuList,
+} from "@mui/material";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import ContentCopy from "@mui/icons-material/ContentCopy";
 
 import CodeBlock from "./CodeBlock";
 
@@ -66,6 +76,34 @@ const MessageBox = React.memo(function MessageBox(props) {
   const isSystem = role === "system";
   const timeString = new Date(timestamp);
 
+  const [contextMenuClicked, setContextMenuClicked] = useState(false);
+  const [contextMenuClickPoint, setContextMenuClickPoint] = useState({
+    x: 0,
+    y: 0,
+  });
+
+  const handleCopyContent = () => {
+    navigator.clipboard.writeText(content);
+  };
+
+  const handleOnContextMenu = (e) => {
+    e.preventDefault();
+    setContextMenuClicked(true);
+    setContextMenuClickPoint({
+      x: e.pageX,
+      y: e.pageY,
+    });
+  };
+
+  useEffect(() => {
+    // Clear the context menu click
+    const handleClick = () => setContextMenuClicked(false);
+    document.addEventListener("click", handleClick);
+    return () => {
+      document.removeEventListener("click", handleClick);
+    };
+  }, []);
+
   return (
     <Box
       sx={{
@@ -79,50 +117,69 @@ const MessageBox = React.memo(function MessageBox(props) {
       }}
       gap={1}
     >
-      <Collapse in={true}>
-        <Box
-          display="flex"
-          flexDirection="column"
-          sx={{
-            borderRadius: "12px",
-            border: isUser ? `0.5px solid` : `0.5px solid`,
-            borderColor: theme.palette.primary.border,
-            backgroundColor: isUser
-              ? theme.palette.background.paper
-              : theme.palette.background.paper,
-            whiteSpace: "pre-line",
-            order: {
-              md: isUser ? 2 : 1,
-            },
-            marginLeft: {
-              xs: isUser ? "auto" : 0,
-              md: 0,
-            },
-            overflow: "auto",
-          }}
-          maxWidth="fit-content"
-          textAlign="left"
-          px={{
-            xs: 2,
-            md: 3,
-          }}
-          py={{
-            xs: 1,
-            md: 2,
-          }}
-          color={
-            isUser
-              ? theme.palette.primary.contrastText
-              : theme.palette.primary.contrastText
-          }
-        >
-          <ParseContent
-            isUser={isUser}
-            content={content}
-            colorMode={colorMode}
-          ></ParseContent>
-        </Box>
-      </Collapse>
+      <Box
+        onContextMenu={handleOnContextMenu}
+        display="flex"
+        flexDirection="column"
+        sx={{
+          borderRadius: "12px",
+          border: isUser ? `0.5px solid` : `0.5px solid`,
+          borderColor: theme.palette.primary.border,
+          backgroundColor: isUser
+            ? theme.palette.background.paper
+            : theme.palette.background.paper,
+          whiteSpace: "pre-line",
+          order: {
+            md: isUser ? 2 : 1,
+          },
+          marginLeft: {
+            xs: isUser ? "auto" : 0,
+            md: 0,
+          },
+          overflow: "auto",
+        }}
+        maxWidth="fit-content"
+        textAlign="left"
+        px={{
+          xs: 2,
+          md: 3,
+        }}
+        py={{
+          xs: 1,
+          md: 2,
+        }}
+        color={
+          isUser
+            ? theme.palette.primary.contrastText
+            : theme.palette.primary.contrastText
+        }
+      >
+        <ParseContent
+          isUser={isUser}
+          content={content}
+          colorMode={colorMode}
+        ></ParseContent>
+        {contextMenuClicked && (
+          <Box
+            sx={{
+              backgroundColor: theme.palette.background.default,
+              boxShadow: 3,
+            }}
+            position="absolute"
+            top={contextMenuClickPoint.y}
+            left={contextMenuClickPoint.x}
+          >
+            <MenuList>
+              <MenuItem onClick={handleCopyContent}>
+                <ListItemIcon>
+                  <ContentCopy fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Copy</ListItemText>
+              </MenuItem>
+            </MenuList>
+          </Box>
+        )}
+      </Box>
       <Box
         display="flex"
         flexDirection="column"
