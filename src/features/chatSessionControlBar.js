@@ -7,7 +7,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 
-export const ChatHistoryControlBar = (props) => {
+export const ChatSessionControlBar = (props) => {
   const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
   return (
     <Box

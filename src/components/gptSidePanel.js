@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   addNewChatRoom,
   currentChatRoomUpdated,
-  fetchChatHistory,
+  fetchChatSession,
   fetchChatRoom,
   postNewMessage,
   selectAllChatRooms,
@@ -57,12 +57,12 @@ const GPTSidePanel = (props) => {
       })
     );
     dispatch(fetchChatRoom());
-    dispatch(fetchChatHistory(chatRoomInfo.id));
+    dispatch(fetchChatSession(chatRoomInfo.id));
     dispatch(currentChatRoomUpdated(chatRoomInfo));
   };
 
   const handleOnClickRoom = async (roomInfo) => {
-    dispatch(fetchChatHistory(roomInfo.id));
+    dispatch(fetchChatSession(roomInfo.id));
 
     const currentChatRoomInfo = {
       id: roomInfo.id,

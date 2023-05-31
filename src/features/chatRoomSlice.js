@@ -17,12 +17,12 @@ const initialState = {
     id: null,
     name: null,
   },
-  currentChatRoomHistory: [],
+  currentChatRoomSession: [],
   chatRooms: [],
   status: {
     fetchGPTStatus: "idle",
     fetchChatRoomStatus: "idle",
-    fetchChatHistoryStatus: "idle",
+    fetchChatSessionStatus: "idle",
   },
 };
 
@@ -30,7 +30,7 @@ export const fetchGPTMessage = createAsyncThunk(
   "chatRoom/fetchGPTMessage",
   async (args, { dispatch, getState }) => {
     const state = getState();
-    const history = formatChatHistory(state.chatHistory.currentChatRoomHistory);
+    const history = formatChatHistory(state.chatRooms.currentChatRoomSession);
 
     // Handle Too Long History
     const slice_history = history.slice(-5);
@@ -41,10 +41,10 @@ export const fetchGPTMessage = createAsyncThunk(
 
     const response = await fetchMessage(fetchHistory);
     const formatedResponse = formatResponseMessage(response);
-    dispatch(addHistoryMessage(formatedResponse));
+    dispatch(addSessionMessage(formatedResponse));
 
     const postChatArgs = {
-      chatRoomId: state.chatHistory.currentChatRoomInfo.id,
+      chatRoomId: state.chatRooms.currentChatRoomInfo.id,
       role: formatedResponse.role,
       newMessage: formatedResponse.content,
     };
@@ -60,8 +60,8 @@ export const postNewMessage = createAsyncThunk(
   }
 );
 
-export const fetchChatHistory = createAsyncThunk(
-  "chatRoom/fetchChatHistory",
+export const fetchChatSession = createAsyncThunk(
+  "chatRoom/fetchChatSession",
   async (rommId, { dispatch, getState }) => {
     const response = await getChatHistory(rommId);
     dispatch(historyUpdated(convertDjangoChatHistory(response)));
@@ -85,14 +85,14 @@ export const fetchChatRoom = createAsyncThunk(
     dispatch(chatRoomsUpdated(response.results));
 
     // Initialize current chatroom
-    if (!state.chatHistory.currentChatRoomInfo.id) {
+    if (!state.chatRooms.currentChatRoomInfo.id) {
       const latest_used_chatroom = response.results.reduce((prev, current) => {
         return new Date(prev.last_used_time) > new Date(current.last_used_time)
           ? prev
           : current;
       });
       dispatch(currentChatRoomUpdated(latest_used_chatroom));
-      dispatch(fetchChatHistory(latest_used_chatroom.id));
+      dispatch(fetchChatSession(latest_used_chatroom.id));
     }
     return response;
   }
@@ -103,10 +103,10 @@ const chatRoomSlice = createSlice({
   initialState,
   reducers: {
     historyUpdated(state, action) {
-      state.currentChatRoomHistory = action.payload;
+      state.currentChatRoomSession = action.payload;
     },
-    addHistoryMessage(state, action) {
-      state.currentChatRoomHistory.push(action.payload);
+    addSessionMessage(state, action) {
+      state.currentChatRoomSession.push(action.payload);
     },
     chatRoomsUpdated(state, action) {
       state.chatRooms = action.payload;
@@ -129,14 +129,14 @@ const chatRoomSlice = createSlice({
         state.status.fetchGPTEerror = action.error.message;
       })
       // Chat History Status
-      .addCase(fetchChatHistory.pending, (state, action) => {
-        state.status.fetchChatHistoryStatus = "loading";
+      .addCase(fetchChatSession.pending, (state, action) => {
+        state.status.fetchChatSessionStatus = "loading";
       })
-      .addCase(fetchChatHistory.fulfilled, (state, action) => {
-        state.status.fetchChatHistoryStatus = "succeeded";
+      .addCase(fetchChatSession.fulfilled, (state, action) => {
+        state.status.fetchChatSessionStatus = "succeeded";
       })
-      .addCase(fetchChatHistory.rejected, (state, action) => {
-        state.status.fetchChatHistoryStatus = "failed";
+      .addCase(fetchChatSession.rejected, (state, action) => {
+        state.status.fetchChatSessionStatus = "failed";
         state.error = action.error.message;
       })
 
@@ -157,24 +157,24 @@ const chatRoomSlice = createSlice({
 export const {
   historyUpdated,
   chatRoomsUpdated,
-  addHistoryMessage,
+  addSessionMessage,
   currentChatRoomUpdated,
 } = chatRoomSlice.actions;
 
 export default chatRoomSlice.reducer;
 
-export const selectAllChatHistory = (state) =>
-  state.chatHistory.currentChatRoomHistory;
+export const selectCurrentChatSession = (state) =>
+  state.chatRooms.currentChatRoomSession;
 export const selectLastRoleOfHistory = (state) =>
-  state.chatHistory.currentChatRoomHistory.slice(-1).role;
+  state.chatRooms.currentChatRoomSession.slice(-1).role;
 
-export const selectAllChatRooms = (state) => state.chatHistory.chatRooms;
+export const selectAllChatRooms = (state) => state.chatRooms.chatRooms;
 
 export const selectFetchGPTStatus = (state) =>
-  state.chatHistory.status.fetchGPTStatus;
+  state.chatRooms.status.fetchGPTStatus;
 
 export const selectChatHistoryStatus = (state) =>
-  state.chatHistory.status.fetchChatHistoryStatus;
+  state.chatRooms.status.fetchChatSessionStatus;
 
 export const selectCurrentChatRoomInfo = (state) =>
-  state.chatHistory.currentChatRoomInfo;
+  state.chatRooms.currentChatRoomInfo;

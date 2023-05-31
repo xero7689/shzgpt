@@ -10,8 +10,8 @@ import { useAppEffect } from "./effects/appEffect";
 import GPTAppBar from "./components/gptAppBar";
 import GPTSidePanel from "./components/gptSidePanel";
 import InputForm from "./components/InputForm";
-import { ChatHistoryList } from "./features/chatHistoryList";
-import { ChatHistoryControlBar } from "./features/chatHistoryControlBar";
+import { ChatSession } from "./features/chatSession";
+import { ChatSessionControlBar } from "./features/chatSessionControlBar";
 import { PromptsList } from "./features/promptsList";
 import { AddPromptForm } from "./features/AddPromptForm";
 
@@ -21,7 +21,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { getDesignTokens } from "./theme";
 import {
   fetchChatRoom,
-  selectAllChatHistory,
+  selectCurrentChatSession,
   selectCurrentChatRoomInfo,
 } from "./features/chatRoomSlice";
 import { useSelector } from "react-redux";
@@ -37,7 +37,7 @@ function App() {
   );
 
   const dispatch = useDispatch();
-  const chatHistory = useSelector(selectAllChatHistory);
+  const chatSession = useSelector(selectCurrentChatSession);
   const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
 
   const { chatInterfaceHeight, appBarRef, chatInterfaceRef, chatContentRef } = useAppEffect();
@@ -46,7 +46,7 @@ function App() {
     dispatch(fetchChatRoom());
   }, [dispatch]);
 
-  useEffect(() => {}, [chatHistory]);
+  useEffect(() => {}, [chatSession]);
 
   useEffect(() => {}, [currentChatRoomInfo]);
 
@@ -87,11 +87,11 @@ function App() {
                 height: chatInterfaceHeight,
               }}
             >
-              <ChatHistoryControlBar></ChatHistoryControlBar>
-              <ChatHistoryList
+              <ChatSessionControlBar></ChatSessionControlBar>
+              <ChatSession
                 colorMode={colorMode}
                 chatContentRef={chatContentRef}
-              ></ChatHistoryList>
+              ></ChatSession>
               <InputForm />
             </Box>
           </Box>

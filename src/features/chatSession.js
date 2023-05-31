@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 
-import { selectAllChatHistory, selectFetchGPTStatus } from "./chatRoomSlice";
+import { selectCurrentChatSession, selectFetchGPTStatus } from "./chatRoomSlice";
 
 import { Box, Container } from "@mui/material";
 
@@ -10,19 +10,19 @@ import { useEffect, useRef, useState } from "react";
 
 const AlwaysScrollToBottom = () => {
   const elementRef = useRef(null);
-  const chatHistory = useSelector(selectAllChatHistory);
+  const chatSession = useSelector(selectCurrentChatSession);
 
   useEffect(() => {
     elementRef.current.scrollIntoView({ behavior: "smooth" });
-  }, [chatHistory]);
+  }, [chatSession]);
   return <div ref={elementRef} />;
 };
 
-export const ChatHistoryList = (props) => {
+export const ChatSession = (props) => {
   const { colorMode } = props;
   const [queryInProgress, setQueryInProgress] = useState(false);
 
-  const chatHistory = useSelector(selectAllChatHistory);
+  const chatSession = useSelector(selectCurrentChatSession);
   const queryStatus = useSelector(selectFetchGPTStatus)
 
   const tmpContentRef = useRef(null);
@@ -54,7 +54,7 @@ export const ChatHistoryList = (props) => {
             },
           }}
         >
-          {chatHistory.map((item) => {
+          {chatSession.map((item) => {
             return (
               <MessageBox
                 key={item.timestamp}

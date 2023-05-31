@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { formatUserMessage } from "../formatter/MessageFormatter";
 
-import { addHistoryMessage, postNewMessage, fetchGPTMessage, selectCurrentChatRoomInfo } from "../features/chatRoomSlice"
+import { addSessionMessage, postNewMessage, fetchGPTMessage, selectCurrentChatRoomInfo } from "../features/chatRoomSlice"
 
 import { Box, Button, TextField } from "@mui/material";
 import { useTheme } from "@emotion/react";
@@ -29,11 +29,10 @@ export default function InputForm(props) {
     }
     const userMessage = formatUserMessage(requestMessage);
 
-    dispatch(addHistoryMessage(userMessage));
+    dispatch(addSessionMessage(userMessage));
 
     messageRef.current.value = "";
 
-    // Post Use Input Chat to Server
     dispatch(
       postNewMessage({
         chatRoomId: currentChatRoomInfo.id,
@@ -42,7 +41,6 @@ export default function InputForm(props) {
       })
     );
 
-    // queryMessage should change to state.currentChatRoomHistory
     try {
       setQueryInProgress(true);
       await dispatch(fetchGPTMessage());
@@ -50,12 +48,10 @@ export default function InputForm(props) {
       setQueryError(err);
     }
     setQueryInProgress(false);
-    //setNeedScroll((pre) => !pre);
   }
 
   function handleSubmit(event) {
     event.preventDefault();
-    // handle form submission here
   }
 
   const handleKeyDown = (event) => {
