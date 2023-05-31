@@ -4,17 +4,16 @@ import { useMemo } from "react";
 import { useTheme } from "@emotion/react";
 import {
   Box,
-  Menu,
   MenuItem,
   ListItemIcon,
   ListItemText,
-  Cox,
   Typography,
-  Button,
   MenuList,
+  Divider,
 } from "@mui/material";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ContentCopy from "@mui/icons-material/ContentCopy";
+import DeleteIcon from '@mui/icons-material/Delete';
+import ReplyIcon from '@mui/icons-material/Reply';
 
 import CodeBlock from "./CodeBlock";
 
@@ -174,7 +173,20 @@ const MessageBox = React.memo(function MessageBox(props) {
                 <ListItemIcon>
                   <ContentCopy fontSize="small" />
                 </ListItemIcon>
-                <ListItemText>Copy</ListItemText>
+                <ListItemText>Copy Content</ListItemText>
+              </MenuItem>
+              <MenuItem onClick={handleCopyContent}>
+                <ListItemIcon>
+                  <ReplyIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Send to Input</ListItemText>
+              </MenuItem>
+              <Divider></Divider>
+              <MenuItem onClick={handleCopyContent}>
+                <ListItemIcon>
+                  <DeleteIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Remove Message</ListItemText>
               </MenuItem>
             </MenuList>
           </Box>
