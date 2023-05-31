@@ -103,9 +103,9 @@ const GPTSidePanel = (props) => {
     >
       <Box
         display="flex"
-        // justifyContent="space-between"
         gap={2}
         alignItems="center"
+        pl={2}
         pt={{
           xs: 1,
           sm: 3,
@@ -139,7 +139,7 @@ const GPTSidePanel = (props) => {
           <CloseIcon fontSize="small" sx={{ color: "primary.contrastText" }} />
         </IconButton>
       </Box>
-      {/* <Divider sx={{ my: 0 }} /> */}
+      <Divider sx={{ my: 0 }} />
       <Box flexGrow={1} sx={{ overflow: "auto" }}>
         <nav aria-label="secondary mailbox folders">
           <List>
