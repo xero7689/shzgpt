@@ -103,7 +103,8 @@ const GPTSidePanel = (props) => {
     >
       <Box
         display="flex"
-        justifyContent="space-between"
+        // justifyContent="space-between"
+        gap={2}
         alignItems="center"
         pt={{
           xs: 1,
@@ -111,9 +112,14 @@ const GPTSidePanel = (props) => {
         }}
         pb={{
           xs: 1,
-          sm: 3,
+          sm: 2,
         }}
       >
+        <ChatIcon
+          sx={{ color: "primary.contrastText" }}
+          color="secondary"
+          fontSize="small"
+        />
         <Typography
           color="primary.contrastText"
           fontSize="normal"
@@ -133,7 +139,7 @@ const GPTSidePanel = (props) => {
           <CloseIcon fontSize="small" sx={{ color: "primary.contrastText" }} />
         </IconButton>
       </Box>
-      <Divider sx={{ my: 0 }} />
+      {/* <Divider sx={{ my: 0 }} /> */}
       <Box flexGrow={1} sx={{ overflow: "auto" }}>
         <nav aria-label="secondary mailbox folders">
           <List>
@@ -141,13 +147,6 @@ const GPTSidePanel = (props) => {
               return (
                 <ListItem disablePadding key={index}>
                   <ListItemButton onClick={() => handleOnClickRoom(item)}>
-                    <ListItemIcon sx={{ minWidth: "36px" }}>
-                      <ChatIcon
-                        sx={{ color: "primary.contrastText" }}
-                        color="secondary"
-                        fontSize="small"
-                      />
-                    </ListItemIcon>
                     <ListItemText
                       primary={
                         <Typography
