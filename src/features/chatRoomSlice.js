@@ -18,6 +18,8 @@ const initialState = {
     name: null,
   },
   currentChatRoomSession: [],
+  sessionHistoryPrev: [],
+  sessionHistoryNext: [],
   chatRooms: [],
   status: {
     fetchGPTStatus: "idle",
@@ -62,8 +64,8 @@ export const postNewMessage = createAsyncThunk(
 
 export const fetchChatSession = createAsyncThunk(
   "chatRoom/fetchChatSession",
-  async (rommId, { dispatch, getState }) => {
-    const response = await getChatHistory(rommId);
+  async (roomId, { dispatch, getState }) => {
+    const response = await getChatHistory(roomId);
     dispatch(historyUpdated(convertDjangoChatHistory(response)));
     return response;
   }
@@ -114,6 +116,25 @@ const chatRoomSlice = createSlice({
     currentChatRoomUpdated(state, action) {
       state.currentChatRoomInfo = action.payload;
     },
+    sessionHistoryPrevPush(state, action) {
+      state.sessionHistoryPrev.push(action.payload);
+    },
+    sessionHistoryPrevPop(state, action) {
+      if (state.sessionHistoryPrev.length !== 0) {
+        const prevSession = state.sessionHistoryPrev.pop();
+        state.currentChatRoomInfo = prevSession;
+      }
+    },
+    sessionHistoryNextPush(state, action) {
+      state.sessionHistoryNext.push(action.payload);
+    },
+    sessionHistoryNextPop(state, action) {
+      if (state.sessionHistoryNext.length !== 0) {
+        state.sessionHistoryPrev.push(state.currentChatRoomInfo);
+        const nextSession = state.sessionHistoryNext.pop();
+        state.currentChatRoomInfo = nextSession;
+      }
+    }
   },
   extraReducers(builder) {
     builder
@@ -159,6 +180,10 @@ export const {
   chatRoomsUpdated,
   addSessionMessage,
   currentChatRoomUpdated,
+  sessionHistoryPrevPush,
+  sessionHistoryPrevPop,
+  sessionHistoryNextPush,
+  sessionHistoryNextPop,
 } = chatRoomSlice.actions;
 
 export default chatRoomSlice.reducer;
@@ -178,3 +203,6 @@ export const selectChatHistoryStatus = (state) =>
 
 export const selectCurrentChatRoomInfo = (state) =>
   state.chatRooms.currentChatRoomInfo;
+
+export const selectSessionHistoryPrev = (state) => state.chatRooms.sessionHistoryPrev;
+export const selectSessionHistoryNext = (state) => state.chatRooms.sessionHistoryNext;

@@ -8,6 +8,7 @@ import {
   postNewMessage,
   selectAllChatRooms,
   selectCurrentChatRoomInfo,
+  sessionHistoryPrevPush,
 } from "../features/chatRoomSlice";
 
 import Box from "@mui/material/Box";
@@ -62,13 +63,14 @@ const GPTSidePanel = (props) => {
   };
 
   const handleOnClickRoom = async (roomInfo) => {
+    dispatch(sessionHistoryPrevPush(currentChatRoomInfo));
     dispatch(fetchChatSession(roomInfo.id));
 
-    const currentChatRoomInfo = {
+    const newChatRoomInfo = {
       id: roomInfo.id,
       name: roomInfo.name,
     };
-    dispatch(currentChatRoomUpdated(currentChatRoomInfo));
+    dispatch(currentChatRoomUpdated(newChatRoomInfo));
   };
 
   return (
