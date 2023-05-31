@@ -168,9 +168,13 @@ export const selectAllChatHistory = (state) =>
 export const selectLastRoleOfHistory = (state) =>
   state.chatHistory.currentChatRoomHistory.slice(-1).role;
 
-export const selectAllChatRooms = state => state.chatHistory.chatRooms;
+export const selectAllChatRooms = (state) => state.chatHistory.chatRooms;
+
+export const selectFetchGPTStatus = (state) =>
+  state.chatHistory.status.fetchGPTStatus;
 
 export const selectChatHistoryStatus = (state) =>
   state.chatHistory.status.fetchChatHistoryStatus;
+
 export const selectCurrentChatRoomInfo = (state) =>
   state.chatHistory.currentChatRoomInfo;

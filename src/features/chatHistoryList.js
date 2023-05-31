@@ -1,12 +1,12 @@
 import { useSelector } from "react-redux";
 
-import { selectAllChatHistory } from "./chatRoomSlice";
+import { selectAllChatHistory, selectFetchGPTStatus } from "./chatRoomSlice";
 
 import { Box, Container } from "@mui/material";
 
 import MessageBox from "../components/MessageBox";
 import LoadingBox from "../components/LoadingBox";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const AlwaysScrollToBottom = () => {
   const elementRef = useRef(null);
@@ -19,10 +19,21 @@ const AlwaysScrollToBottom = () => {
 };
 
 export const ChatHistoryList = (props) => {
-  const { colorMode, queryInProgress } = props;
+  const { colorMode } = props;
+  const [queryInProgress, setQueryInProgress] = useState(false);
 
   const chatHistory = useSelector(selectAllChatHistory);
+  const queryStatus = useSelector(selectFetchGPTStatus)
+
   const tmpContentRef = useRef(null);
+
+  useEffect(() => {
+    if (queryStatus === "loading") {
+      setQueryInProgress(true);
+    } else {
+      setQueryInProgress(false)
+    } 
+  }, [queryStatus])
 
   return (
     <Box flexGrow={1} sx={{ overflow: "auto" }}>

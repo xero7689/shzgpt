@@ -5,7 +5,6 @@ import { useDispatch } from "react-redux";
 import { ThemeProvider } from "@mui/material/styles";
 import { Box, createTheme } from "@mui/material";
 
-import useInputControl from "./control/inputControl";
 import { useAppEffect } from "./effects/appEffect";
 
 import GPTAppBar from "./components/gptAppBar";
@@ -41,11 +40,7 @@ function App() {
   const chatHistory = useSelector(selectAllChatHistory);
   const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
 
-  const { chatInterfaceHeight, appBarRef, chatInterfaceRef, chatContentRef } =
-    useAppEffect();
-  const { handleInputChange, handleSendMessage, messageRef, queryInProgress } =
-    useInputControl();
-  const inputFormProps = { handleInputChange, handleSendMessage, messageRef };
+  const { chatInterfaceHeight, appBarRef, chatInterfaceRef, chatContentRef } = useAppEffect();
 
   useEffect(() => {
     dispatch(fetchChatRoom());
@@ -95,10 +90,9 @@ function App() {
               <ChatHistoryControlBar></ChatHistoryControlBar>
               <ChatHistoryList
                 colorMode={colorMode}
-                queryInProgress={queryInProgress}
                 chatContentRef={chatContentRef}
               ></ChatHistoryList>
-              <InputForm {...inputFormProps} />
+              <InputForm />
             </Box>
           </Box>
         </Box>
@@ -126,8 +120,8 @@ function App() {
             py={2}
             sx={{ border: "1px solid", borderColor: "primary.border" }}
           >
-            <PromptsList></PromptsList>
-            <AddPromptForm></AddPromptForm>
+            <PromptsList />
+            <AddPromptForm />
           </Box>
         </Box>
       </Box>
