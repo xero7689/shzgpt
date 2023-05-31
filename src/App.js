@@ -21,11 +21,8 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 import { getDesignTokens } from "./theme";
 import {
-  currentChatRoomUpdated,
   fetchChatRoom,
-  initCurrentChatRoom,
   selectAllChatHistory,
-  selectAllChatRooms,
   selectCurrentChatRoomInfo,
 } from "./features/chatRoomSlice";
 import { useSelector } from "react-redux";
@@ -43,7 +40,6 @@ function App() {
   const dispatch = useDispatch();
   const chatHistory = useSelector(selectAllChatHistory);
   const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
-  const chatRooms = useSelector(selectAllChatRooms);
 
   const { chatInterfaceHeight, appBarRef, chatInterfaceRef, chatContentRef } =
     useAppEffect();
@@ -53,7 +49,7 @@ function App() {
 
   useEffect(() => {
     dispatch(fetchChatRoom());
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {}, [chatHistory]);
 

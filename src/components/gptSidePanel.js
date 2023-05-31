@@ -28,8 +28,6 @@ import { useTheme } from "@mui/material/styles";
 import ChatIcon from "@mui/icons-material/Chat";
 import CloseIcon from "@mui/icons-material/Close";
 
-import { createChatRoom, postChat } from "../fetchers/storage";
-
 const GPTSidePanel = (props) => {
   const { toggleSidePanel, setToggleSidePanel } = props;
   const theme = useTheme();
