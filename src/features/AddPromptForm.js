@@ -8,6 +8,7 @@ import { Box, Typography, TextField, Button, FormControl, Select, MenuItem } fro
 
 
 export const AddPromptForm = () => {
+    const [topic, setTopic] = useState('');
     const [name, setName] = useState('');
     const [content, setContent] = useState('');
 
@@ -22,7 +23,7 @@ export const AddPromptForm = () => {
         if (canSave) {
             try {
                 setAddRequestStatus('pending');
-                await dispatch(addNewPrompt({ name, content })).unwrap();
+                await dispatch(addNewPrompt({ prompt_topic: topic, name: name, content: content })).unwrap();
                 setName('');
                 setContent('');
 
@@ -36,13 +37,14 @@ export const AddPromptForm = () => {
         }
     }
 
+    const onTopicChanged = e => setTopic(e.target.value);
     const onNameChanged = e => setName(e.target.value);
     const onContentChanged = e => setContent(e.target.value);
 
     return (
         <Box display="flex" flexDirection="column" p={1}>
             <Box component="form" display="flex" flexDirection="column" gap={1}>
-                <Select defaultValue=''>
+                <Select defaultValue='' onChange={onTopicChanged}>
                     { promptTopic.promptTopic.map((topic, index) => {
                         return (
                             <MenuItem key={index} value={topic.id}>
