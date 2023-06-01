@@ -3,20 +3,25 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 
 import { ThemeProvider } from "@mui/material/styles";
-import { Box, createTheme } from "@mui/material";
+import {
+  Box,
+  createTheme,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+} from "@mui/material";
+
+import ChatIcon from "@mui/icons-material/Chat";
+import TextFieldsIcon from "@mui/icons-material/TextFields";
 
 import { useAppEffect } from "./effects/appEffect";
 
 import GPTAppBar from "./components/gptAppBar";
-import GPTSidePanel from "./components/gptSidePanel";
+import ChatRoomsManage from "./components/chatRoomsManage";
 import InputForm from "./components/InputForm";
 import { ChatSession } from "./features/chatSession";
 import { ChatSessionControlBar } from "./features/chatSessionControlBar";
-import { PromptsList } from "./features/promptsList";
-import { AddPromptForm } from "./features/AddPromptForm";
-
-import IconButton from "@mui/material/IconButton";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 import { getDesignTokens } from "./theme";
 import {
@@ -25,10 +30,10 @@ import {
   selectCurrentChatRoomInfo,
 } from "./features/chatRoomSlice";
 import { useSelector } from "react-redux";
+import { PromptManage } from "./features/promptManage";
 
 function App() {
   const [toggleSidePanel, setToggleSidePanel] = useState(true);
-  const [togglePrompts, setTogglePrompts] = useState(false);
   const [colorMode, setColorMode] = useState("light");
 
   const theme = React.useMemo(
@@ -40,7 +45,8 @@ function App() {
   const chatSession = useSelector(selectCurrentChatSession);
   const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
 
-  const { chatInterfaceHeight, appBarRef, chatInterfaceRef, chatContentRef } = useAppEffect();
+  const { chatInterfaceHeight, appBarRef, chatInterfaceRef, chatContentRef } =
+    useAppEffect();
 
   useEffect(() => {
     dispatch(fetchChatRoom());
@@ -50,13 +56,65 @@ function App() {
 
   useEffect(() => {}, [currentChatRoomInfo]);
 
+  const [toggleItemId, setToggleItemid] = useState(null);
+  const naviDrawerItems = [
+    { component: ChatRoomsManage, icon: <ChatIcon /> },
+    { component: PromptManage, icon: <TextFieldsIcon /> },
+  ];
+  const handleNaviDrawerItemClick = (index) => {
+    if (toggleItemId === index) {
+      setToggleItemid(null);
+    } else {
+      setToggleItemid(index);
+    }
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <Box display="flex" maxHeight="100vh" maxWidth="100vw">
-        <GPTSidePanel
-          toggleSidePanel={toggleSidePanel}
-          setToggleSidePanel={setToggleSidePanel}
-        />
+        <Box
+          id="sidepanel-wrapper"
+          display={toggleSidePanel ? "flex" : "none"}
+          sx={{
+            backgroundColor: "primary.main",
+            borderRight: "1px solid",
+            borderColor: "primary.border",
+          }}
+        >
+          <Box
+            id="navigation-drawer"
+            display="flex"
+            flexDirection="column"
+            sx={{
+              borderRight: "1px solid",
+              borderColor: "primary.border",
+            }}
+          >
+            <List>
+              {naviDrawerItems.map((item, index) => (
+                <ListItem
+                  key={index}
+                  disablePadding
+                  onClick={() => handleNaviDrawerItemClick(index)}
+                >
+                  <ListItemButton>
+                    <ListItemIcon sx={{ minWidth: 0 }}>
+                      {item.icon}
+                    </ListItemIcon>
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+          <Box display="flex">
+            {naviDrawerItems.map((item, index) => (
+              <item.component
+                key={index}
+                toggle={toggleItemId === index ? true : false}
+              ></item.component>
+            ))}
+          </Box>
+        </Box>
         <Box flexGrow={1} display="flex" height="100%" flexDirection="column">
           <GPTAppBar
             ref={appBarRef}
@@ -94,34 +152,6 @@ function App() {
               ></ChatSession>
               <InputForm />
             </Box>
-          </Box>
-        </Box>
-        <Box
-          display="flex"
-          sx={{
-            backgroundColor: "primary.main",
-            border: "1px solid",
-            borderColor: "primary.border",
-          }}
-        >
-          <Box display="flex" alignItems="center">
-            <IconButton
-              sx={{ padding: "0px", height: "100%", borderRadius: "0px" }}
-              onClick={() => setTogglePrompts((pre) => !pre)}
-            >
-              <MoreVertIcon fontSize="small" />
-            </IconButton>
-          </Box>
-          <Box
-            minWidth="250px"
-            display={togglePrompts ? "flex" : "none"}
-            flexDirection="column"
-            px={1}
-            py={2}
-            sx={{ border: "1px solid", borderColor: "primary.border" }}
-          >
-            <PromptsList />
-            <AddPromptForm />
           </Box>
         </Box>
       </Box>

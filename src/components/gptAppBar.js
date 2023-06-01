@@ -70,7 +70,7 @@ function GPTAppBar(props, ref) {
                                 sm: "block"
                             }}
                             color="primary.contrastText"
-                            variant="h6"
+                            fontSize="normal"
                             noWrap
                             component="div"
                             fontWeight="bold"

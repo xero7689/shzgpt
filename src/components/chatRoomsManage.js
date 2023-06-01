@@ -23,14 +23,12 @@ import {
   Button,
   Typography,
   Divider,
-  IconButton,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import ChatIcon from "@mui/icons-material/Chat";
-import CloseIcon from "@mui/icons-material/Close";
 
-const GPTSidePanel = (props) => {
-  const { toggleSidePanel, setToggleSidePanel } = props;
+const ChatRoomsManage = (props) => {
+  // const { toggleSidePanel, setToggleSidePanel } = props;
+  const { toggle=false } = props;
   const theme = useTheme();
 
   const newChatRoomRef = useRef();
@@ -80,16 +78,15 @@ const GPTSidePanel = (props) => {
         md: "static",
       }}
       zIndex={9999}
-      display={toggleSidePanel ? "flex" : "none"}
+      display={ toggle ? "flex" : "none"}
       flexDirection="column"
       justifyContent="space-between"
       px={2}
       pb={3}
       sx={{
         backgroundColor: "primary.main",
-        borderRight: "1px solid",
-        borderColor: "primary.border",
       }}
+      minWidth="200px"
       maxHeight={{
         xs: "50%",
         md: "100%",
@@ -117,11 +114,6 @@ const GPTSidePanel = (props) => {
           sm: 2,
         }}
       >
-        <ChatIcon
-          sx={{ color: "primary.contrastText" }}
-          color="secondary"
-          fontSize="small"
-        />
         <Typography
           color="primary.contrastText"
           fontSize="normal"
@@ -129,7 +121,7 @@ const GPTSidePanel = (props) => {
         >
           CHATROOM
         </Typography>
-        <IconButton
+        {/* <IconButton
           sx={{
             display: {
               xs: "block",
@@ -137,9 +129,9 @@ const GPTSidePanel = (props) => {
             },
           }}
           onClick={() => setToggleSidePanel(false)}
-        >
-          <CloseIcon fontSize="small" sx={{ color: "primary.contrastText" }} />
-        </IconButton>
+        > */}
+          {/* <CloseIcon fontSize="small" sx={{ color: "primary.contrastText" }} /> */}
+        {/* </IconButton> */}
       </Box>
       <Divider sx={{ my: 0 }} />
       <Box flexGrow={1} sx={{ overflow: "auto" }}>
@@ -206,4 +198,4 @@ const GPTSidePanel = (props) => {
   );
 };
 
-export default GPTSidePanel;
+export default ChatRoomsManage;
