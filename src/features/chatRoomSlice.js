@@ -133,7 +133,10 @@ const chatRoomSlice = createSlice({
         (chatRoom) => !chatRoomSet.has(chatRoom.id)
       );
 
+      uniqueChatRooms.sort((a, b) => new Date(b.last_used_time) - new Date(a.last_used_time));
+
       state.chatRooms = [...state.chatRooms, ...uniqueChatRooms];
+      state.chatRooms.sort((a, b) => new Date(b.last_used_time) - new Date(a.last_used_time));
     },
     currentChatRoomUpdated(state, action) {
       state.currentChatRoomInfo = action.payload;

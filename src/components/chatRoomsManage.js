@@ -18,17 +18,12 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 
-import {
-  TextField,
-  Button,
-  Typography,
-  Divider,
-} from "@mui/material";
+import { TextField, Button, Typography, Divider } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 
 const ChatRoomsManage = (props) => {
   // const { toggleSidePanel, setToggleSidePanel } = props;
-  const { toggle=false } = props;
+  const { toggle = false } = props;
   const theme = useTheme();
 
   const newChatRoomRef = useRef();
@@ -78,7 +73,7 @@ const ChatRoomsManage = (props) => {
         md: "static",
       }}
       zIndex={9999}
-      display={ toggle ? "flex" : "none"}
+      display={toggle ? "flex" : "none"}
       flexDirection="column"
       justifyContent="space-between"
       px={2}
@@ -130,7 +125,7 @@ const ChatRoomsManage = (props) => {
           }}
           onClick={() => setToggleSidePanel(false)}
         > */}
-          {/* <CloseIcon fontSize="small" sx={{ color: "primary.contrastText" }} /> */}
+        {/* <CloseIcon fontSize="small" sx={{ color: "primary.contrastText" }} /> */}
         {/* </IconButton> */}
       </Box>
       <Divider sx={{ my: 0 }} />
