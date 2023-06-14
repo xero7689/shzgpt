@@ -1,14 +1,19 @@
-const localIP = "127.0.0.1"
+const STORAGE_SERVER_HOST = "127.0.0.1"
 
-export const getChatRoom = async () => {
-    const response = await fetch(`http://${localIP}:8000/api/chatroom/`);
+export const getChatRoom = async (pageNum=null) => {
+    let endpoint = `http://${STORAGE_SERVER_HOST}:8000/api/chatroom/`
+    if (pageNum) {
+        endpoint = endpoint.concat(`?page=${pageNum}`)
+    }
+    const response = await fetch(endpoint);
     const results = await response.json();
+
     return results;
 }
 
 
 export const getChatHistory = async (room_id) => {
-    const response = await fetch(`http://${localIP}:8000/api/chat-history/${room_id}`);
+    const response = await fetch(`http://${STORAGE_SERVER_HOST}:8000/api/chat-history/${room_id}`);
     const results = await response.json();
     return results;
 }
@@ -20,7 +25,7 @@ export const createChatRoom = async (newChatRoomNameInput) => {
         body: JSON.stringify({ name: newChatRoomNameInput }),
     };
 
-    const response = await fetch(`http://${localIP}:8000/api/chatroom/`, requestOptions)
+    const response = await fetch(`http://${STORAGE_SERVER_HOST}:8000/api/chatroom/`, requestOptions)
         .then((response) => response.json())
         .then((data) => {
             return data
@@ -41,7 +46,7 @@ export const postChat = async (chatroom_id, role, content) => {
         }),
     }
 
-    const response = await fetch(`http://${localIP}:8000/api/chat/`, requestOptions)
+    const response = await fetch(`http://${STORAGE_SERVER_HOST}:8000/api/chat/`, requestOptions)
         .then((response) => response.json())
         .then((data) => {
             return data;
@@ -51,14 +56,14 @@ export const postChat = async (chatroom_id, role, content) => {
 }
 
 export const getPromptTopic = async () => {
-    const response = await fetch(`http://${localIP}:8000/api/prompt-topic/`)
+    const response = await fetch(`http://${STORAGE_SERVER_HOST}:8000/api/prompt-topic/`)
     .then((response) => (response.json()))
     .catch((error) => console.log(error));
     return response;
 }
 
 export const getPromptsList = async () => {
-    const response = await fetch(`http://${localIP}:8000/api/prompts/`)
+    const response = await fetch(`http://${STORAGE_SERVER_HOST}:8000/api/prompts/`)
     .then((response) => { return response.json() })
     .catch((error) => console.log(error));
     return response;
@@ -71,7 +76,7 @@ export const postNewPrompt = async (initialPrompt) => {
         body: JSON.stringify(initialPrompt),
     }
 
-    const response = await fetch(`http://${localIP}:8000/api/prompts/`, requestOptions)
+    const response = await fetch(`http://${STORAGE_SERVER_HOST}:8000/api/prompts/`, requestOptions)
         .then((response) => (response.json()))
         .catch((error) => console.log(error));
     return response;

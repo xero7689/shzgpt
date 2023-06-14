@@ -83,8 +83,7 @@ export const fetchChatRoom = createAsyncThunk(
   "chatRoom/fetchChatRoom",
   async (args, { dispatch, getState }) => {
     const state = getState();
-    const response = await getChatRoom();
-    dispatch(chatRoomsUpdated(response.results));
+    let response = await getChatRoom();
 
     // Initialize current chatroom
     if (!state.chatRooms.currentChatRoomInfo.id) {
@@ -95,6 +94,21 @@ export const fetchChatRoom = createAsyncThunk(
       });
       dispatch(currentChatRoomUpdated(latest_used_chatroom));
       dispatch(fetchChatSession(latest_used_chatroom.id));
+    }
+    dispatch(chatRoomsUpdated(response.results));
+
+    // Continue Fetch Remaing ChatRooms
+    const regex = /\/\?page=(.*)/; // regular expression to match "/?" and capture the query string
+    if (response["next"]) {
+      while (response["next"]) {
+        let match = response["next"].match(regex);
+
+        if (match) {
+          const pageNum = match[1];
+          response = await getChatRoom(pageNum);
+          dispatch(chatRoomsUpdated(response.results));
+        }
+      }
     }
     return response;
   }
@@ -111,7 +125,15 @@ const chatRoomSlice = createSlice({
       state.currentChatRoomSession.push(action.payload);
     },
     chatRoomsUpdated(state, action) {
-      state.chatRooms = action.payload;
+      const chatRoomSet = new Set(
+        state.chatRooms.map((chatRoom) => chatRoom.id)
+      );
+
+      const uniqueChatRooms = action.payload.filter(
+        (chatRoom) => !chatRoomSet.has(chatRoom.id)
+      );
+
+      state.chatRooms = [...state.chatRooms, ...uniqueChatRooms];
     },
     currentChatRoomUpdated(state, action) {
       state.currentChatRoomInfo = action.payload;
@@ -134,7 +156,7 @@ const chatRoomSlice = createSlice({
         const nextSession = state.sessionHistoryNext.pop();
         state.currentChatRoomInfo = nextSession;
       }
-    }
+    },
   },
   extraReducers(builder) {
     builder
@@ -204,5 +226,7 @@ export const selectChatHistoryStatus = (state) =>
 export const selectCurrentChatRoomInfo = (state) =>
   state.chatRooms.currentChatRoomInfo;
 
-export const selectSessionHistoryPrev = (state) => state.chatRooms.sessionHistoryPrev;
-export const selectSessionHistoryNext = (state) => state.chatRooms.sessionHistoryNext;
+export const selectSessionHistoryPrev = (state) =>
+  state.chatRooms.sessionHistoryPrev;
+export const selectSessionHistoryNext = (state) =>
+  state.chatRooms.sessionHistoryNext;
