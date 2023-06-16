@@ -32,6 +32,8 @@ import {
 import { useSelector } from "react-redux";
 import { PromptManage } from "./features/promptManage";
 
+import SettingsModal from "./features/settingsModal";
+
 function App() {
   const [toggleSidePanel, setToggleSidePanel] = useState(true);
   const [colorMode, setColorMode] = useState("light");
@@ -55,6 +57,7 @@ function App() {
   useEffect(() => {}, [chatSession]);
 
   useEffect(() => {}, [currentChatRoomInfo]);
+
 
   const [toggleItemId, setToggleItemid] = useState(null);
   const naviDrawerItems = [
@@ -154,6 +157,9 @@ function App() {
             </Box>
           </Box>
         </Box>
+        <SettingsModal>
+
+        </SettingsModal>
       </Box>
     </ThemeProvider>
   );

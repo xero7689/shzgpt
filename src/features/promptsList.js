@@ -7,12 +7,9 @@ import {
   Box,
   Divider,
   Typography,
-  Collapse,
   List,
   ListItem,
   ListItemButton,
-  ListItemText,
-  ListItemIcon,
   CircularProgress,
 } from "@mui/material";
 

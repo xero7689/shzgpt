@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { addNewPrompt } from './promptsSlice';
 import { selectAllPromptTopic } from './promptTopicSlice';
 
-import { Box, Typography, TextField, Button, FormControl, Select, MenuItem } from '@mui/material';
+import { Box, TextField, Button, Select, MenuItem } from '@mui/material';
 
 
 export const AddPromptForm = () => {

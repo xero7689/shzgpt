@@ -15,6 +15,9 @@ import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { useTheme } from '@mui/material/styles';
 
+import { useDispatch } from "react-redux";
+import { toggleSettingsModal } from '../features/settingsSlice';
+
 const Search = styled('div')(({ theme }) => ({
     position: 'relative',
     borderRadius: theme.shape.borderRadius,
@@ -33,6 +36,7 @@ const Search = styled('div')(({ theme }) => ({
 function GPTAppBar(props, ref) {
     const { setToggleSidePanel, setColorMode } = props;
     const theme = useTheme();
+    const dispatch = useDispatch()
 
     const handleClick = () => {
         setToggleSidePanel(toggle => !toggle);
@@ -40,6 +44,10 @@ function GPTAppBar(props, ref) {
 
     const handleSwitchColorMode = () => {
         setColorMode(preMode => preMode === "light" ? "dark" : "light");
+    }
+
+    const handleSettingsClick = () => {
+        dispatch(toggleSettingsModal());
     }
 
     return (
@@ -114,6 +122,7 @@ function GPTAppBar(props, ref) {
                             {theme.palette.mode === 'dark' ? <Brightness7Icon fontSize="small" /> : <Brightness4Icon fontSize="small" />}
                         </IconButton>
                         <IconButton
+                            onClick={handleSettingsClick}
                             aria-label="show more"
                             aria-haspopup="true"
                             sx={{

@@ -6,6 +6,7 @@ export const getDesignTokens = (mode) => ({
                 primary: {
                     main: '#e8e8e8',
                     light: '#f8f8f8',
+                    dark: '#555555',
                     border: '#d7d7d7',
                     contrastText: '#6b6b6b'
                 },
@@ -25,7 +26,8 @@ export const getDesignTokens = (mode) => ({
                 },
                 background: {
                     default: '#f1f1f1',
-                    paper: '#f8f8f8'
+                    paper: '#f8f8f8',
+                    paper2: '#dedede'
                 }
 
             }
@@ -51,7 +53,8 @@ export const getDesignTokens = (mode) => ({
                 },
                 background: {
                     default: '#1d2021',
-                    paper: '#282828'
+                    paper: '#282828',
+                    paper2: '#282828',
                 }
             }),
     },
