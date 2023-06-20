@@ -1,18 +1,21 @@
 import { useDispatch, useSelector } from "react-redux";
 
-import { Box, Modal, TextField, Button } from "@mui/material";
+import { Box, Modal, TextField, Button, Typography } from "@mui/material";
 import { useState } from "react";
 
 import {
+  selectUserIsLogin,
   selectChatUserModalIsOpen,
   toggleChatUserModal,
+  selectUserInfo,
 } from "./chatUserSlice";
 
 import { loginStorageServer, logoutStorageServer } from "./chatUserSlice";
-import { Directions } from "@mui/icons-material";
 
 export default function ChatUserModal(props) {
   const dispatch = useDispatch();
+  const userInfo = useSelector(selectUserInfo);
+  const userIsLogin = useSelector(selectUserIsLogin);
   const modalIsOpen = useSelector(selectChatUserModalIsOpen);
 
   // State For User Name, Password
@@ -63,32 +66,58 @@ export default function ChatUserModal(props) {
   return (
     <Modal open={modalIsOpen} onClose={handleModalClose}>
       <Box sx={modalStyle}>
-        <Box sx={{
-            display: "flex",
+        <Box
+          sx={{
+            display: userIsLogin ? "flex" : "none",
             flexDirection: "column",
-            gap: 1,
-        }}>
-          <TextField
-            onChange={handleUsernameInputOnChange}
-            size="small"
-            label="username"
-          ></TextField>
-          <TextField
-            onChange={handlePasswordInputOnChange}
-            size="small"
-            label="password"
-          ></TextField>
-        </Box>
-        <Box sx={{
-            display: "flex",
-            justifyContent: "space-between",
-        }}>
-          <Button onClick={handleLoginOnClick} variant="contained">
-            Login
-          </Button>
+            gap: 2,
+          }}
+        >
+          <Typography
+            sx={{
+              color: "primary.contrastText",
+              fontWeight: "bold",
+            }}
+            fontSize="large"
+          >
+            Hello, {userInfo.name}
+          </Typography>
           <Button onClick={handleLogoutOnClick} variant="contained">
             LogOut
           </Button>
+        </Box>
+        <Box
+          sx={{
+            display: userIsLogin ? "none" : "flex",
+          }}
+        >
+          <Box
+            sx={{
+              flexDirection: "column",
+              gap: 1,
+            }}
+          >
+            <TextField
+              onChange={handleUsernameInputOnChange}
+              size="small"
+              label="username"
+            ></TextField>
+            <TextField
+              onChange={handlePasswordInputOnChange}
+              size="small"
+              label="password"
+            ></TextField>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <Button onClick={handleLoginOnClick} variant="contained">
+              Login
+            </Button>
+          </Box>
         </Box>
       </Box>
     </Modal>

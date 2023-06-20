@@ -1,34 +1,23 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    modalIsDisplay: false,
-    apiKey: "",
+  modalIsDisplay: false,
 };
 
 export const settingsSlice = createSlice({
-    name: "settings",
-    initialState,
-    reducers: {
-        toggleSettingsModal(state, action) {
-            state.modalIsDisplay = !state.modalIsDisplay;
-        },
-        setApiKey(state, action) {
-            state.apiKey = action.payload;
-
-            const cookieData = JSON.stringify(action.payload);
-            document.cookie = `openai_api_key=${cookieData}`;
-        } 
+  name: "settings",
+  initialState,
+  reducers: {
+    toggleSettingsModal(state, action) {
+      state.modalIsDisplay = !state.modalIsDisplay;
     },
-    extraReducers(builder) {
-    }
+  },
+  extraReducers(builder) {},
 });
 
-export const {
-    toggleSettingsModal,
-    setApiKey
-} = settingsSlice.actions;
+export const { toggleSettingsModal } = settingsSlice.actions;
 
 export default settingsSlice.reducer;
 
-export const selectSettingsDisplayState = (state) => state.settings.modalIsDisplay;
-export const selectAPIKey = (state) => state.settings.apiKey;
+export const selectSettingsDisplayState = (state) =>
+  state.settings.modalIsDisplay;

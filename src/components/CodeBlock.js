@@ -46,7 +46,7 @@ const CodeBlock = (props) => {
             <Box sx={{ width: "100%", overflow: 'auto'}}>
                 <SyntaxHighlighter
                     language={language}
-                    style={ colorMode=="light" ? tomorrow : gruvboxDark}
+                    style={ colorMode==="light" ? tomorrow : gruvboxDark}
                     showLineNumbers
                     customStyle={{
                         margin: 0,

@@ -3,11 +3,17 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { formatUserMessage } from "../formatter/MessageFormatter";
 
-import { addSessionMessage, postNewMessage, fetchGPTMessage, selectCurrentChatRoomInfo } from "../features/chatRoomSlice"
+import {
+  addSessionMessage,
+  postNewMessage,
+  fetchGPTMessage,
+  selectCurrentChatRoomInfo,
+} from "../features/chatRoomSlice";
 
 import { Box, Button, TextField } from "@mui/material";
 import { useTheme } from "@emotion/react";
 import SendIcon from "@mui/icons-material/Send";
+import { selectActiveKey } from "../features/apiKeySlice";
 
 export default function InputForm(props) {
   const theme = useTheme();
@@ -18,6 +24,7 @@ export default function InputForm(props) {
   const [queryInProgress, setQueryInProgress] = useState(false);
   const [queryError, setQueryError] = useState(null);
   const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
+  const activeKey = useSelector(selectActiveKey);
 
   const handleInputChange = (event) => {
     setRequestMessage(event.target.value);
@@ -43,7 +50,9 @@ export default function InputForm(props) {
 
     try {
       setQueryInProgress(true);
-      await dispatch(fetchGPTMessage());
+      if (activeKey) {
+        await dispatch(fetchGPTMessage({ activeKey }));
+      }
     } catch (err) {
       setQueryError(err);
     }

@@ -34,6 +34,12 @@ import { PromptManage } from "./features/promptManage";
 
 import SettingsModal from "./features/settingsModal";
 import ChatUserModal from "./features/chatUserModal";
+import {
+  getUserInfo,
+  selectUserInfo,
+  selectUserIsLogin,
+} from "./features/chatUserSlice";
+import { fetchAPIKey } from "./features/apiKeySlice";
 
 function App() {
   const [toggleSidePanel, setToggleSidePanel] = useState(true);
@@ -47,9 +53,18 @@ function App() {
   const dispatch = useDispatch();
   const chatSession = useSelector(selectCurrentChatSession);
   const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
+  const userIsLogin = useSelector(selectUserIsLogin);
+  const userInfo = useSelector(selectUserInfo);
 
   const { chatInterfaceHeight, appBarRef, chatInterfaceRef, chatContentRef } =
     useAppEffect();
+
+  useEffect(() => {
+    if (userIsLogin && Object.keys(userInfo).length === 0) {
+      dispatch(getUserInfo());
+      dispatch(fetchAPIKey());
+    }
+  }, [dispatch, userIsLogin, userInfo]);
 
   useEffect(() => {
     dispatch(fetchChatRoom());
@@ -58,7 +73,6 @@ function App() {
   useEffect(() => {}, [chatSession]);
 
   useEffect(() => {}, [currentChatRoomInfo]);
-
 
   const [toggleItemId, setToggleItemid] = useState(null);
   const naviDrawerItems = [
@@ -158,8 +172,8 @@ function App() {
             </Box>
           </Box>
         </Box>
-        <SettingsModal/>
-        <ChatUserModal/>
+        <SettingsModal />
+        <ChatUserModal />
       </Box>
     </ThemeProvider>
   );

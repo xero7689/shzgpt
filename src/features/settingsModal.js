@@ -1,22 +1,13 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import {
-  Box,
-  Button,
-  Modal,
-  Tab,
-  Tabs,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, Modal, Tab, Tabs, Typography } from "@mui/material";
 
 import {
-  setApiKey,
-  selectAPIKey,
   selectSettingsDisplayState,
   toggleSettingsModal,
 } from "./settingsSlice";
+import APIKeyPanel from "./apiKeyPanel";
 
 const modalStyle = {
   position: "absolute",
@@ -62,7 +53,6 @@ function a11yProps(index) {
 export default function SettingsModal(props) {
   const dispatch = useDispatch();
   const settingsIsDisplay = useSelector(selectSettingsDisplayState);
-  const APIKey = useSelector(selectAPIKey);
 
   const [value, setValue] = useState(0);
 
@@ -72,18 +62,6 @@ export default function SettingsModal(props) {
 
   const handleSettingsClose = () => {
     dispatch(toggleSettingsModal());
-  };
-
-  // Handle API Key Event
-  // State For API Key
-  const [inputAPIKey, setInputAPIKey] = useState(null);
-
-  const handleAPIKeyInputOnChange = (event) => {
-    setInputAPIKey(event.target.value);
-  };
-
-  const handleUpdateInputAPIKey = () => {
-    dispatch(setApiKey(inputAPIKey));
   };
 
   return (
@@ -116,40 +94,7 @@ export default function SettingsModal(props) {
           <Tab label="Account" {...a11yProps(2)} />
         </Tabs>
         <TabPanel value={value} index={0}>
-          <Box>
-            <Typography
-              fontSize="large"
-              color="primary.contrastText"
-              marginBottom={1}
-            >
-              OpenAI API Configuration
-            </Typography>
-            <Typography
-              variant="p"
-              fontSize="small"
-              color="primary.contrastText"
-            >
-              Register an API key for ChatGPT from OpenAI, and copy the key for
-              use in here.
-            </Typography>
-          </Box>
-          <Box display="flex">
-            <TextField
-              onChange={handleAPIKeyInputOnChange}
-              size="small"
-              label="Your API Key"
-              variant="outlined"
-            />
-            <Button onClick={handleUpdateInputAPIKey} variant="contained">
-              Update
-            </Button>
-          </Box>
-          <Box display="flex">
-            <Typography fontSize="small" color="primary.contrastText">
-              Current API Key:
-            </Typography>
-            <Typography>{APIKey}</Typography>
-          </Box>
+          <APIKeyPanel></APIKeyPanel>
         </TabPanel>
         <TabPanel value={value} index={1}>
           <Typography>ChatRoom Settings</Typography>

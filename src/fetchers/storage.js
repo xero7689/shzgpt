@@ -40,6 +40,36 @@ export const logout = async () => {
   return response;
 };
 
+export const getUser = async () => {
+  let endpoint = `http://${STORAGE_SERVER_HOST}:8000/api/user/`;
+
+  const requestOptions = {
+    method: "GET",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+  };
+
+  const response = await fetch(endpoint, requestOptions);
+  const results = await response.json();
+
+  return results;
+};
+
+export const getAPIKey = async () => {
+  let endpoint = `http://${STORAGE_SERVER_HOST}:8000/api/api-key/`;
+
+  const requestOptions = {
+    method: "GET",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+  };
+
+  const response = await fetch(endpoint, requestOptions);
+  const results = await response.json();
+
+  return results;
+};
+
 export const getChatRoom = async (pageNum = null) => {
   let endpoint = `http://${STORAGE_SERVER_HOST}:8000/api/chatroom/`;
   const requestOptions = {
@@ -57,15 +87,20 @@ export const getChatRoom = async (pageNum = null) => {
   return results;
 };
 
-export const getChatHistory = async (room_id) => {
+export const getChatHistory = async (roomId, pageNum = null) => {
+  let endpoint = `http://${STORAGE_SERVER_HOST}:8000/api/chat-history/${roomId}`;
   const requestOptions = {
     method: "GET",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
   };
 
+  if (pageNum) {
+    endpoint = endpoint.concat(`?page=${pageNum}`);
+  }
+
   const response = await fetch(
-    `http://${STORAGE_SERVER_HOST}:8000/api/chat-history/${room_id}`,
+    endpoint,
     requestOptions
   );
 

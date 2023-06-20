@@ -5,6 +5,7 @@ import promptsReducer from "../features/promptsSlice";
 import promptTopicReducer from "../features/promptTopicSlice";
 import settingsReducer from "../features/settingsSlice";
 import chatUserReducer from "../features/chatUserSlice";
+import apiKeySlice from "../features/apiKeySlice";
 
 export default configureStore({
     reducer: {
@@ -15,5 +16,6 @@ export default configureStore({
         promptTopic: promptTopicReducer,
         settings: settingsReducer,
         chatUser: chatUserReducer,
+        apiKey: apiKeySlice,
     }
 });

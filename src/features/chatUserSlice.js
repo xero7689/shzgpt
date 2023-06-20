@@ -1,7 +1,7 @@
 import Cookies from "js-cookie";
 
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { login, logout } from "../fetchers/storage";
+import { getUser, login, logout } from "../fetchers/storage";
 
 const initialState = {
   userInfo: {},
@@ -27,8 +27,17 @@ export const logoutStorageServer = createAsyncThunk(
     // Verify current login status before logout
     const response = await logout();
     if (response["status"] === "success") {
-        dispatch(setUserLogout());
+      dispatch(setUserLogout());
     }
+    return response;
+  }
+);
+
+export const getUserInfo = createAsyncThunk(
+  "chatUser/getUserInfo",
+  async (args, { dispatch, getState }) => {
+    const response = await getUser();
+    dispatch(setUserInfo(response));
     return response;
   }
 );
@@ -42,23 +51,32 @@ export const chatUserSlice = createSlice({
       state.isLogin = true;
     },
     setUserLogout(state, action) {
-      state.userInfo = null;
+      state.userInfo = {};
       state.isLogin = false;
     },
     setLoginStatus(state, action) {
       state.loginStatus = action.payload;
     },
+    setUserInfo(state, action) {
+        state.userInfo = action.payload;
+    },
     toggleChatUserModal(state, action) {
-        state.modalIsOpen = !state.modalIsOpen;
-    }
+      state.modalIsOpen = !state.modalIsOpen;
+    },
   },
   extraReducers(builder) {},
 });
 
-export const { setUserLogin, setUserLogout, setLoginStatus, toggleChatUserModal } =
-  chatUserSlice.actions;
+export const {
+  setUserLogin,
+  setUserLogout,
+  setLoginStatus,
+  setUserInfo,
+  toggleChatUserModal,
+} = chatUserSlice.actions;
 
 export default chatUserSlice.reducer;
 
-export const selectUser = (state) => state.chatUser.userInfo;
+export const selectUserInfo = (state) => state.chatUser.userInfo;
+export const selectUserIsLogin = (state) => state.chatUser.isLogin;
 export const selectChatUserModalIsOpen = (state) => state.chatUser.modalIsOpen;

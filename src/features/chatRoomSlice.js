@@ -18,6 +18,7 @@ const initialState = {
     name: null,
   },
   currentChatRoomSession: [],
+  nextChatHistoryPagination: 0,
   sessionHistoryPrev: [],
   sessionHistoryNext: [],
   chatRooms: [],
@@ -30,7 +31,7 @@ const initialState = {
 
 export const fetchGPTMessage = createAsyncThunk(
   "chatRoom/fetchGPTMessage",
-  async (args, { dispatch, getState }) => {
+  async ({ activeKey }, { dispatch, getState }) => {
     const state = getState();
     const history = formatChatHistory(state.chatRooms.currentChatRoomSession);
 
@@ -41,7 +42,7 @@ export const fetchGPTMessage = createAsyncThunk(
     // Prime Too Long History
     const fetchHistory = history.length > 10 ? slice_history : history;
 
-    const response = await fetchMessage(fetchHistory);
+    const response = await fetchMessage(fetchHistory, activeKey);
     const formatedResponse = formatResponseMessage(response);
     dispatch(addSessionMessage(formatedResponse));
 
@@ -66,7 +67,8 @@ export const fetchChatSession = createAsyncThunk(
   "chatRoom/fetchChatSession",
   async (roomId, { dispatch, getState }) => {
     const response = await getChatHistory(roomId);
-    dispatch(historyUpdated(convertDjangoChatHistory(response)));
+    /* Handle response.next in the future */
+    dispatch(historyUpdated(convertDjangoChatHistory(response.results)));
     return response;
   }
 );
@@ -138,10 +140,14 @@ const chatRoomSlice = createSlice({
         (chatRoom) => !chatRoomSet.has(chatRoom.id)
       );
 
-      uniqueChatRooms.sort((a, b) => new Date(b.last_used_time) - new Date(a.last_used_time));
+      uniqueChatRooms.sort(
+        (a, b) => new Date(b.last_used_time) - new Date(a.last_used_time)
+      );
 
       state.chatRooms = [...state.chatRooms, ...uniqueChatRooms];
-      state.chatRooms.sort((a, b) => new Date(b.last_used_time) - new Date(a.last_used_time));
+      state.chatRooms.sort(
+        (a, b) => new Date(b.last_used_time) - new Date(a.last_used_time)
+      );
     },
     currentChatRoomUpdated(state, action) {
       state.currentChatRoomInfo = action.payload;
