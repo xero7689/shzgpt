@@ -71,7 +71,6 @@ const ChatRoomsManage = (props) => {
         xs: "fixed",
         md: "static",
       }}
-      zIndex={9999}
       display={toggle ? "flex" : "none"}
       flexDirection="column"
       justifyContent="space-between"

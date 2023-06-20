@@ -35,7 +35,7 @@ export const fetchGPTMessage = createAsyncThunk(
     const history = formatChatHistory(state.chatRooms.currentChatRoomSession);
 
     // Handle Too Long History
-    const slice_history = history.slice(-5);
+    const slice_history = history.slice(-3);
     slice_history.unshift(history[1]);
 
     // Prime Too Long History
@@ -83,6 +83,11 @@ export const fetchChatRoom = createAsyncThunk(
   "chatRoom/fetchChatRoom",
   async (args, { dispatch, getState }) => {
     const state = getState();
+
+    if (!state.chatUser.isLogin) {
+      return false;
+    }
+
     let response = await getChatRoom();
 
     // Initialize current chatroom

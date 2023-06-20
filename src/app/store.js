@@ -4,6 +4,7 @@ import chatRoomReducer from "../features/chatRoomSlice";
 import promptsReducer from "../features/promptsSlice";
 import promptTopicReducer from "../features/promptTopicSlice";
 import settingsReducer from "../features/settingsSlice";
+import chatUserReducer from "../features/chatUserSlice";
 
 export default configureStore({
     reducer: {
@@ -13,5 +14,6 @@ export default configureStore({
         prompts: promptsReducer,
         promptTopic: promptTopicReducer,
         settings: settingsReducer,
+        chatUser: chatUserReducer,
     }
 });

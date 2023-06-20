@@ -33,6 +33,7 @@ import { useSelector } from "react-redux";
 import { PromptManage } from "./features/promptManage";
 
 import SettingsModal from "./features/settingsModal";
+import ChatUserModal from "./features/chatUserModal";
 
 function App() {
   const [toggleSidePanel, setToggleSidePanel] = useState(true);
@@ -157,9 +158,8 @@ function App() {
             </Box>
           </Box>
         </Box>
-        <SettingsModal>
-
-        </SettingsModal>
+        <SettingsModal/>
+        <ChatUserModal/>
       </Box>
     </ThemeProvider>
   );

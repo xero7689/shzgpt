@@ -23,7 +23,7 @@ const modalStyle = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: "50%",
+  // width: "50%",
   bgcolor: "background.paper2",
   borderRadius: 2,
   boxShadow: 24,
@@ -66,10 +66,7 @@ export default function SettingsModal(props) {
 
   const [value, setValue] = useState(0);
 
-  // State For API Key
-  const [inputAPIKey, setInputAPIKey] = useState(null);
-
-  const handleChange = (event, newValue) => {
+  const handleModalChange = (event, newValue) => {
     setValue(newValue);
   };
 
@@ -78,6 +75,9 @@ export default function SettingsModal(props) {
   };
 
   // Handle API Key Event
+  // State For API Key
+  const [inputAPIKey, setInputAPIKey] = useState(null);
+
   const handleAPIKeyInputOnChange = (event) => {
     setInputAPIKey(event.target.value);
   };
@@ -98,7 +98,7 @@ export default function SettingsModal(props) {
           orientation="vertical"
           variant="scrollable"
           value={value}
-          onChange={handleChange}
+          onChange={handleModalChange}
           aria-label="Settings"
           textColor="secondary"
           TabIndicatorProps={{
@@ -113,6 +113,7 @@ export default function SettingsModal(props) {
         >
           <Tab label="OpenAI" {...a11yProps(0)} />
           <Tab label="Chat Room" {...a11yProps(1)} />
+          <Tab label="Account" {...a11yProps(2)} />
         </Tabs>
         <TabPanel value={value} index={0}>
           <Box>
@@ -151,7 +152,7 @@ export default function SettingsModal(props) {
           </Box>
         </TabPanel>
         <TabPanel value={value} index={1}>
-          Item Two
+          <Typography>ChatRoom Settings</Typography>
         </TabPanel>
       </Box>
     </Modal>
