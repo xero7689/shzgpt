@@ -86,10 +86,6 @@ export const fetchChatRoom = createAsyncThunk(
   async (args, { dispatch, getState }) => {
     const state = getState();
 
-    if (!state.chatUser.isLogin) {
-      return false;
-    }
-
     let response = await getChatRoom();
 
     // Initialize current chatroom
@@ -125,6 +121,23 @@ const chatRoomSlice = createSlice({
   name: "chatRoom",
   initialState,
   reducers: {
+    initChatRoomState(state, action) {
+      state.currentChatRoomInfo = {
+        id: null,
+        name: null,
+      };
+      state.currentChatRoomSession = [];
+      state.nextChatHistoryPagination = 0;
+      state.sessionHistoryPrev = [];
+
+      state.sessionHistoryNext = [];
+      state.chatRooms = [];
+      state.status = {
+        fetchGPTStatus: "idle",
+        fetchChatRoomStatus: "idle",
+        fetchChatSessionStatus: "idle",
+      };
+    },
     historyUpdated(state, action) {
       state.currentChatRoomSession = action.payload;
     },
@@ -213,6 +226,7 @@ const chatRoomSlice = createSlice({
 
 export const {
   historyUpdated,
+  initChatRoomState,
   chatRoomsUpdated,
   addSessionMessage,
   currentChatRoomUpdated,

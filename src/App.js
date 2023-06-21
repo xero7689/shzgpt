@@ -28,6 +28,7 @@ import {
   fetchChatRoom,
   selectCurrentChatSession,
   selectCurrentChatRoomInfo,
+  initChatRoomState,
 } from "./features/chatRoomSlice";
 import { useSelector } from "react-redux";
 import { PromptManage } from "./features/promptManage";
@@ -40,6 +41,7 @@ import {
   selectUserIsLogin,
 } from "./features/chatUserSlice";
 import { fetchAPIKey } from "./features/apiKeySlice";
+import { initPromptState } from "./features/promptsSlice";
 
 function App() {
   const [toggleSidePanel, setToggleSidePanel] = useState(true);
@@ -60,19 +62,27 @@ function App() {
     useAppEffect();
 
   useEffect(() => {
-    if (userIsLogin && Object.keys(userInfo).length === 0) {
-      dispatch(getUserInfo());
-      dispatch(fetchAPIKey());
+    if (userIsLogin) {
+      if (Object.keys(userInfo).length === 0) {
+        dispatch(getUserInfo());
+        dispatch(fetchAPIKey());
+      }
+      dispatch(fetchChatRoom());
     }
   }, [dispatch, userIsLogin, userInfo]);
 
   useEffect(() => {
-    dispatch(fetchChatRoom());
-  }, [dispatch]);
+    if (!userIsLogin) {
+      dispatch(initChatRoomState());
+      dispatch(initPromptState());
+    }
+  }, [dispatch, userIsLogin]);
 
-  useEffect(() => {}, [chatSession]);
+  useEffect(() => {
+  }, [chatSession]);
 
-  useEffect(() => {}, [currentChatRoomInfo]);
+  useEffect(() => {
+  }, [currentChatRoomInfo]);
 
   const [toggleItemId, setToggleItemid] = useState(null);
   const naviDrawerItems = [

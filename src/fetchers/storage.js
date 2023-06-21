@@ -20,7 +20,6 @@ export const login = async (username, password) => {
       return response.json();
     })
     .catch((error) => console.log(error));
-  console.log(response);
   return response;
 };
 

@@ -25,7 +25,6 @@ export const fetchPrompts = createAsyncThunk(
 export const addNewPrompt = createAsyncThunk(
   "prompts/addNewPrompt",
   async (initialPrompt, { dispatch, getState }) => {
-
     const response = await postNewPrompt(initialPrompt);
     return response;
   }
@@ -34,7 +33,14 @@ export const addNewPrompt = createAsyncThunk(
 const promptsSlice = createSlice({
   name: "prompts",
   initialState,
-  reducers: {},
+  reducers: {
+    initPromptState(state, action) {
+      state.prompts = [];
+      state.promptTopic = [];
+      state.status = "idle";
+      state.error = null;
+    },
+  },
   extraReducers(builder) {
     builder
       .addCase(fetchPrompts.pending, (state, action) => {
@@ -54,7 +60,7 @@ const promptsSlice = createSlice({
   },
 });
 
-export const { promptAdded } = promptsSlice.actions;
+export const { initPromptState } = promptsSlice.actions;
 export default promptsSlice.reducer;
 
 export const selectAllPrompts = (state) => state.prompts;

@@ -40,9 +40,11 @@ export default function APIKeyPanel(props) {
   };
 
   useEffect(() => {
+    console.log(`[API Key Panel][Effect] User Login Change to ${userIsLogin}`);
     if (userIsLogin) {
       dispatch(fetchAPIKey());
     }
+    console.log("[API Key Panel][Effect] Dispatch fetch APIKey Finish");
   }, [dispatch, userIsLogin]);
 
   return (
