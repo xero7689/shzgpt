@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { Box, Modal, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Modal, Tab, Tabs } from "@mui/material";
 
 import {
   selectSettingsDisplayState,
@@ -92,7 +92,6 @@ export default function SettingsModal(props) {
         >
           <Tab label="OpenAI" {...a11yProps(0)} />
           <Tab label="Chat Room" {...a11yProps(1)} />
-          <Tab label="Account" {...a11yProps(2)} />
         </Tabs>
 
         <TabPanel value={value} index={0}>
@@ -101,10 +100,6 @@ export default function SettingsModal(props) {
 
         <TabPanel value={value} index={1}>
           <ChatRoomSettingsPanel></ChatRoomSettingsPanel>
-        </TabPanel>
-
-        <TabPanel value={value} index={2}>
-          <Typography>ChatRoom Settings</Typography>
         </TabPanel>
       </Box>
     </Modal>

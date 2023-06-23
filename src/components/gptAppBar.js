@@ -1,6 +1,7 @@
-import { forwardRef } from "react";
+import { useState, forwardRef, useEffect } from "react";
 
 import { styled, alpha } from "@mui/material/styles";
+import { Divider, List, ListItemButton, ListItemText } from "@mui/material";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
@@ -16,9 +17,16 @@ import Brightness7Icon from "@mui/icons-material/Brightness7";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useTheme } from "@mui/material/styles";
 
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toggleSettingsModal } from "../features/settingsSlice";
 import { toggleChatUserModal } from "../features/chatUserSlice";
+import {
+  fetchChatSession,
+  selectAllChatRooms,
+  selectCurrentChatRoomInfo,
+  sessionHistoryPrevPush,
+  currentChatRoomUpdated,
+} from "../features/chatRoomSlice";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -38,6 +46,14 @@ function GPTAppBar(props, ref) {
   const { setToggleSidePanel, setColorMode } = props;
   const theme = useTheme();
   const dispatch = useDispatch();
+  const allChatRooms = useSelector(selectAllChatRooms);
+
+  // Search Bar state
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const [chatroomSearchResult, setChatroomSearchResult] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(1);
+  const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
 
   const handleClick = () => {
     setToggleSidePanel((toggle) => !toggle);
@@ -53,6 +69,53 @@ function GPTAppBar(props, ref) {
 
   const handleChatUserClick = () => {
     dispatch(toggleChatUserModal());
+  };
+
+  const handleSearchBarFocus = () => {
+    if (searchKeyword) {
+      setIsSearching(true);
+    }
+  };
+
+  const handleSearchBarBlur = () => {
+    setIsSearching(false);
+  };
+
+  const searchChatRooms = (chatrooms, keyword) => {
+    const filteredChatRooms = chatrooms.filter((chatroom) => {
+      const name = chatroom.name.toLowerCase();
+      const searchKeyword = keyword.toLowerCase();
+      return name.includes(searchKeyword);
+    });
+    return filteredChatRooms;
+  };
+
+  const handleSearchBarChange = (event) => {
+    const keyword = event.target.value;
+    setSearchKeyword(keyword);
+    const matchRooms = searchChatRooms(allChatRooms, keyword);
+    setChatroomSearchResult(matchRooms);
+    if (!isSearching && searchKeyword) {
+      setIsSearching(true);
+    }
+  };
+
+  useEffect(() => {
+    if (isSearching) {
+      if (!searchKeyword) {
+        setIsSearching(false);
+      }
+    }
+  }, [isSearching, searchKeyword]);
+
+  const handleListItemClick = (event, chatRoomInfo) => {
+    dispatch(sessionHistoryPrevPush(currentChatRoomInfo));
+    dispatch(fetchChatSession(chatRoomInfo.id));
+    const newChatRoomInfo = {
+      id: chatRoomInfo.id,
+      name: chatRoomInfo.name,
+    };
+    dispatch(currentChatRoomUpdated(newChatRoomInfo));
   };
 
   return (
@@ -96,6 +159,9 @@ function GPTAppBar(props, ref) {
             <Search>
               <TextField
                 size="small"
+                onFocus={handleSearchBarFocus}
+                onBlur={handleSearchBarBlur}
+                onChange={handleSearchBarChange}
                 InputLabelProps={{
                   style: {
                     color: "#939fa5",
@@ -121,6 +187,47 @@ function GPTAppBar(props, ref) {
                 Search
               </TextField>
             </Search>
+            <List
+              component="nav"
+              aria-label="main mailbox folders"
+              sx={{
+                display: isSearching ? "block" : "none",
+                position: "absolute",
+                backgroundColor: "background.paper",
+                border: "1px solid",
+                borderColor: "primary.border",
+                paddingLeft: 1,
+                paddingRight: 1,
+              }}
+            >
+              <ListItemText>
+                <Typography fontSize="small" color="secondary.main">
+                  Chatroom Results
+                </Typography>
+              </ListItemText>
+              <Divider></Divider>
+              {chatroomSearchResult.map((item, index) => {
+                return (
+                  <ListItemButton
+                    key={index}
+                    selected={selectedIndex === index}
+                    onMouseDown={(event) => {
+                      handleListItemClick(event, item);
+                    }}
+                    sx={{
+                      padding: 0,
+                    }}
+                  >
+                    <ListItemText
+                      sx={{ color: "primary.contrastText" }}
+                    >
+                      <Typography color="primary.contrastText" fontSize="small">{item.name}</Typography>
+                    </ListItemText>
+                  </ListItemButton>
+                );
+              })}
+              <Divider></Divider>
+            </List>
           </Box>
           <Box sx={{ display: { xs: "flex" } }}>
             <IconButton

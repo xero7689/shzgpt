@@ -17,7 +17,7 @@ builder.build({
         //     'icon': path.join(__dirname, 'public', 'goricon.ico'),
         // },
         'mac': {
-            'icon': path.join(__dirname, 'public', 'goricon.ico'),
+            'icon': path.join(__dirname, 'public', 'logo1024.png'),
         },
         // 打包需要用到的原始碼、模組，皆需要寫到 files 內
         'files': [

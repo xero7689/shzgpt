@@ -1,7 +1,10 @@
-import { Box, TextField, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import SettingsPanelItem from "../components/settingsPanelItem";
 import { useDispatch, useSelector } from "react-redux";
-import { selectMaxCompleteTokenLength, updateMaxCompleteTokenLength } from "./chatRoomSlice";
+import {
+  selectMaxCompleteTokenLength,
+  updateMaxCompleteTokenLength,
+} from "./chatRoomSlice";
 
 export default function ChatRoomSettingsPanel(props) {
   const dispatch = useDispatch();
@@ -9,7 +12,7 @@ export default function ChatRoomSettingsPanel(props) {
   const readMaximumCompeleteNum = (event) => {
     const parsedValue = parseInt(event.target.value);
     dispatch(updateMaxCompleteTokenLength(parsedValue));
-  }
+  };
   return (
     <Box>
       <Box>

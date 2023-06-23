@@ -12,7 +12,7 @@ import {
   formatResponseMessage,
 } from "../formatter/MessageFormatter";
 
-import { encode, encodeChat, decode, isWithinTokenLimit } from "gpt-tokenizer";
+import { encode } from "gpt-tokenizer";
 
 const initialState = {
   currentChatRoomInfo: {
