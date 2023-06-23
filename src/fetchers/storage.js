@@ -86,7 +86,7 @@ export const getChatRoom = async (pageNum = null) => {
   return results;
 };
 
-export const getChatHistory = async (roomId, pageNum = null) => {
+export const getChatHistory = async (roomId) => {
   let endpoint = `http://${STORAGE_SERVER_HOST}:8000/api/chat-history/${roomId}`;
   const requestOptions = {
     method: "GET",
@@ -94,30 +94,23 @@ export const getChatHistory = async (roomId, pageNum = null) => {
     headers: { "Content-Type": "application/json" },
   };
 
-  if (pageNum) {
-    endpoint = endpoint.concat(`?page=${pageNum}`);
-  }
-
-  const response = await fetch(
-    endpoint,
-    requestOptions
-  );
+  const response = await fetch(endpoint, requestOptions);
 
   const results = await response.json();
   return results;
 };
 
 export const createChatRoom = async (newChatRoomNameInput) => {
+  let endpoint = `http://${STORAGE_SERVER_HOST}:8000/api/chatroom/`;
+  const csrftoken = Cookies.get("csrftoken");
   const requestOptions = {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken },
     body: JSON.stringify({ name: newChatRoomNameInput }),
   };
 
-  const response = await fetch(
-    `http://${STORAGE_SERVER_HOST}:8000/api/chatroom/`,
-    requestOptions
-  )
+  const response = await fetch(endpoint, requestOptions)
     .then((response) => response.json())
     .then((data) => {
       return data;
@@ -188,16 +181,16 @@ export const getPromptsList = async () => {
 };
 
 export const postNewPrompt = async (initialPrompt) => {
+  let endpoint = `http://${STORAGE_SERVER_HOST}:8000/api/prompts/`;
+  const csrftoken = Cookies.get("csrftoken");
   const requestOptions = {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken },
     body: JSON.stringify(initialPrompt),
   };
 
-  const response = await fetch(
-    `http://${STORAGE_SERVER_HOST}:8000/api/prompts/`,
-    requestOptions
-  )
+  const response = await fetch(endpoint, requestOptions)
     .then((response) => response.json())
     .catch((error) => console.log(error));
   return response;

@@ -78,11 +78,9 @@ function App() {
     }
   }, [dispatch, userIsLogin]);
 
-  useEffect(() => {
-  }, [chatSession]);
+  useEffect(() => {}, [chatSession]);
 
-  useEffect(() => {
-  }, [currentChatRoomInfo]);
+  useEffect(() => {}, [currentChatRoomInfo]);
 
   const [toggleItemId, setToggleItemid] = useState(null);
   const naviDrawerItems = [
@@ -126,7 +124,9 @@ function App() {
                   onClick={() => handleNaviDrawerItemClick(index)}
                 >
                   <ListItemButton>
-                    <ListItemIcon sx={{ minWidth: 0 }}>
+                    <ListItemIcon
+                      sx={{ minWidth: 0, color: "primary.contrastText" }}
+                    >
                       {item.icon}
                     </ListItemIcon>
                   </ListItemButton>

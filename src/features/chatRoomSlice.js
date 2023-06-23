@@ -67,8 +67,7 @@ export const fetchChatSession = createAsyncThunk(
   "chatRoom/fetchChatSession",
   async (roomId, { dispatch, getState }) => {
     const response = await getChatHistory(roomId);
-    /* Handle response.next in the future */
-    dispatch(historyUpdated(convertDjangoChatHistory(response.results)));
+    dispatch(historyUpdated(convertDjangoChatHistory(response)));
     return response;
   }
 );

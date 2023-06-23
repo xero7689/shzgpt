@@ -8,6 +8,7 @@ import {
   toggleSettingsModal,
 } from "./settingsSlice";
 import APIKeyPanel from "./apiKeyPanel";
+import ChatRoomSettingsPanel from "./chatRoomSettingsPanel";
 
 const modalStyle = {
   position: "absolute",
@@ -93,10 +94,16 @@ export default function SettingsModal(props) {
           <Tab label="Chat Room" {...a11yProps(1)} />
           <Tab label="Account" {...a11yProps(2)} />
         </Tabs>
+
         <TabPanel value={value} index={0}>
           <APIKeyPanel></APIKeyPanel>
         </TabPanel>
+
         <TabPanel value={value} index={1}>
+          <ChatRoomSettingsPanel></ChatRoomSettingsPanel>
+        </TabPanel>
+
+        <TabPanel value={value} index={2}>
           <Typography>ChatRoom Settings</Typography>
         </TabPanel>
       </Box>
