@@ -12,6 +12,8 @@ import {
   formatResponseMessage,
 } from "../formatter/MessageFormatter";
 
+import { encode, encodeChat, decode, isWithinTokenLimit } from "gpt-tokenizer";
+
 const initialState = {
   currentChatRoomInfo: {
     id: null,
@@ -22,6 +24,7 @@ const initialState = {
   sessionHistoryPrev: [],
   sessionHistoryNext: [],
   chatRooms: [],
+  maxCompleteTokenLength: 1024,
   status: {
     fetchGPTStatus: "idle",
     fetchChatRoomStatus: "idle",
@@ -35,14 +38,22 @@ export const fetchGPTMessage = createAsyncThunk(
     const state = getState();
     const history = formatChatHistory(state.chatRooms.currentChatRoomSession);
 
-    // Handle Too Long History
-    const slice_history = history.slice(-3);
-    slice_history.unshift(history[1]);
+    const fetchHistory = history;
 
-    // Prime Too Long History
-    const fetchHistory = history.length > 10 ? slice_history : history;
+    let finalHistory = [];
+    fetchHistory.reduceRight(
+      (accumulator, item) => {
+        const token = encode(item.content);
+        accumulator += token.length;
+        if (accumulator < state.chatRooms.maxCompleteTokenLength) {
+          finalHistory.push(item);
+        }
+        return accumulator;
+      },
+      0
+    );
 
-    const response = await fetchMessage(fetchHistory, activeKey);
+    const response = await fetchMessage(finalHistory.reverse(), activeKey);
     const formatedResponse = formatResponseMessage(response);
     dispatch(addSessionMessage(formatedResponse));
 
@@ -183,6 +194,9 @@ const chatRoomSlice = createSlice({
         state.currentChatRoomInfo = nextSession;
       }
     },
+    updateMaxCompleteTokenLength(state, action) {
+      state.maxCompleteTokenLength = action.payload;
+    },
   },
   extraReducers(builder) {
     builder
@@ -233,6 +247,7 @@ export const {
   sessionHistoryPrevPop,
   sessionHistoryNextPush,
   sessionHistoryNextPop,
+  updateMaxCompleteTokenLength,
 } = chatRoomSlice.actions;
 
 export default chatRoomSlice.reducer;
@@ -257,3 +272,6 @@ export const selectSessionHistoryPrev = (state) =>
   state.chatRooms.sessionHistoryPrev;
 export const selectSessionHistoryNext = (state) =>
   state.chatRooms.sessionHistoryNext;
+
+export const selectMaxCompleteTokenLength = (state) =>
+  state.chatRooms.maxCompleteTokenLength;

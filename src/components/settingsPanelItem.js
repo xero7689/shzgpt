@@ -11,7 +11,7 @@ const panelItemStyle = {
 };
 
 export default function SettingsPanelItem(props) {
-  const { title, desc, onInputChangeHandler } = props;
+  const { title, desc, onInputChangeHandler, defaultValue } = props;
   const handleOnInputChange = (event) => {
     onInputChangeHandler(event);
   };
@@ -26,6 +26,7 @@ export default function SettingsPanelItem(props) {
         sx={{
           width: "8ch",
         }}
+        defaultValue={defaultValue}
       ></TextField>
     </Box>
   );
