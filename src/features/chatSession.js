@@ -1,6 +1,9 @@
 import { useSelector } from "react-redux";
 
-import { selectCurrentChatSession, selectFetchGPTStatus } from "./chatRoomSlice";
+import {
+  selectCurrentChatSession,
+  selectFetchGPTStatus,
+} from "./chatRoomSlice";
 
 import { Box, Container } from "@mui/material";
 
@@ -23,7 +26,7 @@ export const ChatSession = (props) => {
   const [queryInProgress, setQueryInProgress] = useState(false);
 
   const chatSession = useSelector(selectCurrentChatSession);
-  const queryStatus = useSelector(selectFetchGPTStatus)
+  const queryStatus = useSelector(selectFetchGPTStatus);
 
   const tmpContentRef = useRef(null);
 
@@ -31,17 +34,19 @@ export const ChatSession = (props) => {
     if (queryStatus === "loading") {
       setQueryInProgress(true);
     } else {
-      setQueryInProgress(false)
-    } 
-  }, [queryStatus])
+      setQueryInProgress(false);
+    }
+  }, [queryStatus]);
 
   return (
-    <Box flexGrow={1} sx={{ overflow: "auto" }}>
+    <Box
+      flexGrow={1}
+      sx={{ overflow: "auto" }}
+    >
       <Container maxWidth="md">
         <Box
           ref={tmpContentRef}
           className="ChatContent"
-          px={4}
           display="flex"
           flexDirection="column"
           gap={4}
