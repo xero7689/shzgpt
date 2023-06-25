@@ -51,20 +51,12 @@ export const ChatSessionControlBar = (props) => {
       backgroundColor="primary.main"
       px={2}
     >
-      <Box display="flex">
-        <IconButton onClick={handlePreviousSessionClick}>
-          <ArrowBackIcon
-            fontSize="small"
-            sx={{ color: "primary.contrastText" }}
-          ></ArrowBackIcon>
-        </IconButton>
-        <IconButton onClick={handleNextSessionClick}>
-          <ArrowForwardIcon
-            fontSize="small"
-            sx={{ color: "primary.contrastText" }}
-          ></ArrowForwardIcon>
-        </IconButton>
-      </Box>
+      <IconButton onClick={handlePreviousSessionClick}>
+        <ArrowBackIcon
+          fontSize="small"
+          sx={{ color: "primary.contrastText" }}
+        ></ArrowBackIcon>
+      </IconButton>
       <Typography
         variant="subtitle2"
         fontWeight="bold"
@@ -73,8 +65,11 @@ export const ChatSessionControlBar = (props) => {
       >
         {currentChatRoomInfo.name}
       </Typography>
-      <IconButton>
-        <MoreVertIcon sx={{ color: "primary.contrastText" }} />
+      <IconButton onClick={handleNextSessionClick}>
+        <ArrowForwardIcon
+          fontSize="small"
+          sx={{ color: "primary.contrastText" }}
+        ></ArrowForwardIcon>
       </IconButton>
     </Box>
   );
