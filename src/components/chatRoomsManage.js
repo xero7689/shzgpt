@@ -17,11 +17,20 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 
-import { TextField, Button, Typography, Divider } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Typography,
+  Divider,
+  IconButton,
+  Menu,
+} from "@mui/material";
+import AddBoxIcon from "@mui/icons-material/AddBox";
 import { useTheme } from "@mui/material/styles";
 
+import { isMobile } from "react-device-detect";
+
 const ChatRoomsManage = (props) => {
-  // const { toggleSidePanel, setToggleSidePanel } = props;
   const { toggle = false } = props;
   const theme = useTheme();
 
@@ -31,6 +40,16 @@ const ChatRoomsManage = (props) => {
   const chatRooms = useSelector(selectAllChatRooms);
   const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
   const dispatch = useDispatch();
+
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleAddChatroomOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleAddChatroomClose = () => {
+    setAnchorEl(null);
+  };
 
   useEffect(() => {}, [chatRooms]);
   useEffect(() => {}, [currentChatRoomInfo]);
@@ -52,6 +71,7 @@ const ChatRoomsManage = (props) => {
     dispatch(fetchChatRoom());
     dispatch(fetchChatSession(chatRoomInfo.id));
     dispatch(currentChatRoomUpdated(chatRoomInfo));
+    setAnchorEl(null);
   };
 
   const handleOnClickRoom = async (roomInfo) => {
@@ -80,10 +100,7 @@ const ChatRoomsManage = (props) => {
         backgroundColor: "primary.main",
       }}
       minWidth="200px"
-      maxHeight={{
-        xs: "50%",
-        md: "100%",
-      }}
+      maxHeight={ isMobile ? "90vh" : "100vh"}
       boxShadow={{
         xs: 5,
         md: 0,
@@ -95,8 +112,7 @@ const ChatRoomsManage = (props) => {
     >
       <Box
         display="flex"
-        gap={2}
-        alignItems="center"
+        justifyContent="space-between"
         pl={2}
         pt={{
           xs: 1,
@@ -114,17 +130,64 @@ const ChatRoomsManage = (props) => {
         >
           CHATROOM
         </Typography>
-        {/* <IconButton
-          sx={{
-            display: {
-              xs: "block",
-              sm: "none",
-            },
+        <IconButton sx={{ padding: 0 }} onClick={handleAddChatroomOpen}>
+          <AddBoxIcon fontSize="small" sx={{ color: "primary.contrastText" }} />
+        </IconButton>
+        <Menu
+          anchorEl={anchorEl}
+          anchorOrigin={{
+            vertical: "top",
+            horizontal: "right",
           }}
-          onClick={() => setToggleSidePanel(false)}
-        > */}
-        {/* <CloseIcon fontSize="small" sx={{ color: "primary.contrastText" }} /> */}
-        {/* </IconButton> */}
+          keepMounted
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+          open={Boolean(anchorEl)}
+          onClose={handleAddChatroomClose}
+          PaperProps={{
+            sx: {
+              marginTop: 4,
+            }
+          }}
+        >
+          <Box display="flex" flexDirection="column" gap={1} backgroundColor="background.pape2" padding={2}>
+            <Typography color="primary.contrastText" textAlign="center" fontWeight="bold">Add New Chatroom</Typography>
+            <TextField
+              size="small"
+              inputRef={newChatRoomRef}
+              onChange={handleOnChange}
+              InputLabelProps={{
+                style: { color: theme.palette.primary.contrastText },
+              }}
+              variant="outlined"
+              sx={{
+                input: {
+                  color: "primary.contrastText",
+                },
+                fieldset: {
+                  borderColor: "primary.border",
+                },
+              }}
+            />
+            <Button
+              variant="contained"
+              sx={{
+                bgcolor: "secondary.main",
+              }}
+              onClick={handleSubmitNewChatRoom}
+            >
+              <Typography
+                fontSize={14}
+                fontWeight="bold"
+                color="secondary.contrastText"
+              >
+                Add!
+              </Typography>
+            </Button>
+          </Box>
+        </Menu>
       </Box>
       <Divider sx={{ my: 0 }} />
       <Box flexGrow={1} sx={{ overflow: "auto" }}>
@@ -152,41 +215,6 @@ const ChatRoomsManage = (props) => {
         </nav>
       </Box>
       <Divider sx={{ my: 2 }} variant="middle" />
-      <Box display="flex" flexDirection="column" gap={1}>
-        <TextField
-          size="small"
-          inputRef={newChatRoomRef}
-          onChange={handleOnChange}
-          label="Set Chatroom Name.."
-          InputLabelProps={{
-            style: { color: theme.palette.primary.contrastText },
-          }}
-          variant="outlined"
-          sx={{
-            input: {
-              color: "primary.contrastText",
-            },
-            fieldset: {
-              borderColor: "primary.border",
-            },
-          }}
-        />
-        <Button
-          variant="contained"
-          sx={{
-            bgcolor: "secondary.main",
-          }}
-          onClick={handleSubmitNewChatRoom}
-        >
-          <Typography
-            fontSize={14}
-            fontWeight="bold"
-            color="secondary.contrastText"
-          >
-            New Chat
-          </Typography>
-        </Button>
-      </Box>
     </Box>
   );
 };
