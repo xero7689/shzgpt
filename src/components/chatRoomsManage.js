@@ -87,28 +87,12 @@ const ChatRoomsManage = (props) => {
 
   return (
     <Box
-      position={{
-        xs: "fixed",
-        md: "static",
-      }}
       display={toggle ? "flex" : "none"}
       flexDirection="column"
-      justifyContent="space-between"
       px={2}
       pb={3}
-      sx={{
-        backgroundColor: "primary.main",
-      }}
       minWidth="200px"
       maxHeight={ isMobile ? "90vh" : "100vh"}
-      boxShadow={{
-        xs: 5,
-        md: 0,
-      }}
-      borderRadius={{
-        xs: "12px",
-        md: "0",
-      }}
     >
       <Box
         display="flex"
