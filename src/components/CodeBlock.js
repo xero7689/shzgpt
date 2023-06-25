@@ -53,7 +53,7 @@ const CodeBlock = (props) => {
           </Typography>
         </Button>
       </Box>
-      <Box sx={{ width: "100%", overflow: "auto" }}>
+      <Box sx={{ overflow: "auto" }}>
         {isMobileOnly ? (
           <Box>{codeString}</Box>
         ) : (
@@ -66,9 +66,7 @@ const CodeBlock = (props) => {
               paddingTop: "24px",
               paddingBottom: "24px",
             }}
-            lineProps={{
-              overflow: "auto",
-            }}
+            wrapLines={true}
           >
             {codeString}
           </SyntaxHighlighter>

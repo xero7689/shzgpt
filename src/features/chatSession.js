@@ -11,6 +11,8 @@ import MessageBox from "../components/MessageBox";
 import LoadingBox from "../components/LoadingBox";
 import { useEffect, useRef, useState } from "react";
 
+import { isMobile } from "react-device-detect";
+
 const AlwaysScrollToBottom = () => {
   const elementRef = useRef(null);
   const chatSession = useSelector(selectCurrentChatSession);
@@ -43,17 +45,16 @@ export const ChatSession = (props) => {
       flexGrow={1}
       sx={{ overflow: "auto" }}
     >
-      <Container maxWidth="md">
+      <Container maxWidth={ isMobile ? "sm" : "md"}>
         <Box
           ref={tmpContentRef}
           className="ChatContent"
           display="flex"
           flexDirection="column"
           gap={4}
-          pt={4}
-          py={3}
+          pt={3}
           sx={{
-            // overflow: "auto",
+            overflow: "auto",
             "&::-webkit-scrollbar": {
               display: "none",
             },
