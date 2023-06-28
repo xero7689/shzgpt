@@ -29,5 +29,6 @@ Start the project locally using:
 ```
 npm run start
 ```
+- Make sure you have already started the shzgpt-storage server.
 
 The application should be accessible at `127.0.0.1:3000` by default.
