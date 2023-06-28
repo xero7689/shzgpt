@@ -2,13 +2,13 @@ import Cookies from "js-cookie";
 const STORAGE_API_ENDPOINT = process.env.REACT_APP_DJANGO_STORAGE_API_ENDPOINT;
 
 export const login = async (username, password) => {
-  let endpoint = `${STORAGE_API_ENDPOINT}/api/login/`;
+  let endpoint = `${STORAGE_API_ENDPOINT}/chat/login/`;
   const csrftoken = Cookies.get("csrftoken");
 
   const requestOptions = {
     method: "POST",
     credentials: "include",
-    headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken },
+    headers: { "Content-Type": "application/json", "X-Csrftoken": csrftoken },
     body: JSON.stringify({
       username,
       password,
@@ -23,7 +23,7 @@ export const login = async (username, password) => {
 };
 
 export const logout = async () => {
-  let endpoint = `${STORAGE_API_ENDPOINT}/api/logout/`;
+  let endpoint = `${STORAGE_API_ENDPOINT}/chat/logout/`;
   const csrftoken = Cookies.get("csrftoken");
 
   const requestOptions = {
@@ -39,7 +39,7 @@ export const logout = async () => {
 };
 
 export const getUser = async () => {
-  let endpoint = `${STORAGE_API_ENDPOINT}/api/user/`;
+  let endpoint = `${STORAGE_API_ENDPOINT}/chat/user/`;
 
   const requestOptions = {
     method: "GET",
@@ -54,7 +54,7 @@ export const getUser = async () => {
 };
 
 export const getAPIKey = async () => {
-  let endpoint = `${STORAGE_API_ENDPOINT}/api/api-key/`;
+  let endpoint = `${STORAGE_API_ENDPOINT}/chat/api-key/`;
 
   const requestOptions = {
     method: "GET",
@@ -69,7 +69,7 @@ export const getAPIKey = async () => {
 };
 
 export const getChatRoom = async (pageNum = null) => {
-  let endpoint = `${STORAGE_API_ENDPOINT}/api/chatroom/`;
+  let endpoint = `${STORAGE_API_ENDPOINT}/chat/chatroom/`;
   const requestOptions = {
     method: "GET",
     credentials: "include",
@@ -86,7 +86,7 @@ export const getChatRoom = async (pageNum = null) => {
 };
 
 export const getChatHistory = async (roomId) => {
-  let endpoint = `${STORAGE_API_ENDPOINT}/api/chat-history/${roomId}`;
+  let endpoint = `${STORAGE_API_ENDPOINT}/chat/chat-history/${roomId}`;
   const requestOptions = {
     method: "GET",
     credentials: "include",
@@ -100,7 +100,7 @@ export const getChatHistory = async (roomId) => {
 };
 
 export const createChatRoom = async (newChatRoomNameInput) => {
-  let endpoint = `${STORAGE_API_ENDPOINT}/api/chatroom/`;
+  let endpoint = `${STORAGE_API_ENDPOINT}/chat/chatroom/`;
   const csrftoken = Cookies.get("csrftoken");
   const requestOptions = {
     method: "POST",
@@ -134,7 +134,7 @@ export const postChat = async (chatroom_id, role, content) => {
   };
 
   const response = await fetch(
-    `${STORAGE_API_ENDPOINT}/api/chat/`,
+    `${STORAGE_API_ENDPOINT}/chat/chat/`,
     requestOptions
   )
     .then((response) => response.json())
@@ -153,7 +153,7 @@ export const getPromptTopic = async () => {
   };
 
   const response = await fetch(
-    `${STORAGE_API_ENDPOINT}/api/prompt-topic/`,
+    `${STORAGE_API_ENDPOINT}/chat/prompt-topic/`,
     requestOptions
   )
     .then((response) => response.json())
@@ -169,7 +169,7 @@ export const getPromptsList = async () => {
   };
 
   const response = await fetch(
-    `${STORAGE_API_ENDPOINT}/api/prompts/`,
+    `${STORAGE_API_ENDPOINT}/chat/prompts/`,
     requestOptions
   )
     .then((response) => {
@@ -180,7 +180,7 @@ export const getPromptsList = async () => {
 };
 
 export const postNewPrompt = async (initialPrompt) => {
-  let endpoint = `${STORAGE_API_ENDPOINT}/api/prompts/`;
+  let endpoint = `${STORAGE_API_ENDPOINT}/chat/prompts/`;
   const csrftoken = Cookies.get("csrftoken");
   const requestOptions = {
     method: "POST",
