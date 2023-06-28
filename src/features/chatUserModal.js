@@ -117,6 +117,7 @@ export default function ChatUserModal(props) {
               onChange={handlePasswordInputOnChange}
               size="small"
               label="Password"
+              type="password"
             ></TextField>
             <Button onClick={handleLoginOnClick} variant="contained" color="secondary">
               <Typography fontWeight="bold">Login!</Typography>
