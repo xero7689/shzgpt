@@ -12,7 +12,7 @@ import {
 
 import { loginStorageServer, logoutStorageServer } from "./chatUserSlice";
 
-export default function ChatUserModal(props) {
+export default function ChatUserModal() {
   const dispatch = useDispatch();
   const userInfo = useSelector(selectUserInfo);
   const userIsLogin = useSelector(selectUserIsLogin);
@@ -44,7 +44,13 @@ export default function ChatUserModal(props) {
   };
 
   const handleModalClose = () => {
-    dispatch(toggleChatUserModal());
+    if (userIsLogin) {
+      dispatch(toggleChatUserModal());
+    } else {
+      // Only allowed close modal if user is login
+      // Add Notification Here in the future's feature
+      return;
+    }
   };
 
   const modalStyle = {

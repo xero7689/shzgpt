@@ -35,10 +35,13 @@ import { PromptManage } from "./features/promptManage";
 
 import SettingsModal from "./features/settingsModal";
 import ChatUserModal from "./features/chatUserModal";
+
 import {
   getUserInfo,
   selectUserInfo,
   selectUserIsLogin,
+  selectChatUserModalIsOpen,
+  toggleChatUserModal,
 } from "./features/chatUserSlice";
 import { fetchAPIKey } from "./features/apiKeySlice";
 import { initPromptState } from "./features/promptsSlice";
@@ -57,6 +60,7 @@ function App() {
   const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
   const userIsLogin = useSelector(selectUserIsLogin);
   const userInfo = useSelector(selectUserInfo);
+  const userModalIsOpen = useSelector(selectChatUserModalIsOpen);
 
   const { chatInterfaceHeight, appBarRef, chatInterfaceRef, chatContentRef } =
     useAppEffect();
@@ -68,6 +72,12 @@ function App() {
         dispatch(fetchAPIKey());
       }
       dispatch(fetchChatRoom());
+    } else {
+      if (!userModalIsOpen) {
+        // Only allowed close modal if user is login
+        // Add Notification Here in the future's feature
+        dispatch(toggleChatUserModal());
+      }
     }
   }, [dispatch, userIsLogin, userInfo]);
 
