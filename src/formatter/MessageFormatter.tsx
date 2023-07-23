@@ -1,8 +1,4 @@
-interface FormattedUserMessage {
-  timestamp: number,
-  role: string,
-  content: string
-}
+import { FormattedUserMessage, GPT_Response, ChatHistoryEntry, FormattedChatHistory } from "../types/interfaces";
 
 export function formatUserMessage(userMessage: string): FormattedUserMessage {
   const timestamp = Date.now();
@@ -13,20 +9,7 @@ export function formatUserMessage(userMessage: string): FormattedUserMessage {
   }
 }
 
-interface GPT_Response {
-  data: {
-    choices: {
-      message: {
-        content: string;
-      }
-    }[]
-  },
-  status: number,
-  statusText: string,
-  request: XMLHttpRequest,
-  config: object,
-  headers: object
-}
+
 
 export function formatResponseMessage(response: GPT_Response) {
   const timestamp = Date.now();
@@ -37,16 +20,7 @@ export function formatResponseMessage(response: GPT_Response) {
   }
 }
 
-interface ChatHistoryEntry {
-  timestamp: number;
-  role: string;
-  content: string;
-}
 
-interface FormattedChatHistory {
-  role: string;
-  content: string;
-}
 
 export function formatChatHistory(history: ChatHistoryEntry[]): FormattedChatHistory[] {
   // Format chat history used to query API

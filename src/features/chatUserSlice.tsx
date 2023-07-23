@@ -4,11 +4,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { RootState } from "../app/store";
 import { getUser, login, logout } from "../fetchers/storage";
 
-interface UserInfo {
-  id: number | null;
-  name: string;
-  created_at: string;
-}
+import { UserInfo } from "../types/interfaces";
 
 const initialState = {
   userInfo: {} as UserInfo,
