@@ -1,4 +1,7 @@
+import React from 'react';
 import { useDispatch, useSelector } from "react-redux";
+import { ThunkDispatch, Action } from '@reduxjs/toolkit';
+import { RootState } from '../app/store';
 
 import { Box, Modal, TextField, Button, Typography } from "@mui/material";
 import { useState } from "react";
@@ -12,21 +15,21 @@ import {
 
 import { loginStorageServer, logoutStorageServer } from "./chatUserSlice";
 
-export default function ChatUserModal(props) {
-  const dispatch = useDispatch();
+export default function ChatUserModal() {
+  const dispatch: ThunkDispatch<RootState, null, Action> = useDispatch();
   const userInfo = useSelector(selectUserInfo);
   const userIsLogin = useSelector(selectUserIsLogin);
   const modalIsOpen = useSelector(selectChatUserModalIsOpen);
 
   // State For User Name, Password
-  const [inputUsername, setInputUsername] = useState(null);
-  const [inputPassword, setInputPassword] = useState(null);
+  const [inputUsername, setInputUsername] = useState<string>("");
+  const [inputPassword, setInputPassword] = useState<string>("");
 
-  const handleUsernameInputOnChange = (event) => {
+  const handleUsernameInputOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputUsername(event.target.value);
   };
 
-  const handlePasswordInputOnChange = (event) => {
+  const handlePasswordInputOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputPassword(event.target.value);
   };
 
