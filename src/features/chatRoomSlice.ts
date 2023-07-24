@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { RootState } from "../app/store";
 import fetchMessage from "../fetchers/gpt";
 import {
   getChatHistory,
@@ -14,11 +15,15 @@ import {
 
 import { encode } from "gpt-tokenizer";
 
+import { ChatCompletionRequestMessage } from "openai";
+
+import { CurrentChatRoomInfo } from "../types/interfaces";
+
 const initialState = {
   currentChatRoomInfo: {
     id: null,
     name: null,
-  },
+  } as CurrentChatRoomInfo,
   currentChatRoomSession: [],
   nextChatHistoryPagination: 0,
   sessionHistoryPrev: [],
@@ -32,29 +37,26 @@ const initialState = {
   },
 };
 
-export const fetchGPTMessage = createAsyncThunk(
+export const fetchGPTMessage = createAsyncThunk<void, { activeKey: string }>(
   "chatRoom/fetchGPTMessage",
   async ({ activeKey }, { dispatch, getState }) => {
-    const state = getState();
+    const state = getState() as RootState;
     const history = formatChatHistory(state.chatRooms.currentChatRoomSession);
 
     const fetchHistory = history;
 
-    let finalHistory = [];
-    fetchHistory.reduceRight(
-      (accumulator, item) => {
-        const token = encode(item.content);
-        accumulator += token.length;
-        if (accumulator < state.chatRooms.maxCompleteTokenLength) {
-          finalHistory.push(item);
-        }
-        return accumulator;
-      },
-      0
-    );
+    let finalHistory: ChatCompletionRequestMessage[] = [];
+    fetchHistory.reduceRight((accumulator, item) => {
+      const token = encode(item.content);
+      accumulator += token.length;
+      if (accumulator < state.chatRooms.maxCompleteTokenLength) {
+        finalHistory.push(item);
+      }
+      return accumulator;
+    }, 0);
 
     const response = await fetchMessage(finalHistory.reverse(), activeKey);
-    const formatedResponse = formatResponseMessage(response);
+    const formatedResponse = formatResponseMessage(response.data);
     dispatch(addSessionMessage(formatedResponse));
 
     const postChatArgs = {
@@ -68,7 +70,8 @@ export const fetchGPTMessage = createAsyncThunk(
 
 export const postNewMessage = createAsyncThunk(
   "chatRoom/addNewMessage",
-  async ({ chatRoomId, role, newMessage }, { dispatch, getState }) => {
+  async (args: PostNewMessageArgs) => {
+    const { chatRoomId, role, newMessage } = args;
     const response = await postChat(chatRoomId, role, newMessage);
     return response;
   }
@@ -76,7 +79,7 @@ export const postNewMessage = createAsyncThunk(
 
 export const fetchChatSession = createAsyncThunk(
   "chatRoom/fetchChatSession",
-  async (roomId, { dispatch, getState }) => {
+  async (roomId, { dispatch }) => {
     const response = await getChatHistory(roomId);
     dispatch(historyUpdated(convertDjangoChatHistory(response)));
     return response;
@@ -93,8 +96,8 @@ export const addNewChatRoom = createAsyncThunk(
 
 export const fetchChatRoom = createAsyncThunk(
   "chatRoom/fetchChatRoom",
-  async (args, { dispatch, getState }) => {
-    const state = getState();
+  async (_, { dispatch, getState }) => {
+    const state = getState() as RootState;
 
     let response = await getChatRoom();
 
@@ -131,7 +134,7 @@ const chatRoomSlice = createSlice({
   name: "chatRoom",
   initialState,
   reducers: {
-    initChatRoomState(state, action) {
+    initChatRoomState(state) {
       state.currentChatRoomInfo = {
         id: null,
         name: null,

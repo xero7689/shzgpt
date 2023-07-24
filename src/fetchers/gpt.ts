@@ -1,6 +1,7 @@
 import { Configuration, OpenAIApi } from "openai";
+import { ChatCompletionRequestMessage } from "openai";
 
-const fetchMessage = async (messages, apiKey) => {
+const fetchMessage = async (messages: ChatCompletionRequestMessage[], apiKey: string) => {
   const configuration = new Configuration({
     apiKey: apiKey,
   });

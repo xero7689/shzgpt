@@ -1,11 +1,13 @@
 import Cookies from "js-cookie";
+import { ShzGPTPromptArgs } from "../types/interfaces";
+
 const STORAGE_API_ENDPOINT = process.env.REACT_APP_DJANGO_STORAGE_API_ENDPOINT;
 
-export const login = async (username, password) => {
+export const login = async (username: string, password: string) => {
   let endpoint = `${STORAGE_API_ENDPOINT}/chat/login/`;
   const csrftoken = Cookies.get("csrftoken");
 
-  const requestOptions = {
+  const requestOptions: RequestInit = {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json", "X-Csrftoken": csrftoken },
@@ -26,7 +28,7 @@ export const logout = async () => {
   let endpoint = `${STORAGE_API_ENDPOINT}/chat/logout/`;
   const csrftoken = Cookies.get("csrftoken");
 
-  const requestOptions = {
+  const requestOptions: RequestInit = {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken },
@@ -41,7 +43,7 @@ export const logout = async () => {
 export const getUser = async () => {
   let endpoint = `${STORAGE_API_ENDPOINT}/chat/user/`;
 
-  const requestOptions = {
+  const requestOptions: RequestInit = {
     method: "GET",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -56,7 +58,7 @@ export const getUser = async () => {
 export const getAPIKey = async () => {
   let endpoint = `${STORAGE_API_ENDPOINT}/chat/api-key/`;
 
-  const requestOptions = {
+  const requestOptions: RequestInit = {
     method: "GET",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -70,7 +72,7 @@ export const getAPIKey = async () => {
 
 export const getChatRoom = async (pageNum = null) => {
   let endpoint = `${STORAGE_API_ENDPOINT}/chat/chatroom/`;
-  const requestOptions = {
+  const requestOptions: RequestInit = {
     method: "GET",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -85,9 +87,9 @@ export const getChatRoom = async (pageNum = null) => {
   return results;
 };
 
-export const getChatHistory = async (roomId) => {
+export const getChatHistory = async (roomId: number) => {
   let endpoint = `${STORAGE_API_ENDPOINT}/chat/chat-history/${roomId}`;
-  const requestOptions = {
+  const requestOptions: RequestInit = {
     method: "GET",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -99,10 +101,10 @@ export const getChatHistory = async (roomId) => {
   return results;
 };
 
-export const createChatRoom = async (newChatRoomNameInput) => {
+export const createChatRoom = async (newChatRoomNameInput: string) => {
   let endpoint = `${STORAGE_API_ENDPOINT}/chat/chatroom/`;
   const csrftoken = Cookies.get("csrftoken");
-  const requestOptions = {
+  const requestOptions: RequestInit = {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken },
@@ -119,10 +121,14 @@ export const createChatRoom = async (newChatRoomNameInput) => {
   return response;
 };
 
-export const postChat = async (chatroom_id, role, content) => {
+export const postChat = async (
+  chatroom_id: number,
+  role: string,
+  content: string
+) => {
   const csrftoken = Cookies.get("csrftoken");
 
-  const requestOptions = {
+  const requestOptions: RequestInit = {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken },
@@ -146,7 +152,7 @@ export const postChat = async (chatroom_id, role, content) => {
 };
 
 export const getPromptTopic = async () => {
-  const requestOptions = {
+  const requestOptions: RequestInit = {
     method: "GET",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -162,7 +168,7 @@ export const getPromptTopic = async () => {
 };
 
 export const getPromptsList = async () => {
-  const requestOptions = {
+  const requestOptions: RequestInit = {
     method: "GET",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -179,10 +185,10 @@ export const getPromptsList = async () => {
   return response;
 };
 
-export const postNewPrompt = async (initialPrompt) => {
+export const postNewPrompt = async (initialPrompt: ShzGPTPromptArgs) => {
   let endpoint = `${STORAGE_API_ENDPOINT}/chat/prompts/`;
   const csrftoken = Cookies.get("csrftoken");
-  const requestOptions = {
+  const requestOptions: RequestInit = {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken },

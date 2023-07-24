@@ -1,16 +1,18 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getPromptTopic } from "../fetchers/storage";
+import { RootState } from "../app/store";
+import { PromptTopicState, ShzGPTPromptTopic } from "../types/interfaces";
 
-const initialState = {
+const initialState: PromptTopicState = {
   promptTopic: [],
   status: "idle",
-  error: null,
+  error: undefined,
 };
 
 export const fetchPromptTopic = createAsyncThunk(
   "prompts/fetchPromptTopic",
-  async (args, { dispatch, getState }) => {
-    const state = getState();
+  async (_, { getState }) => {
+    const state = getState() as RootState;
 
     if (!state.chatUser.isLogin) {
       return [];
@@ -33,7 +35,7 @@ const promptTopicSlice = createSlice({
 
 export default promptTopicSlice.reducer;
 
-export const selectAllPromptTopic = (state) => state.promptTopic;
+export const selectAllPromptTopic = (state: RootState) => state.promptTopic.promptTopic;
 
-export const selectPromptTopicById = (state, promptTopicId) =>
-  state.promptTopic.find((promptTopic) => promptTopic.id === promptTopicId);
+export const selectPromptTopicById = (state: RootState, promptTopicId: ShzGPTPromptTopic["id"]) =>
+  state.promptTopic.promptTopic.find((promptTopic: ShzGPTPromptTopic) => promptTopic.id === promptTopicId);

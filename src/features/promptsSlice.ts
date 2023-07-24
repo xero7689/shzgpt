@@ -1,17 +1,19 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getPromptsList, postNewPrompt } from "../fetchers/storage";
+import { RootState } from "../app/store";
 
-const initialState = {
-  prompts: [],
-  promptTopic: [],
+import { PromptSliceState, ShzGPTPrompt, ShzGPTPromptArgs } from "../types/interfaces";
+
+const initialState: PromptSliceState = {
+  prompts: [] as ShzGPTPrompt[],
   status: "idle",
-  error: null,
+  error: undefined,
 };
 
 export const fetchPrompts = createAsyncThunk(
   "prompts/fetchPrompts",
-  async (args, { dispatch, getState }) => {
-    const state = getState();
+  async (_, { getState }) => {
+    const state = getState() as RootState;
 
     if (!state.chatUser.isLogin) {
       return [];
@@ -24,7 +26,7 @@ export const fetchPrompts = createAsyncThunk(
 
 export const addNewPrompt = createAsyncThunk(
   "prompts/addNewPrompt",
-  async (initialPrompt, { dispatch, getState }) => {
+  async (initialPrompt: ShzGPTPromptArgs) => {
     const response = await postNewPrompt(initialPrompt);
     return response;
   }
@@ -34,16 +36,15 @@ const promptsSlice = createSlice({
   name: "prompts",
   initialState,
   reducers: {
-    initPromptState(state, action) {
+    initPromptState(state) {
       state.prompts = [];
-      state.promptTopic = [];
       state.status = "idle";
-      state.error = null;
+      state.error = undefined;
     },
   },
   extraReducers(builder) {
     builder
-      .addCase(fetchPrompts.pending, (state, action) => {
+      .addCase(fetchPrompts.pending, (state) => {
         state.status = "loading";
       })
       .addCase(fetchPrompts.fulfilled, (state, action) => {
@@ -63,7 +64,7 @@ const promptsSlice = createSlice({
 export const { initPromptState } = promptsSlice.actions;
 export default promptsSlice.reducer;
 
-export const selectAllPrompts = (state) => state.prompts;
+export const selectAllPrompts = (state: RootState) => state.prompts.prompts;
 
-export const selectPromptById = (state, promptId) =>
-  state.prompts.find((prompt) => prompt.id === promptId);
+export const selectPromptById = (state: RootState, promptId: number) =>
+  state.prompts.prompts.find((prompt) => prompt.id === promptId);

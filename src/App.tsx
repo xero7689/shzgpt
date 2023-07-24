@@ -43,6 +43,9 @@ import {
 import { fetchAPIKey } from "./features/apiKeySlice";
 import { initPromptState } from "./features/promptsSlice";
 
+import { ThunkDispatch, Action } from "@reduxjs/toolkit";
+import { RootState } from "./app/store";
+
 function App() {
   const [toggleSidePanel, setToggleSidePanel] = useState(true);
   const [colorMode, setColorMode] = useState("light");
@@ -52,7 +55,7 @@ function App() {
     [colorMode]
   );
 
-  const dispatch = useDispatch();
+  const dispatch: ThunkDispatch<RootState, null, Action> = useDispatch();
   const chatSession = useSelector(selectCurrentChatSession);
   const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
   const userIsLogin = useSelector(selectUserIsLogin);
@@ -82,12 +85,12 @@ function App() {
 
   useEffect(() => {}, [currentChatRoomInfo]);
 
-  const [toggleItemId, setToggleItemid] = useState(null);
+  const [toggleItemId, setToggleItemid] = useState<number|null>(null);
   const naviDrawerItems = [
     { component: ChatRoomsManage, icon: <ChatIcon /> },
     { component: PromptManage, icon: <TextFieldsIcon /> },
   ];
-  const handleNaviDrawerItemClick = (index) => {
+  const handleNaviDrawerItemClick = (index: number | null) => {
     if (toggleItemId === index) {
       setToggleItemid(null);
     } else {
