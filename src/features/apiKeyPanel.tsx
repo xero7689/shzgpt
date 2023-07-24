@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { AppDispatch } from "../app/store";
 
 import {
   Box,
@@ -20,23 +21,26 @@ import {
 } from "./apiKeySlice";
 import { selectUserIsLogin } from "./chatUserSlice";
 
-export default function APIKeyPanel(props) {
-  const dispatch = useDispatch();
+export default function APIKeyPanel() {
+  const dispatch = useDispatch() as AppDispatch;
   const APIKeys = useSelector(selectAllAPIKeys);
   const activeKey = useSelector(selectActiveKey);
   const userIsLogin = useSelector(selectUserIsLogin);
-  const [inputAPIKey, setInputAPIKey] = useState(null);
+  const [inputAPIKey, setInputAPIKey] = useState<string | null>(null);
 
-  const handleAPIKeyInputOnChange = (event) => {
+  const handleAPIKeyInputOnChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setInputAPIKey(event.target.value);
   };
 
-  const handleAddInputAPIKey = () => {
-    // dispatch(setApiKey(inputAPIKey));
-  };
+  // const handleAddInputAPIKey = () => {
+  //   dispatch(setApiKey(inputAPIKey));
+  // };
 
-  const handleKeyItemOnClick = (event) => {
-    dispatch(updateActiveKey(event.target.textContent));
+  const handleKeyItemOnClick = (event: React.MouseEvent<HTMLElement>) => {
+    const target = event.target as HTMLElement;
+    dispatch(updateActiveKey(target.textContent));
   };
 
   useEffect(() => {

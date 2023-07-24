@@ -25,8 +25,9 @@ export interface ShzGPTMessage {
 
 export interface ShzGPTPrompt {
   id: number;
-  prompt_topic: number;
   name: string;
+  prompt_topic: number;
+  content: string;
 }
 
 export interface ShzGPTPromptTopic {
@@ -64,3 +65,17 @@ export interface PromptSliceState extends BaseState {
 export interface PromptTopicState extends BaseState {
   promptTopic: ShzGPTPromptTopic[];
 }
+
+export interface APIKeyObject {
+  id: number;
+  key: string;
+  desc: string;
+  model: number;
+  created_at: string;
+}
+
+export interface APIKeyState {
+  keys: APIKeyObject[];
+  activeKey: string;
+}
+
