@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux'
 
+import { AppDispatch }  from '../app/store';
 import { addNewPrompt } from './promptsSlice';
 import { selectAllPromptTopic } from './promptTopicSlice';
 
 import { Box, TextField, Button, Select, MenuItem } from '@mui/material';
+
+import { SelectChangeEvent } from '@mui/material';
 
 
 export const AddPromptForm = () => {
@@ -16,7 +19,7 @@ export const AddPromptForm = () => {
 
     const [addRequestStatus, setAddRequestStatus] = useState('idle');
 
-    const dispatch = useDispatch();
+    const dispatch = useDispatch() as AppDispatch;
 
     const canSave = [name, content].every(Boolean) && addRequestStatus === 'idle';
     const onSavePromptClicked = async () => {
@@ -37,15 +40,15 @@ export const AddPromptForm = () => {
         }
     }
 
-    const onTopicChanged = e => setTopic(e.target.value);
-    const onNameChanged = e => setName(e.target.value);
-    const onContentChanged = e => setContent(e.target.value);
+    const onTopicChanged = (e: SelectChangeEvent<string>) => setTopic(e.target.value);
+    const onNameChanged = (e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value);
+    const onContentChanged = (e: React.ChangeEvent<HTMLInputElement>) => setContent(e.target.value);
 
     return (
         <Box display="flex" flexDirection="column" p={1}>
             <Box component="form" display="flex" flexDirection="column" gap={1}>
                 <Select defaultValue='' onChange={onTopicChanged}>
-                    { promptTopic.promptTopic.map((topic, index) => {
+                    { promptTopic.map((topic, index) => {
                         return (
                             <MenuItem key={index} value={topic.id}>
                                 {topic.name}
