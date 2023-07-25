@@ -17,13 +17,10 @@ import { encode } from "gpt-tokenizer";
 
 import { ChatCompletionRequestMessage } from "openai";
 
-import { CurrentChatRoomInfo } from "../types/interfaces";
+import { ChatRoomObject, ChatRoomState } from "../types/interfaces";
 
 const initialState = {
-  currentChatRoomInfo: {
-    id: null,
-    name: null,
-  } as CurrentChatRoomInfo,
+  currentChatRoomInfo: null,
   currentChatRoomSession: [],
   nextChatHistoryPagination: 0,
   sessionHistoryPrev: [],
@@ -32,15 +29,25 @@ const initialState = {
   maxCompleteTokenLength: 1024,
   status: {
     fetchGPTStatus: "idle",
+    fetchGPTErrorMessage: "",
     fetchChatRoomStatus: "idle",
     fetchChatSessionStatus: "idle",
   },
-};
+} as ChatRoomState;
+
+import { PostNewMessageArgs } from "../types/interfaces";
 
 export const fetchGPTMessage = createAsyncThunk<void, { activeKey: string }>(
   "chatRoom/fetchGPTMessage",
   async ({ activeKey }, { dispatch, getState }) => {
     const state = getState() as RootState;
+
+    if (!state.chatRooms.currentChatRoomInfo) {
+      state.chatRooms.status.fetchGPTStatus = "Error";
+      state.chatRooms.status.fetchGPTErrorMessage =
+        "Currnet Chatroom not exists";
+      return;
+    }
     const history = formatChatHistory(state.chatRooms.currentChatRoomSession);
 
     const fetchHistory = history;
@@ -71,15 +78,14 @@ export const fetchGPTMessage = createAsyncThunk<void, { activeKey: string }>(
 export const postNewMessage = createAsyncThunk(
   "chatRoom/addNewMessage",
   async (args: PostNewMessageArgs) => {
-    const { chatRoomId, role, newMessage } = args;
-    const response = await postChat(chatRoomId, role, newMessage);
+    const response = await postChat(args);
     return response;
   }
 );
 
 export const fetchChatSession = createAsyncThunk(
   "chatRoom/fetchChatSession",
-  async (roomId, { dispatch }) => {
+  async (roomId: number, { dispatch }) => {
     const response = await getChatHistory(roomId);
     dispatch(historyUpdated(convertDjangoChatHistory(response)));
     return response;
@@ -88,7 +94,7 @@ export const fetchChatSession = createAsyncThunk(
 
 export const addNewChatRoom = createAsyncThunk(
   "chatRoom/addNewChatRoom",
-  async (newChatRoomName) => {
+  async (newChatRoomName: string) => {
     const response = await createChatRoom(newChatRoomName);
     return response;
   }
@@ -100,16 +106,25 @@ export const fetchChatRoom = createAsyncThunk(
     const state = getState() as RootState;
 
     let response = await getChatRoom();
+    let results = response.results as ChatRoomObject[];
 
     // Initialize current chatroom
-    if (!state.chatRooms.currentChatRoomInfo.id) {
-      const latest_used_chatroom = response.results.reduce((prev, current) => {
-        return new Date(prev.last_used_time) > new Date(current.last_used_time)
-          ? prev
-          : current;
+    if (!state.chatRooms.currentChatRoomInfo) {
+      //The `reduce` function expects the provided callback function to always return a valid `ChatRoomObject`, but in some cases, it may return `undefined`.
+      //An initial value for the `reduce` function to ensure that it always returns a valid `ChatRoomObject` is necessary.
+      const latest_used_chatroom = results.reduce((prev, current) => {
+        if (prev.last_used_time && current.last_used_time) {
+          return new Date(prev.last_used_time) >
+            new Date(current.last_used_time)
+            ? prev
+            : current;
+        }
+        return prev;
       });
-      dispatch(currentChatRoomUpdated(latest_used_chatroom));
-      dispatch(fetchChatSession(latest_used_chatroom.id));
+      if (latest_used_chatroom.id) {
+        dispatch(currentChatRoomUpdated(latest_used_chatroom));
+        dispatch(fetchChatSession(latest_used_chatroom.id));
+      }
     }
     dispatch(chatRoomsUpdated(response.results));
 
@@ -135,10 +150,7 @@ const chatRoomSlice = createSlice({
   initialState,
   reducers: {
     initChatRoomState(state) {
-      state.currentChatRoomInfo = {
-        id: null,
-        name: null,
-      };
+      state.currentChatRoomInfo = null;
       state.currentChatRoomSession = [];
       state.nextChatHistoryPagination = 0;
       state.sessionHistoryPrev = [];
@@ -147,6 +159,7 @@ const chatRoomSlice = createSlice({
       state.chatRooms = [];
       state.status = {
         fetchGPTStatus: "idle",
+        fetchGPTErrorMessage: "",
         fetchChatRoomStatus: "idle",
         fetchChatSessionStatus: "idle",
       };
@@ -163,17 +176,23 @@ const chatRoomSlice = createSlice({
       );
 
       const uniqueChatRooms = action.payload.filter(
-        (chatRoom) => !chatRoomSet.has(chatRoom.id)
+        (chatRoom: ChatRoomObject) => !chatRoomSet.has(chatRoom.id)
       );
 
-      uniqueChatRooms.sort(
-        (a, b) => new Date(b.last_used_time) - new Date(a.last_used_time)
-      );
+      uniqueChatRooms.sort((a: ChatRoomObject, b: ChatRoomObject) => {
+        if (a.last_used_time && b.last_used_time) {
+          return new Date(b.last_used_time) > new Date(a.last_used_time);
+        }
+      });
 
       state.chatRooms = [...state.chatRooms, ...uniqueChatRooms];
-      state.chatRooms.sort(
-        (a, b) => new Date(b.last_used_time) - new Date(a.last_used_time)
-      );
+      state.chatRooms.sort((a, b) => {
+        if (a.last_used_time && b.last_used_time) {
+          new Date(b.last_used_time).getTime() -
+            new Date(a.last_used_time).getTime();
+        }
+        return 0; // Handle the case if last_used_time not exists
+      });
     },
     currentChatRoomUpdated(state, action) {
       state.currentChatRoomInfo = action.payload;
@@ -181,20 +200,24 @@ const chatRoomSlice = createSlice({
     sessionHistoryPrevPush(state, action) {
       state.sessionHistoryPrev.push(action.payload);
     },
-    sessionHistoryPrevPop(state, action) {
+    sessionHistoryPrevPop(state) {
       if (state.sessionHistoryPrev.length !== 0) {
         const prevSession = state.sessionHistoryPrev.pop();
-        state.currentChatRoomInfo = prevSession;
+        if (prevSession) {
+          state.currentChatRoomInfo = prevSession;
+        }
       }
     },
     sessionHistoryNextPush(state, action) {
       state.sessionHistoryNext.push(action.payload);
     },
-    sessionHistoryNextPop(state, action) {
-      if (state.sessionHistoryNext.length !== 0) {
+    sessionHistoryNextPop(state) {
+      if (state.sessionHistoryNext.length !== 0 && state.currentChatRoomInfo) {
         state.sessionHistoryPrev.push(state.currentChatRoomInfo);
         const nextSession = state.sessionHistoryNext.pop();
-        state.currentChatRoomInfo = nextSession;
+        if (nextSession) {
+          state.currentChatRoomInfo = nextSession;
+        }
       }
     },
     updateMaxCompleteTokenLength(state, action) {
@@ -204,38 +227,44 @@ const chatRoomSlice = createSlice({
   extraReducers(builder) {
     builder
       // GPT Message Status
-      .addCase(fetchGPTMessage.pending, (state, action) => {
+      .addCase(fetchGPTMessage.pending, (state) => {
         state.status.fetchGPTStatus = "loading";
       })
-      .addCase(fetchGPTMessage.fulfilled, (state, action) => {
+      .addCase(fetchGPTMessage.fulfilled, (state) => {
         state.status.fetchGPTStatus = "succeeded";
       })
       .addCase(fetchGPTMessage.rejected, (state, action) => {
         state.status.fetchGPTStatus = "failed";
-        state.status.fetchGPTEerror = action.error.message;
+        if (action.error.message) {
+          state.status.fetchGPTErrorMessage = action.error.message;
+        }
       })
       // Chat History Status
-      .addCase(fetchChatSession.pending, (state, action) => {
+      .addCase(fetchChatSession.pending, (state) => {
         state.status.fetchChatSessionStatus = "loading";
       })
-      .addCase(fetchChatSession.fulfilled, (state, action) => {
+      .addCase(fetchChatSession.fulfilled, (state) => {
         state.status.fetchChatSessionStatus = "succeeded";
       })
       .addCase(fetchChatSession.rejected, (state, action) => {
         state.status.fetchChatSessionStatus = "failed";
-        state.error = action.error.message;
+        if (action.error.message) {
+          state.status.fetchGPTErrorMessage = action.error.message;
+        }
       })
 
       // ChatRoom Status
-      .addCase(fetchChatRoom.pending, (state, action) => {
+      .addCase(fetchChatRoom.pending, (state) => {
         state.status.fetchChatRoomStatus = "loading";
       })
-      .addCase(fetchChatRoom.fulfilled, (state, action) => {
+      .addCase(fetchChatRoom.fulfilled, (state) => {
         state.status.fetchChatRoomStatus = "succeeded";
       })
       .addCase(fetchChatRoom.rejected, (state, action) => {
         state.status.fetchChatRoomStatus = "failed";
-        state.error = action.error.message;
+        if (action.error.message) {
+          state.status.fetchGPTErrorMessage = action.error.message;
+        }
       });
   },
 });
@@ -255,26 +284,30 @@ export const {
 
 export default chatRoomSlice.reducer;
 
-export const selectCurrentChatSession = (state) =>
+export const selectCurrentChatSession = (state: RootState) =>
   state.chatRooms.currentChatRoomSession;
-export const selectLastRoleOfHistory = (state) =>
-  state.chatRooms.currentChatRoomSession.slice(-1).role;
+export const selectLastRoleOfHistory = (state: RootState) => {
+ const lastSession = state.chatRooms.currentChatRoomSession.slice(-1);
+ if (lastSession) {
+     return lastSession[0].role;
+ }
+}
 
-export const selectAllChatRooms = (state) => state.chatRooms.chatRooms;
+export const selectAllChatRooms = (state: RootState) => state.chatRooms.chatRooms;
 
-export const selectFetchGPTStatus = (state) =>
+export const selectFetchGPTStatus = (state: RootState) =>
   state.chatRooms.status.fetchGPTStatus;
 
-export const selectChatHistoryStatus = (state) =>
+export const selectChatHistoryStatus = (state: RootState) =>
   state.chatRooms.status.fetchChatSessionStatus;
 
-export const selectCurrentChatRoomInfo = (state) =>
+export const selectCurrentChatRoomInfo = (state: RootState) =>
   state.chatRooms.currentChatRoomInfo;
 
-export const selectSessionHistoryPrev = (state) =>
+export const selectSessionHistoryPrev = (state: RootState) =>
   state.chatRooms.sessionHistoryPrev;
-export const selectSessionHistoryNext = (state) =>
+export const selectSessionHistoryNext = (state: RootState) =>
   state.chatRooms.sessionHistoryNext;
 
-export const selectMaxCompleteTokenLength = (state) =>
+export const selectMaxCompleteTokenLength = (state: RootState) =>
   state.chatRooms.maxCompleteTokenLength;
