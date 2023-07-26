@@ -1,0 +1,128 @@
+import { useState, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
+import { formatUserMessage } from "../formatter/MessageFormatter";
+
+import {
+  addSessionMessage,
+  postNewMessage,
+  fetchGPTMessage,
+  selectCurrentChatRoomInfo,
+} from "../features/chatRoomSlice";
+
+import { Box, Button, TextField } from "@mui/material";
+import { useTheme } from "@mui/material";
+import SendIcon from "@mui/icons-material/Send";
+import { selectActiveKey } from "../features/apiKeySlice";
+
+import { AppDispatch } from "../app/store";
+
+export default function InputForm() {
+  const theme = useTheme();
+
+  const messageRef = useRef<HTMLInputElement>();
+  const dispatch = useDispatch() as AppDispatch;
+  const [requestMessage, setRequestMessage] = useState("");
+  const [queryInProgress, setQueryInProgress] = useState(false);
+  const [_, setQueryError] = useState(null);
+  const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
+  const activeKey = useSelector(selectActiveKey);
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRequestMessage(event.target.value);
+  };
+
+  async function handleSendMessage() {
+    if (queryInProgress || !currentChatRoomInfo || !messageRef.current) {
+      return;
+    }
+
+    const userMessage = formatUserMessage(requestMessage);
+
+    dispatch(addSessionMessage(userMessage));
+
+    messageRef.current.value = "";
+
+    dispatch(
+      postNewMessage({
+        chatRoomId: currentChatRoomInfo.id,
+        role: userMessage.role,
+        newMessage: userMessage.content,
+      })
+    );
+
+    try {
+      setQueryInProgress(true);
+      if (activeKey) {
+        await dispatch(fetchGPTMessage({ activeKey }));
+      }
+    } catch (err: any) {
+      setQueryError(err);
+    }
+    setQueryInProgress(false);
+  }
+
+  function handleSubmit(event: React.ChangeEvent<HTMLFormElement>) {
+    event.preventDefault();
+  }
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter") {
+      if (event.shiftKey) {
+        // Do line break here!
+      } else {
+        event.preventDefault();
+        if (!messageRef.current || messageRef.current.value.trim() === "") {
+          return;
+        }
+        handleSendMessage();
+      }
+    }
+  };
+  return (
+    <Box
+      className="InputGroup"
+      component="form"
+      autoComplete="off"
+      display="flex"
+      alignItems="center"
+      onSubmit={handleSubmit}
+      p={2}
+      gap={2}
+    >
+      <TextField
+        inputRef={messageRef}
+        id="outlined-basic"
+        variant="filled"
+        onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
+        autoComplete="off"
+        autoCorrect="off"
+        label="Send a message..."
+        multiline
+        maxRows={4}
+        InputLabelProps={{
+          style: { color: theme.palette.primary.contrastText },
+        }}
+        sx={{
+          width: "100%",
+          textArea: {
+            color: theme.palette.primary.contrastText,
+          },
+        }}
+      />
+      <Button
+        variant="contained"
+        endIcon={<SendIcon />}
+        sx={{
+          fontWeight: "bold",
+          backgroundColor: theme.palette.secondary.main,
+          color: theme.palette.secondary.contrastText,
+        }}
+        onClick={handleSendMessage}
+      >
+        Send
+      </Button>
+    </Box>
+  );
+}
