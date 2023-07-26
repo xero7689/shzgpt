@@ -4,7 +4,6 @@ import {
   PostNewMessageArgs,
   ShzGPTChatHistoryResponseObject,
 } from "../types/interfaces";
-import { ChatCompletionResponseMessageRoleEnum } from "openai";
 
 const STORAGE_API_ENDPOINT = process.env.REACT_APP_DJANGO_STORAGE_API_ENDPOINT;
 
