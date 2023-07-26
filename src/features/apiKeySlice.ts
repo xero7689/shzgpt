@@ -23,9 +23,15 @@ const initialState: APIKeyState = {
 
 export const fetchAPIKey = createAsyncThunk(
   "apiKey/fetchAPIKey",
-  async (_, { dispatch }) => {
+  async (_, { dispatch, getState }) => {
+    const state = getState() as RootState;
     const response = await getAPIKey();
-    dispatch(updateAPIKeys(response.results));
+    if (response.results.length >= 0) {
+        dispatch(updateAPIKeys(response.results));
+        if (!state.apiKey.activeKey) {
+            dispatch(updateActiveKey(response.results[0].key));
+        }
+    }
   }
 );
 

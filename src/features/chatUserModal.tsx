@@ -47,7 +47,13 @@ export default function ChatUserModal() {
   };
 
   const handleModalClose = () => {
-    dispatch(toggleChatUserModal());
+    if (userIsLogin) {
+      dispatch(toggleChatUserModal());
+    } else {
+      // Only allowed close modal if user is login
+      // Add Notification Here in the future's feature
+      return;
+    }
   };
 
   const modalStyle = {
