@@ -1,4 +1,4 @@
-import { ChatCompletionRequestMessageRoleEnum } from "openai";
+import { CreateChatCompletionResponse, ChatCompletionRequestMessageRoleEnum } from "openai";
 
 export interface UserInfo {
   id: number | null;
@@ -6,9 +6,31 @@ export interface UserInfo {
   created_at: string;
 }
 
-export interface CurrentChatRoomInfo {
-  id: number | null;
-  name: string | null;
+export interface ChatRoomObject {
+  id: number;
+  name: string;
+  created_at: string;
+  last_used_time: string;
+}
+
+// Calling chatroom status is a little wierd
+// since this is the status corresponding to fetch() api
+export interface ChatRoomStatus {
+    fetchGPTStatus: string;
+    fetchGPTErrorMessage: string;
+    fetchChatRoomStatus: string;
+    fetchChatSessionStatus: string;
+}
+
+export interface ChatRoomState {
+    currentChatRoomInfo: ChatRoomObject | null;
+    currentChatRoomSession: ShzGPTMessage[];
+    nextChatHistoryPagination: number;
+    sessionHistoryPrev: ChatRoomObject[];
+    sessionHistoryNext: ChatRoomObject[];
+    chatRooms: ChatRoomObject[];
+    status: ChatRoomStatus;
+    maxCompleteTokenLength: number;
 }
 
 export interface PostNewMessageArgs {
@@ -17,8 +39,17 @@ export interface PostNewMessageArgs {
   newMessage: string;
 }
 
+export type ShzGPTChatHistoryResponseObject = {
+    id: number,
+    role: ChatCompletionRequestMessageRoleEnum,
+    content: string,
+    chatroom: number,
+    tokens: number,
+    created_at: string
+}
+
 export interface ShzGPTMessage {
-  timestamp: number;
+  timestamp: string;
   role: ChatCompletionRequestMessageRoleEnum;
   content: string;
 }
@@ -78,4 +109,3 @@ export interface APIKeyState {
   keys: APIKeyObject[];
   activeKey: string;
 }
-

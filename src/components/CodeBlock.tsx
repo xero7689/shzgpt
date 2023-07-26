@@ -11,10 +11,16 @@ import CopyAllIcon from "@mui/icons-material/CopyAll";
 import { useState } from "react";
 import { isMobileOnly } from "react-device-detect";
 
-const CodeBlock = (props) => {
+type CodeBlockProps = {
+  codeString: string;
+  language: string;
+  colorMode: string;
+};
+
+const CodeBlock = (props: CodeBlockProps) => {
   const { codeString, language, colorMode } = props;
 
-  const [copySuccess, setCopySuccess] = useState(false);
+  const [ _, setCopySuccess] = useState(false);
 
   const handleCopyClick = () => {
     navigator.clipboard.writeText(codeString);

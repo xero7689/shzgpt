@@ -10,9 +10,16 @@ const panelItemStyle = {
   color: "primary.contrastText",
 };
 
-export default function SettingsPanelItem(props) {
+type SettingsPanelItemProps = {
+  title: string;
+  desc: string;
+  onInputChangeHandler: React.ChangeEventHandler<HTMLInputElement>;
+  defaultValue: number;
+};
+
+export default function SettingsPanelItem(props: SettingsPanelItemProps) {
   const { title, desc, onInputChangeHandler, defaultValue } = props;
-  const handleOnInputChange = (event) => {
+  const handleOnInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onInputChangeHandler(event);
   };
   return (

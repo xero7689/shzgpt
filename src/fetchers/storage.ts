@@ -1,5 +1,10 @@
 import Cookies from "js-cookie";
-import { ShzGPTPromptArgs } from "../types/interfaces";
+import {
+  ShzGPTPromptArgs,
+  PostNewMessageArgs,
+  ShzGPTChatHistoryResponseObject,
+} from "../types/interfaces";
+import { ChatCompletionResponseMessageRoleEnum } from "openai";
 
 const STORAGE_API_ENDPOINT = process.env.REACT_APP_DJANGO_STORAGE_API_ENDPOINT;
 
@@ -87,7 +92,9 @@ export const getChatRoom = async (pageNum = null) => {
   return results;
 };
 
-export const getChatHistory = async (roomId: number) => {
+export const getChatHistory = async (
+  roomId: number
+): Promise<ShzGPTChatHistoryResponseObject[]> => {
   let endpoint = `${STORAGE_API_ENDPOINT}/chat/chat-history/${roomId}`;
   const requestOptions: RequestInit = {
     method: "GET",
@@ -121,11 +128,8 @@ export const createChatRoom = async (newChatRoomNameInput: string) => {
   return response;
 };
 
-export const postChat = async (
-  chatroom_id: number,
-  role: string,
-  content: string
-) => {
+export const postChat = async (args: PostNewMessageArgs) => {
+  const { chatRoomId, role, newMessage } = args;
   const csrftoken = Cookies.get("csrftoken");
 
   const requestOptions: RequestInit = {
@@ -133,9 +137,9 @@ export const postChat = async (
     credentials: "include",
     headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken },
     body: JSON.stringify({
-      chatroom: chatroom_id,
+      chatroom: chatRoomId,
       role: role,
-      content: content,
+      content: newMessage,
     }),
   };
 

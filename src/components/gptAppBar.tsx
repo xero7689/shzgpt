@@ -28,6 +28,10 @@ import {
   currentChatRoomUpdated,
 } from "../features/chatRoomSlice";
 
+import { ChatRoomObject } from "../types/interfaces";
+import { AppDispatch } from "../app/store";
+import { PaletteMode } from "@mui/material";
+
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
   borderRadius: theme.shape.borderRadius,
@@ -42,21 +46,26 @@ const Search = styled("div")(({ theme }) => ({
   },
 }));
 
-function GPTAppBar(props, ref) {
+type GPTAppBarProps = {
+  setToggleSidePanel: React.Dispatch<React.SetStateAction<boolean>>;
+  setColorMode: React.Dispatch<React.SetStateAction<PaletteMode>>;
+};
+
+function GPTAppBar(props: GPTAppBarProps, ref: any) {
   const { setToggleSidePanel, setColorMode } = props;
   const theme = useTheme();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch() as AppDispatch;
   const allChatRooms = useSelector(selectAllChatRooms);
 
   // Search Bar state
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [chatroomSearchResult, setChatroomSearchResult] = useState([]);
-  const [selectedIndex, setSelectedIndex] = useState(1);
+  const [chatroomSearchResult, setChatroomSearchResult] = useState<ChatRoomObject[]>([]);
+  const [selectedIndex, _] = useState(1);
   const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
 
   const handleClick = () => {
-    setToggleSidePanel((toggle) => !toggle);
+    setToggleSidePanel((toggle: boolean) => !toggle);
   };
 
   const handleSwitchColorMode = () => {
@@ -81,7 +90,7 @@ function GPTAppBar(props, ref) {
     setIsSearching(false);
   };
 
-  const searchChatRooms = (chatrooms, keyword) => {
+  const searchChatRooms = (chatrooms: ChatRoomObject[], keyword: string) => {
     const filteredChatRooms = chatrooms.filter((chatroom) => {
       const name = chatroom.name.toLowerCase();
       const searchKeyword = keyword.toLowerCase();
@@ -90,7 +99,7 @@ function GPTAppBar(props, ref) {
     return filteredChatRooms;
   };
 
-  const handleSearchBarChange = (event) => {
+  const handleSearchBarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const keyword = event.target.value;
     setSearchKeyword(keyword);
     const matchRooms = searchChatRooms(allChatRooms, keyword);
@@ -108,7 +117,7 @@ function GPTAppBar(props, ref) {
     }
   }, [isSearching, searchKeyword]);
 
-  const handleListItemClick = (event, chatRoomInfo) => {
+  const handleListItemClick = (_: React.MouseEvent, chatRoomInfo: ChatRoomObject) => {
     dispatch(sessionHistoryPrevPush(currentChatRoomInfo));
     dispatch(fetchChatSession(chatRoomInfo.id));
     const newChatRoomInfo = {
@@ -218,10 +227,10 @@ function GPTAppBar(props, ref) {
                       padding: 0,
                     }}
                   >
-                    <ListItemText
-                      sx={{ color: "primary.contrastText" }}
-                    >
-                      <Typography color="primary.contrastText" fontSize="small">{item.name}</Typography>
+                    <ListItemText sx={{ color: "primary.contrastText" }}>
+                      <Typography color="primary.contrastText" fontSize="small">
+                        {item.name}
+                      </Typography>
                     </ListItemText>
                   </ListItemButton>
                 );

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useMemo } from "react";
 
-import { useTheme } from "@emotion/react";
+import { useTheme } from "@mui/material";
 import {
   Box,
   MenuItem,
@@ -12,12 +12,14 @@ import {
   Divider,
 } from "@mui/material";
 import ContentCopy from "@mui/icons-material/ContentCopy";
-import DeleteIcon from '@mui/icons-material/Delete';
-import ReplyIcon from '@mui/icons-material/Reply';
+import DeleteIcon from "@mui/icons-material/Delete";
+import ReplyIcon from "@mui/icons-material/Reply";
 
 import CodeBlock from "./CodeBlock";
 
-function separateCodeBlocks(rawString) {
+import { ChatCompletionRequestMessageRoleEnum } from "openai";
+
+function separateCodeBlocks(rawString: string) {
   const pattern = /```([^\n]+)?\n([\s\S]+?)\n```/g;
   let match,
     lastIndex = 0;
@@ -38,7 +40,13 @@ function separateCodeBlocks(rawString) {
   return blocks;
 }
 
-function ParseContent(props) {
+type ParseContentProps = {
+  isUser: boolean;
+  content: string;
+  colorMode: string;
+};
+
+function ParseContent(props: ParseContentProps) {
   const { isUser, content, colorMode } = props;
   const blocks = useMemo(() => separateCodeBlocks(content), [content]);
 
@@ -50,7 +58,7 @@ function ParseContent(props) {
             <CodeBlock
               key={index}
               codeString={block.content}
-              language={block.language}
+              language={block.language ? block.language : ""}
               colorMode={colorMode}
             ></CodeBlock>
           );
@@ -67,7 +75,14 @@ function ParseContent(props) {
   );
 }
 
-const MessageBox = React.memo(function MessageBox(props) {
+type MessageBoxProps = {
+  timestamp: string;
+  role: ChatCompletionRequestMessageRoleEnum;
+  content: string;
+  colorMode: string;
+};
+
+const MessageBox = React.memo(function MessageBox(props: MessageBoxProps) {
   const { timestamp, role, content, colorMode } = props;
   const theme = useTheme();
 
@@ -85,7 +100,7 @@ const MessageBox = React.memo(function MessageBox(props) {
     navigator.clipboard.writeText(content);
   };
 
-  const handleOnContextMenu = (e) => {
+  const handleOnContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
     setContextMenuClicked(true);
     setContextMenuClickPoint({

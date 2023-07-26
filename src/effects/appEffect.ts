@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 
 
 export const useAppEffect = () => {
-    const appBarRef = useRef(null);
+    const appBarRef = useRef<HTMLInputElement>(null);
     const chatInterfaceRef = useRef(null);
     const chatContentRef = useRef(null);
 

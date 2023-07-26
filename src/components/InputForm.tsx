@@ -11,29 +11,32 @@ import {
 } from "../features/chatRoomSlice";
 
 import { Box, Button, TextField } from "@mui/material";
-import { useTheme } from "@emotion/react";
+import { useTheme } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import { selectActiveKey } from "../features/apiKeySlice";
 
-export default function InputForm(props) {
+import { AppDispatch } from "../app/store";
+
+export default function InputForm() {
   const theme = useTheme();
 
-  const messageRef = useRef();
-  const dispatch = useDispatch();
+  const messageRef = useRef<HTMLInputElement>();
+  const dispatch = useDispatch() as AppDispatch;
   const [requestMessage, setRequestMessage] = useState("");
   const [queryInProgress, setQueryInProgress] = useState(false);
-  const [queryError, setQueryError] = useState(null);
+  const [_, setQueryError] = useState(null);
   const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
   const activeKey = useSelector(selectActiveKey);
 
-  const handleInputChange = (event) => {
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRequestMessage(event.target.value);
   };
 
   async function handleSendMessage() {
-    if (queryInProgress) {
+    if (queryInProgress || !currentChatRoomInfo || !messageRef.current) {
       return;
     }
+
     const userMessage = formatUserMessage(requestMessage);
 
     dispatch(addSessionMessage(userMessage));
@@ -53,23 +56,23 @@ export default function InputForm(props) {
       if (activeKey) {
         await dispatch(fetchGPTMessage({ activeKey }));
       }
-    } catch (err) {
+    } catch (err: any) {
       setQueryError(err);
     }
     setQueryInProgress(false);
   }
 
-  function handleSubmit(event) {
+  function handleSubmit(event: React.ChangeEvent<HTMLFormElement>) {
     event.preventDefault();
   }
 
-  const handleKeyDown = (event) => {
+  const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === "Enter") {
       if (event.shiftKey) {
         // Do line break here!
       } else {
         event.preventDefault();
-        if (messageRef.current.value.trim() === "") {
+        if (!messageRef.current || messageRef.current.value.trim() === "") {
           return;
         }
         handleSendMessage();
@@ -113,8 +116,8 @@ export default function InputForm(props) {
         endIcon={<SendIcon />}
         sx={{
           fontWeight: "bold",
-          backgroundColor: theme.palette.thirdary.main,
-          color: theme.palette.thirdary.contrastText,
+          backgroundColor: theme.palette.secondary.main,
+          color: theme.palette.secondary.contrastText,
         }}
         onClick={handleSendMessage}
       >

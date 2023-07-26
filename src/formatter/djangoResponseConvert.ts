@@ -1,4 +1,6 @@
-export function convertDjangoChatHistory(data) {
+import { ShzGPTChatHistoryResponseObject } from "../types/interfaces";
+
+export function convertDjangoChatHistory(data: ShzGPTChatHistoryResponseObject[]) {
     if (data.length === 0) return data;
 
     return data.map(({ role, content, created_at }) => {

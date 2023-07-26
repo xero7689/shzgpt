@@ -46,9 +46,12 @@ import { initPromptState } from "./features/promptsSlice";
 import { ThunkDispatch, Action } from "@reduxjs/toolkit";
 import { RootState } from "./app/store";
 
+import { PaletteMode } from "@mui/material";
+
 function App() {
-  const [toggleSidePanel, setToggleSidePanel] = useState(true);
-  const [colorMode, setColorMode] = useState("light");
+  const [toggleSidePanel, setToggleSidePanel] = useState<boolean>(true);
+  const [colorMode, setColorMode] = useState<PaletteMode>("light");
+
 
   const theme = React.useMemo(
     () => createTheme(getDesignTokens(colorMode)),

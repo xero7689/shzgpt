@@ -1,3 +1,4 @@
+import React, { ReactNode } from "react";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -24,7 +25,14 @@ const modalStyle = {
   flexGrow: 1,
 };
 
-function TabPanel(props) {
+type TabPanelProps = {
+  children: ReactNode;
+  value: number;
+  index: number;
+  other?: any; // Specify the type based on what data is expected in the `other` field
+};
+
+function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
 
   return (
@@ -44,20 +52,20 @@ function TabPanel(props) {
   );
 }
 
-function a11yProps(index) {
+function a11yProps(index: number) {
   return {
     id: `vertical-tab-${index}`,
     "aria-controls": `vertical-tabpanel-${index}`,
   };
 }
 
-export default function SettingsModal(props) {
+export default function SettingsModal() {
   const dispatch = useDispatch();
   const settingsIsDisplay = useSelector(selectSettingsDisplayState);
 
   const [value, setValue] = useState(0);
 
-  const handleModalChange = (event, newValue) => {
+  const handleModalChange = (_: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 

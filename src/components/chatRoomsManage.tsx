@@ -29,8 +29,14 @@ import AddBoxIcon from "@mui/icons-material/AddBox";
 import { useTheme } from "@mui/material/styles";
 
 import { isMobile } from "react-device-detect";
+import { AppDispatch } from "../app/store";
+import { ChatRoomObject } from "../types/interfaces";
 
-const ChatRoomsManage = (props) => {
+type ChatRoomManageProps = {
+  toggle: boolean;
+};
+
+const ChatRoomsManage = (props: ChatRoomManageProps) => {
   const { toggle = false } = props;
   const theme = useTheme();
 
@@ -39,12 +45,13 @@ const ChatRoomsManage = (props) => {
 
   const chatRooms = useSelector(selectAllChatRooms);
   const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch() as AppDispatch;
 
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  const handleAddChatroomOpen = (event) => {
-    setAnchorEl(event.currentTarget);
+  const handleAddChatroomOpen = (event: React.MouseEvent<HTMLElement>) => {
+    const currentTarget = event.currentTarget;
+    setAnchorEl(currentTarget);
   };
 
   const handleAddChatroomClose = () => {
@@ -54,7 +61,7 @@ const ChatRoomsManage = (props) => {
   useEffect(() => {}, [chatRooms]);
   useEffect(() => {}, [currentChatRoomInfo]);
 
-  const handleOnChange = (event) => {
+  const handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNewChatRoomNameInput(event.target.value);
   };
 
@@ -74,7 +81,7 @@ const ChatRoomsManage = (props) => {
     setAnchorEl(null);
   };
 
-  const handleOnClickRoom = async (roomInfo) => {
+  const handleOnClickRoom = async (roomInfo: ChatRoomObject) => {
     dispatch(sessionHistoryPrevPush(currentChatRoomInfo));
     dispatch(fetchChatSession(roomInfo.id));
 
@@ -92,7 +99,7 @@ const ChatRoomsManage = (props) => {
       px={2}
       pb={3}
       minWidth="200px"
-      maxHeight={ isMobile ? "90vh" : "100vh"}
+      maxHeight={isMobile ? "90vh" : "100vh"}
     >
       <Box
         display="flex"
@@ -133,11 +140,22 @@ const ChatRoomsManage = (props) => {
           PaperProps={{
             sx: {
               marginTop: 4,
-            }
+            },
           }}
         >
-          <Box display="flex" flexDirection="column" gap={1} backgroundColor="background.pape2" padding={2}>
-            <Typography color="primary.contrastText" textAlign="center" fontWeight="bold">Add New Chatroom</Typography>
+          <Box
+            display="flex"
+            flexDirection="column"
+            gap={1}
+            padding={2}
+          >
+            <Typography
+              color="primary.contrastText"
+              textAlign="center"
+              fontWeight="bold"
+            >
+              Add New Chatroom
+            </Typography>
             <TextField
               size="small"
               inputRef={newChatRoomRef}

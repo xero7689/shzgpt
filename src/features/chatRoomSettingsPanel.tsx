@@ -6,11 +6,12 @@ import {
   updateMaxCompleteTokenLength,
 } from "./chatRoomSlice";
 
-export default function ChatRoomSettingsPanel(props) {
+export default function ChatRoomSettingsPanel() {
   const dispatch = useDispatch();
   const maxCompleteTokenLength = useSelector(selectMaxCompleteTokenLength);
-  const readMaximumCompeleteNum = (event) => {
-    const parsedValue = parseInt(event.target.value);
+  const readMaximumCompeleteNum = (event: React.SyntheticEvent<HTMLInputElement>) => {
+    const target = event.target as HTMLInputElement;
+    const parsedValue = parseInt(target.value);
     dispatch(updateMaxCompleteTokenLength(parsedValue));
   };
   return (

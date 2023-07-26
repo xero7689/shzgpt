@@ -1,10 +1,12 @@
 import { ShzGPTMessage } from "../types/interfaces";
-import { ChatCompletionRequestMessage } from "openai";
-
-import { CreateChatCompletionResponse } from "openai";
+import {
+  ChatCompletionRequestMessage,
+  ChatCompletionRequestMessageRoleEnum,
+  CreateChatCompletionResponse,
+} from "openai";
 
 export function formatUserMessage(userMessage: string): ShzGPTMessage {
-  const timestamp = Date.now();
+  const timestamp = Date.now().toString();
   return {
     timestamp: timestamp,
     role: "user",
@@ -29,7 +31,7 @@ export function formatResponseMessage(
 
   return {
     timestamp: timestamp,
-    role: "assistant",
+    role: ChatCompletionRequestMessageRoleEnum["Assistant"],
     content: content,
   };
 }

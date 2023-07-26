@@ -3,8 +3,12 @@ import { Box } from "@mui/material";
 import { PromptsList } from "./promptsList";
 import { AddPromptForm } from "./AddPromptForm";
 
-export const PromptManage = (props) => {
-  const { toggle=false } = props;
+type PromptManageProps = {
+  toggle: boolean;
+};
+
+export const PromptManage = (props: PromptManageProps) => {
+  const { toggle = false } = props;
   //   const [togglePrompts, setTogglePrompts] = useState(true);
   return (
     <Box

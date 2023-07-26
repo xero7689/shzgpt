@@ -14,16 +14,23 @@ import { useEffect, useRef, useState } from "react";
 import { isMobile } from "react-device-detect";
 
 const AlwaysScrollToBottom = () => {
-  const elementRef = useRef(null);
+  const elementRef = useRef<HTMLDivElement>(null);
   const chatSession = useSelector(selectCurrentChatSession);
 
   useEffect(() => {
-    elementRef.current.scrollIntoView({ behavior: "smooth" });
+    if (elementRef.current) {
+      elementRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [chatSession]);
   return <div ref={elementRef} />;
 };
 
-export const ChatSession = (props) => {
+interface ChatSessionArgs {
+  colorMode: string;
+  chatContentRef: React.MutableRefObject<HTMLElement | null>;
+}
+
+export const ChatSession = (props: ChatSessionArgs) => {
   const { colorMode } = props;
   const [queryInProgress, setQueryInProgress] = useState(false);
 
@@ -41,11 +48,8 @@ export const ChatSession = (props) => {
   }, [queryStatus]);
 
   return (
-    <Box
-      flexGrow={1}
-      sx={{ overflow: "auto" }}
-    >
-      <Container maxWidth={ isMobile ? "sm" : "md"}>
+    <Box flexGrow={1} sx={{ overflow: "auto" }}>
+      <Container maxWidth={isMobile ? "sm" : "md"}>
         <Box
           ref={tmpContentRef}
           className="ChatContent"

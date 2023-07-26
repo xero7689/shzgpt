@@ -286,14 +286,16 @@ export default chatRoomSlice.reducer;
 
 export const selectCurrentChatSession = (state: RootState) =>
   state.chatRooms.currentChatRoomSession;
-export const selectLastRoleOfHistory = (state: RootState) => {
- const lastSession = state.chatRooms.currentChatRoomSession.slice(-1);
- if (lastSession) {
-     return lastSession[0].role;
- }
-}
 
-export const selectAllChatRooms = (state: RootState) => state.chatRooms.chatRooms;
+export const selectLastRoleOfHistory = (state: RootState) => {
+  const lastSession = state.chatRooms.currentChatRoomSession.slice(-1);
+  if (lastSession) {
+    return lastSession[0].role;
+  }
+};
+
+export const selectAllChatRooms = (state: RootState) =>
+  state.chatRooms.chatRooms;
 
 export const selectFetchGPTStatus = (state: RootState) =>
   state.chatRooms.status.fetchGPTStatus;

@@ -1,4 +1,13 @@
-export const getDesignTokens = (mode) => ({
+import { PaletteMode } from "@mui/material";
+
+// Extend the border color
+declare module "@mui/material/styles/createPalette" {
+    export interface PaletteColor {
+        border: string;
+    }
+}
+
+export const getDesignTokens = (mode: PaletteMode) => ({
     palette: {
         mode,
         ...(mode === 'light'

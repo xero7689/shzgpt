@@ -14,11 +14,11 @@ import { Box, Typography } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useEffect } from "react";
+import { AppDispatch } from "../app/store";
 
-export const ChatSessionControlBar = (props) => {
-  const dispatch = useDispatch();
+export const ChatSessionControlBar = () => {
+  const dispatch = useDispatch() as AppDispatch;
   const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
   const sessionHistoryPrev = useSelector(selectSessionHistoryPrev);
   const sessionHistoryNext = useSelector(selectSessionHistoryNext);
@@ -38,7 +38,7 @@ export const ChatSessionControlBar = (props) => {
   };
 
   useEffect(() => {
-    if (currentChatRoomInfo.id !== null) {
+    if (currentChatRoomInfo) {
       dispatch(fetchChatSession(currentChatRoomInfo.id));
     }
   }, [dispatch, currentChatRoomInfo]);
@@ -48,7 +48,6 @@ export const ChatSessionControlBar = (props) => {
       display="flex"
       justifyContent="space-between"
       alignItems="center"
-      backgroundColor="primary.main"
       px={2}
     >
       <IconButton onClick={handlePreviousSessionClick}>
@@ -63,7 +62,7 @@ export const ChatSessionControlBar = (props) => {
         pl={2}
         color="primary.contrastText"
       >
-        {currentChatRoomInfo.name}
+        {currentChatRoomInfo ? currentChatRoomInfo.name : "[Anonymouse ChatRoom]"}
       </Typography>
       <IconButton onClick={handleNextSessionClick}>
         <ArrowForwardIcon

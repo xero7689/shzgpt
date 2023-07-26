@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { RootState } from "../app/store";
 
 const initialState = {
   modalIsDisplay: false,
@@ -8,16 +9,15 @@ export const settingsSlice = createSlice({
   name: "settings",
   initialState,
   reducers: {
-    toggleSettingsModal(state, action) {
+    toggleSettingsModal(state) {
       state.modalIsDisplay = !state.modalIsDisplay;
     },
   },
-  extraReducers(builder) {},
 });
 
 export const { toggleSettingsModal } = settingsSlice.actions;
 
 export default settingsSlice.reducer;
 
-export const selectSettingsDisplayState = (state) =>
+export const selectSettingsDisplayState = (state: RootState) =>
   state.settings.modalIsDisplay;
