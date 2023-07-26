@@ -19,6 +19,8 @@ import { ChatCompletionRequestMessage } from "openai";
 
 import { ChatRoomObject, ChatRoomState } from "../types/interfaces";
 
+import { PostNewMessageArgs } from "../types/interfaces";
+
 const initialState = {
   currentChatRoomInfo: null,
   currentChatRoomSession: [],
@@ -34,8 +36,6 @@ const initialState = {
     fetchChatSessionStatus: "idle",
   },
 } as ChatRoomState;
-
-import { PostNewMessageArgs } from "../types/interfaces";
 
 export const fetchGPTMessage = createAsyncThunk<void, { activeKey: string }>(
   "chatRoom/fetchGPTMessage",
@@ -188,10 +188,13 @@ const chatRoomSlice = createSlice({
       state.chatRooms = [...state.chatRooms, ...uniqueChatRooms];
       state.chatRooms.sort((a, b) => {
         if (a.last_used_time && b.last_used_time) {
-          new Date(b.last_used_time).getTime() -
-            new Date(a.last_used_time).getTime();
+          return (
+            new Date(b.last_used_time).getTime() -
+            new Date(a.last_used_time).getTime()
+          );
+        } else {
+          return 0; // Handle the case if last_used_time not exists
         }
-        return 0; // Handle the case if last_used_time not exists
       });
     },
     currentChatRoomUpdated(state, action) {
