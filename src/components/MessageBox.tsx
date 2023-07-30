@@ -76,7 +76,7 @@ function ParseContent(props: ParseContentProps) {
 }
 
 type MessageBoxProps = {
-  timestamp: string;
+  timestamp: number;
   role: ChatCompletionRequestMessageRoleEnum;
   content: string;
   colorMode: string;
