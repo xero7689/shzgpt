@@ -49,7 +49,7 @@ export type ShzGPTChatHistoryResponseObject = {
 }
 
 export interface ShzGPTMessage {
-  timestamp: string;
+  timestamp: number;
   role: ChatCompletionRequestMessageRoleEnum;
   content: string;
 }
