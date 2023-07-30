@@ -6,7 +6,7 @@ import {
 } from "openai";
 
 export function formatUserMessage(userMessage: string): ShzGPTMessage {
-  const timestamp = Date.now().toString();
+  const timestamp = Date.now();
   return {
     timestamp: timestamp,
     role: "user",
