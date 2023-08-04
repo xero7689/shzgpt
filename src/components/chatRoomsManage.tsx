@@ -76,14 +76,12 @@ const ChatRoomsManage = (props: ChatRoomManageProps) => {
       })
     );
     dispatch(fetchChatRoom());
-    dispatch(fetchChatSession(chatRoomInfo.id));
     dispatch(currentChatRoomUpdated(chatRoomInfo));
     setAnchorEl(null);
   };
 
   const handleOnClickRoom = async (roomInfo: ChatRoomObject) => {
     dispatch(sessionHistoryPrevPush(currentChatRoomInfo));
-    dispatch(fetchChatSession(roomInfo.id));
 
     const newChatRoomInfo = {
       id: roomInfo.id,

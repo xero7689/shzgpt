@@ -94,7 +94,7 @@ export const getChatRoom = async (pageNum = null) => {
 export const getChatHistory = async (
   roomId: number
 ): Promise<ShzGPTChatHistoryResponseObject[]> => {
-  let endpoint = `${STORAGE_API_ENDPOINT}/chat/chat-history/${roomId}`;
+  let endpoint = `${STORAGE_API_ENDPOINT}/chat/chat-history/${roomId}/`;
   const requestOptions: RequestInit = {
     method: "GET",
     credentials: "include",
