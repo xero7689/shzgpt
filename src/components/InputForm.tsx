@@ -1,11 +1,11 @@
 import { useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { AnyAction } from "@reduxjs/toolkit";
 
 import { formatUserMessage } from "../formatter/MessageFormatter";
 
 import {
   addSessionMessage,
-  postNewMessage,
   fetchGPTMessage,
   selectCurrentChatRoomInfo,
 } from "../features/chatRoomSlice";
@@ -16,6 +16,8 @@ import SendIcon from "@mui/icons-material/Send";
 import { selectActiveKey } from "../features/apiKeySlice";
 
 import { AppDispatch } from "../app/store";
+
+import { postChat } from "../fetchers/storage";
 
 export default function InputForm() {
   const theme = useTheme();
@@ -43,18 +45,27 @@ export default function InputForm() {
 
     messageRef.current.value = "";
 
-    dispatch(
-      postNewMessage({
+    const userInputMessage = {
         chatRoomId: currentChatRoomInfo.id,
         role: userMessage.role,
         newMessage: userMessage.content,
-      })
-    );
+      }
+
+    await postChat(userInputMessage);
 
     try {
       setQueryInProgress(true);
       if (activeKey) {
-        await dispatch(fetchGPTMessage({ activeKey }));
+        const dispatchedAction: AnyAction = await dispatch(
+          fetchGPTMessage({ activeKey })
+        );
+        const actionPayload = dispatchedAction.payload;
+        const postChatArgs = {
+          chatRoomId: currentChatRoomInfo.id,
+          role: actionPayload.role,
+          newMessage: actionPayload.content,
+        };
+        await postChat(postChatArgs);
       }
     } catch (err: any) {
       setQueryError(err);

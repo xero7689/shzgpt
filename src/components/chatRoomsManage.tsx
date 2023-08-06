@@ -5,7 +5,6 @@ import {
   currentChatRoomUpdated,
   fetchChatSession,
   fetchChatRoom,
-  postNewMessage,
   selectAllChatRooms,
   selectCurrentChatRoomInfo,
   sessionHistoryPrevPush,
@@ -31,6 +30,10 @@ import { useTheme } from "@mui/material/styles";
 import { isMobile } from "react-device-detect";
 import { AppDispatch } from "../app/store";
 import { ChatRoomObject } from "../types/interfaces";
+
+import { postChat } from "../fetchers/storage";
+
+import { ChatCompletionRequestMessageRoleEnum } from "openai";
 
 type ChatRoomManageProps = {
   toggle: boolean;
@@ -68,13 +71,14 @@ const ChatRoomsManage = (props: ChatRoomManageProps) => {
   const handleSubmitNewChatRoom = async () => {
     const response = await dispatch(addNewChatRoom(newChatRoomNameInput));
     const chatRoomInfo = response.payload;
-    dispatch(
-      postNewMessage({
-        chatRoomId: chatRoomInfo.id,
-        role: "system",
-        newMessage: "You're a helpful assistance.",
-      })
-    );
+
+    const initMessage = {
+      chatRoomId: chatRoomInfo.id,
+      role: ChatCompletionRequestMessageRoleEnum.System,
+      newMessage: "You're a helpful assistance.",
+    };
+    await postChat(initMessage);
+
     dispatch(fetchChatRoom());
     dispatch(currentChatRoomUpdated(chatRoomInfo));
     setAnchorEl(null);
@@ -141,12 +145,7 @@ const ChatRoomsManage = (props: ChatRoomManageProps) => {
             },
           }}
         >
-          <Box
-            display="flex"
-            flexDirection="column"
-            gap={1}
-            padding={2}
-          >
+          <Box display="flex" flexDirection="column" gap={1} padding={2}>
             <Typography
               color="primary.contrastText"
               textAlign="center"

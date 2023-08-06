@@ -19,7 +19,7 @@ import { ChatCompletionRequestMessage } from "openai";
 
 import { ChatRoomObject, ChatRoomState } from "../types/interfaces";
 
-import { PostNewMessageArgs } from "../types/interfaces";
+import { ShzGPTMessage, PostNewMessageArgs } from "../types/interfaces";
 
 const initialState = {
   currentChatRoomInfo: null,
@@ -37,16 +37,16 @@ const initialState = {
   },
 } as ChatRoomState;
 
-export const fetchGPTMessage = createAsyncThunk<void, { activeKey: string }>(
+export const fetchGPTMessage = createAsyncThunk<ShzGPTMessage, { activeKey: string }>(
   "chatRoom/fetchGPTMessage",
-  async ({ activeKey }, { dispatch, getState }) => {
+  async ({ activeKey }, { getState }) => {
     const state = getState() as RootState;
 
     if (!state.chatRooms.currentChatRoomInfo) {
       state.chatRooms.status.fetchGPTStatus = "Error";
       state.chatRooms.status.fetchGPTErrorMessage =
         "Currnet Chatroom not exists";
-      return;
+      throw new Error("Current Chat Room doesn't Exist");
     }
     const history = formatChatHistory(state.chatRooms.currentChatRoomSession);
 
@@ -63,23 +63,7 @@ export const fetchGPTMessage = createAsyncThunk<void, { activeKey: string }>(
     }, 0);
 
     const response = await fetchMessage(finalHistory.reverse(), activeKey);
-    const formatedResponse = formatResponseMessage(response.data);
-    dispatch(addSessionMessage(formatedResponse));
-
-    const postChatArgs = {
-      chatRoomId: state.chatRooms.currentChatRoomInfo.id,
-      role: formatedResponse.role,
-      newMessage: formatedResponse.content,
-    };
-    dispatch(postNewMessage(postChatArgs));
-  }
-);
-
-export const postNewMessage = createAsyncThunk(
-  "chatRoom/addNewMessage",
-  async (args: PostNewMessageArgs) => {
-    const response = await postChat(args);
-    return response;
+    return formatResponseMessage(response.data);
   }
 );
 
@@ -233,8 +217,9 @@ const chatRoomSlice = createSlice({
       .addCase(fetchGPTMessage.pending, (state) => {
         state.status.fetchGPTStatus = "loading";
       })
-      .addCase(fetchGPTMessage.fulfilled, (state) => {
+      .addCase(fetchGPTMessage.fulfilled, (state, action) => {
         state.status.fetchGPTStatus = "succeeded";
+        state.currentChatRoomSession.push(action.payload);
       })
       .addCase(fetchGPTMessage.rejected, (state, action) => {
         state.status.fetchGPTStatus = "failed";
