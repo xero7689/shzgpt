@@ -39,7 +39,7 @@ export const ChatSessionControlBar = () => {
 
   useEffect(() => {
     if (currentChatRoomInfo) {
-      dispatch(fetchChatSession(currentChatRoomInfo.id));
+      dispatch(fetchChatSession({roomId: currentChatRoomInfo.id}));
     }
   }, [dispatch, currentChatRoomInfo]);
 

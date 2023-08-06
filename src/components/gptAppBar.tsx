@@ -119,7 +119,7 @@ function GPTAppBar(props: GPTAppBarProps, ref: any) {
 
   const handleListItemClick = (_: React.MouseEvent, chatRoomInfo: ChatRoomObject) => {
     dispatch(sessionHistoryPrevPush(currentChatRoomInfo));
-    dispatch(fetchChatSession(chatRoomInfo.id));
+    dispatch(fetchChatSession({ roomId: chatRoomInfo.id}));
     const newChatRoomInfo = {
       id: chatRoomInfo.id,
       name: chatRoomInfo.name,

@@ -3,7 +3,6 @@ import { RootState } from "../app/store";
 import fetchMessage from "../fetchers/gpt";
 import {
   getChatHistory,
-  postChat,
   getChatRoom,
   createChatRoom,
 } from "../fetchers/storage";
@@ -19,7 +18,9 @@ import { ChatCompletionRequestMessage } from "openai";
 
 import { ChatRoomObject, ChatRoomState } from "../types/interfaces";
 
-import { ShzGPTMessage, PostNewMessageArgs } from "../types/interfaces";
+import {
+  ShzGPTMessage,
+} from "../types/interfaces";
 
 const initialState = {
   currentChatRoomInfo: null,
@@ -37,44 +38,42 @@ const initialState = {
   },
 } as ChatRoomState;
 
-export const fetchGPTMessage = createAsyncThunk<ShzGPTMessage, { activeKey: string }>(
-  "chatRoom/fetchGPTMessage",
-  async ({ activeKey }, { getState }) => {
-    const state = getState() as RootState;
+export const fetchGPTMessage = createAsyncThunk<
+  ShzGPTMessage,
+  { activeKey: string }
+>("chatRoom/fetchGPTMessage", async ({ activeKey }, { getState }) => {
+  const state = getState() as RootState;
 
-    if (!state.chatRooms.currentChatRoomInfo) {
-      state.chatRooms.status.fetchGPTStatus = "Error";
-      state.chatRooms.status.fetchGPTErrorMessage =
-        "Currnet Chatroom not exists";
-      throw new Error("Current Chat Room doesn't Exist");
+  if (!state.chatRooms.currentChatRoomInfo) {
+    state.chatRooms.status.fetchGPTStatus = "Error";
+    state.chatRooms.status.fetchGPTErrorMessage = "Currnet Chatroom not exists";
+    throw new Error("Current Chat Room doesn't Exist");
+  }
+  const history = formatChatHistory(state.chatRooms.currentChatRoomSession);
+
+  const fetchHistory = history;
+
+  let finalHistory: ChatCompletionRequestMessage[] = [];
+  fetchHistory.reduceRight((accumulator, item) => {
+    const token = encode(item.content);
+    accumulator += token.length;
+    if (accumulator < state.chatRooms.maxCompleteTokenLength) {
+      finalHistory.push(item);
     }
-    const history = formatChatHistory(state.chatRooms.currentChatRoomSession);
+    return accumulator;
+  }, 0);
 
-    const fetchHistory = history;
+  const response = await fetchMessage(finalHistory.reverse(), activeKey);
+  return formatResponseMessage(response.data);
+});
 
-    let finalHistory: ChatCompletionRequestMessage[] = [];
-    fetchHistory.reduceRight((accumulator, item) => {
-      const token = encode(item.content);
-      accumulator += token.length;
-      if (accumulator < state.chatRooms.maxCompleteTokenLength) {
-        finalHistory.push(item);
-      }
-      return accumulator;
-    }, 0);
-
-    const response = await fetchMessage(finalHistory.reverse(), activeKey);
-    return formatResponseMessage(response.data);
-  }
-);
-
-export const fetchChatSession = createAsyncThunk(
-  "chatRoom/fetchChatSession",
-  async (roomId: number, { dispatch }) => {
-    const response = await getChatHistory(roomId);
-    dispatch(historyUpdated(convertDjangoChatHistory(response)));
-    return response;
-  }
-);
+export const fetchChatSession = createAsyncThunk<
+  ShzGPTMessage[],
+  { roomId: number }
+>("chatRoom/fetchChatSession", async ({ roomId }, { dispatch }) => {
+  const response = await getChatHistory(roomId);
+  return convertDjangoChatHistory(response);
+});
 
 export const addNewChatRoom = createAsyncThunk(
   "chatRoom/addNewChatRoom",
@@ -107,7 +106,7 @@ export const fetchChatRoom = createAsyncThunk(
       });
       if (latest_used_chatroom.id) {
         dispatch(currentChatRoomUpdated(latest_used_chatroom));
-        dispatch(fetchChatSession(latest_used_chatroom.id));
+        dispatch(fetchChatSession({ roomId: latest_used_chatroom.id }));
       }
     }
     dispatch(chatRoomsUpdated(response.results));
@@ -231,8 +230,9 @@ const chatRoomSlice = createSlice({
       .addCase(fetchChatSession.pending, (state) => {
         state.status.fetchChatSessionStatus = "loading";
       })
-      .addCase(fetchChatSession.fulfilled, (state) => {
+      .addCase(fetchChatSession.fulfilled, (state, action) => {
         state.status.fetchChatSessionStatus = "succeeded";
+        state.currentChatRoomSession = action.payload;
       })
       .addCase(fetchChatSession.rejected, (state, action) => {
         state.status.fetchChatSessionStatus = "failed";
