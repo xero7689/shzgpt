@@ -13,13 +13,13 @@ const initialState = {
   modalIsOpen: false,
 };
 
-export const loginStorageServer = createAsyncThunk<void, {username: string, password: string}>(
+export const loginStorageServer = createAsyncThunk<UserInfo, {username: string, password: string}>(
   "chatUser/loginStorageServer",
   async ({ username, password }, { dispatch }) => {
     const response = await login(username, password);
 
     if (response["status"] === "success") {
-      dispatch(setUserLogin(response.data));
+      return response.data;
     }
   }
 );
@@ -71,6 +71,17 @@ export const chatUserSlice = createSlice({
       state.modalIsOpen = !state.modalIsOpen;
     },
   },
+  extraReducers(builder) {
+      builder
+      .addCase(loginStorageServer.pending, (state) => {
+      })
+      .addCase(loginStorageServer.fulfilled, (state, action) => {
+          state.userInfo = action.payload;
+          state.isLogin = true;
+      })
+      .addCase(loginStorageServer.rejected, (state) => {
+      })
+  }
 });
 
 export const {
