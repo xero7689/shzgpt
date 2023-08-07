@@ -10,14 +10,14 @@ import {
   selectUserIsLogin,
   selectChatUserModalIsOpen,
   toggleChatUserModal,
-  selectUserInfo,
+  selectChatUserData,
 } from "./chatUserSlice";
 
 import { loginStorageServer, logoutStorageServer } from "./chatUserSlice";
 
 export default function ChatUserModal() {
   const dispatch: ThunkDispatch<RootState, null, Action> = useDispatch();
-  const userInfo = useSelector(selectUserInfo);
+  const ChatUserData = useSelector(selectChatUserData);
   const userIsLogin = useSelector(selectUserIsLogin);
   const modalIsOpen = useSelector(selectChatUserModalIsOpen);
 
@@ -94,7 +94,7 @@ export default function ChatUserModal() {
               color: "primary.contrastText",
             }}
           >
-            Hello, {userInfo.name}
+            Hello, {ChatUserData.name}
           </Typography>
           <Button onClick={handleLogoutOnClick} variant="contained" color="warning">
             <Typography fontWeight="bold">Log Out!</Typography>

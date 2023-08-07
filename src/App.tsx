@@ -37,8 +37,8 @@ import SettingsModal from "./features/settingsModal";
 import ChatUserModal from "./features/chatUserModal";
 
 import {
-  getUserInfo,
-  selectUserInfo,
+  getChatUserData,
+  selectChatUserData,
   selectUserIsLogin,
   selectChatUserModalIsOpen,
   toggleChatUserModal,
@@ -65,7 +65,7 @@ function App() {
   const chatSession = useSelector(selectCurrentChatSession);
   const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
   const userIsLogin = useSelector(selectUserIsLogin);
-  const userInfo = useSelector(selectUserInfo);
+  const userInfo = useSelector(selectChatUserData);
   const userModalIsOpen = useSelector(selectChatUserModalIsOpen);
 
   const { chatInterfaceHeight, appBarRef, chatInterfaceRef, chatContentRef } =
@@ -74,7 +74,7 @@ function App() {
   useEffect(() => {
     if (userIsLogin) {
       if (Object.keys(userInfo).length === 0) {
-        dispatch(getUserInfo());
+        dispatch(getChatUserData());
         dispatch(fetchAPIKey());
       }
       dispatch(fetchChatRoom());
