@@ -1,5 +1,11 @@
 import { CreateChatCompletionResponse, ChatCompletionRequestMessageRoleEnum } from "openai";
 
+export interface BaseResponse {
+  status: string;
+  detail: string;
+  data: object;
+}
+
 export interface ChatUserData {
   id: number | null;
   name: string;
