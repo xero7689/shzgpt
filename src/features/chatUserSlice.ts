@@ -11,6 +11,8 @@ const initialState = {
   isLogin: Boolean(Cookies.get("c_user")),
   loginStatus: "pending",
   loginDetail: "",
+  logoutStatus: "pending",
+  logoutDetail: "",
   modalIsOpen: false,
 };
 
@@ -22,7 +24,7 @@ export const loginStorageServer = createAsyncThunk<
   async ({ username, password }, { dispatch, rejectWithValue }) => {
     const response = await login(username, password);
 
-    if (response["status"] === "success") {
+    if (response["status"] === "succeeded") {
       return response;
     } else {
       return rejectWithValue(response);
@@ -30,15 +32,16 @@ export const loginStorageServer = createAsyncThunk<
   }
 );
 
-export const logoutStorageServer = createAsyncThunk<void>(
+export const logoutStorageServer = createAsyncThunk<BaseResponse>(
   "chatUser/logoutStorageServer",
-  async (_, { dispatch }) => {
-    // Verify current login status before logout
+  async (_, { dispatch, rejectWithValue }) => {
     const response = await logout();
-    if (response["status"] === "success") {
-      dispatch(setUserLogout());
+
+    if (response["status"] === "succeeded") {
+      return response;
+    } else {
+      return rejectWithValue(response);
     }
-    return response;
   }
 );
 
@@ -55,20 +58,6 @@ export const chatUserSlice = createSlice({
   name: "chatUser",
   initialState,
   reducers: {
-    setUserLogin(state, action) {
-      state.ChatUserData = action.payload;
-      state.isLogin = true;
-    },
-    setUserLogout(state) {
-      state.ChatUserData = {
-        id: null,
-        name: "",
-        created_at: "",
-      };
-      state.loginStatus = "pending";
-      state.loginDetail = "";
-      state.isLogin = false;
-    },
     setLoginStatus(state, action) {
       state.loginStatus = action.payload;
     },
@@ -84,7 +73,9 @@ export const chatUserSlice = createSlice({
   },
   extraReducers(builder) {
     builder
-      .addCase(loginStorageServer.pending, (state) => {})
+      .addCase(loginStorageServer.pending, (state) => {
+        state.loginStatus = "loading";
+      })
       .addCase(loginStorageServer.fulfilled, (state, action) => {
         const payload = action.payload;
         const data = payload.data as ChatUserData;
@@ -98,13 +89,33 @@ export const chatUserSlice = createSlice({
         state.loginStatus = payload["status"];
         state.loginDetail = payload["detail"];
         state.isLogin = false;
-      });
+      })
+      .addCase(logoutStorageServer.pending, (state) => {
+        state.logoutStatus = "loading";
+      })
+      .addCase(logoutStorageServer.fulfilled, (state, action) => {
+        state.ChatUserData = {
+          id: null,
+          name: "",
+          created_at: "",
+        };
+        state.loginStatus = "pending";
+        state.loginDetail = "";
+        state.isLogin = false;
+
+        const payload = action.payload as BaseResponse;
+        state.logoutStatus = payload["status"];
+        state.logoutDetail = payload["detail"];
+      })
+      .addCase(logoutStorageServer.rejected, (state, action) => {
+        const payload = action.payload as BaseResponse;
+        state.logoutStatus = payload["status"];
+        state.logoutDetail = payload["detail"];
+      })
   },
 });
 
 export const {
-  setUserLogin,
-  setUserLogout,
   setLoginStatus,
   setLoginDetail,
   setChatUserData,
@@ -118,7 +129,13 @@ export const selectChatUserData = (state: RootState) =>
 export const selectUserIsLogin = (state: RootState) => state.chatUser.isLogin;
 export const selectChatUserModalIsOpen = (state: RootState) =>
   state.chatUser.modalIsOpen;
+
 export const selectLoginStatus = (state: RootState) =>
   state.chatUser.loginStatus;
 export const selectLoginDetail = (state: RootState) =>
   state.chatUser.loginDetail;
+
+export const selectLogoutStatus = (state: RootState) =>
+  state.chatUser.logoutStatus;
+export const selectLogoutDetail = (state: RootState) =>
+  state.chatUser.logoutDetail;

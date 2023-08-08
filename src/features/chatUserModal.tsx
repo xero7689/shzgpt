@@ -15,10 +15,12 @@ import {
   selectChatUserModalIsOpen,
   toggleChatUserModal,
   selectChatUserData,
-  selectLoginStatus,
   setLoginDetail,
   setLoginStatus,
+  selectLoginStatus,
   selectLoginDetail,
+  selectLogoutDetail,
+  selectLogoutStatus
 } from "./chatUserSlice";
 
 import { loginStorageServer, logoutStorageServer } from "./chatUserSlice";
@@ -29,12 +31,16 @@ export default function ChatUserModal() {
   const userIsLogin = useSelector(selectUserIsLogin);
   const loginStatus = useSelector(selectLoginStatus);
   const loginDetail = useSelector(selectLoginDetail);
+  const logoutStatus = useSelector(selectLogoutStatus);
+  const logoutDetail = useSelector(selectLogoutDetail);
+
   const modalIsOpen = useSelector(selectChatUserModalIsOpen);
 
   // State For User Name, Password
   const [inputUsername, setInputUsername] = useState<string>("");
   const [inputPassword, setInputPassword] = useState<string>("");
   const [loginQueryStatus, setLoginQueryStatus] = useState<boolean>(false);
+  const [logoutQueryStatus, setLogoutQueryStatus] = useState<boolean>(false);
 
   const handleUsernameInputOnChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -81,10 +87,16 @@ export default function ChatUserModal() {
   };
 
   useEffect(() => {
-    if (loginQueryStatus && loginStatus !== "pending") {
+    if (loginQueryStatus && loginStatus !== "loading") {
       setLoginQueryStatus(false);
     }
   }, [loginQueryStatus, loginStatus]);
+
+  useEffect(() => {
+    if (logoutQueryStatus && logoutStatus !== "loading") {
+      setLogoutQueryStatus(false);
+    }
+  }, [logoutQueryStatus, logoutStatus]);
 
   const modalStyle = {
     position: "absolute",
@@ -131,6 +143,11 @@ export default function ChatUserModal() {
           >
             Hello, {ChatUserData.name}
           </Typography>
+          <Box>
+            <Typography sx={{ color: "error.main" }} fontWeight="bold" textAlign="center">
+              {logoutStatus === "failed" ? `Oops! ${logoutDetail}` : ""}
+            </Typography>
+          </Box>
           <Button
             onClick={handleLogoutOnClick}
             variant="contained"
@@ -150,8 +167,8 @@ export default function ChatUserModal() {
             <Typography variant="h6">Welcome to SHZ GPT!</Typography>
           </Box>
           <Box>
-            <Typography sx={{ color: "error.main" }}>
-              {loginStatus === "failed" ? loginDetail : ""}
+            <Typography sx={{ color: "error.main" }} fontWeight="bold" textAlign="center">
+              {loginStatus === "failed" ? `Oops! ${loginDetail}` : ""}
             </Typography>
           </Box>
           <Box
