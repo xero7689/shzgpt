@@ -7,7 +7,7 @@ import { formatUserMessage } from "../formatter/MessageFormatter";
 import {
   addSessionMessage,
   fetchGPTMessage,
-  selectCurrentChatRoomInfo,
+  selectCurrentChatRoomId,
 } from "../features/chatRoomSlice";
 
 import { Box, Button, TextField } from "@mui/material";
@@ -27,7 +27,7 @@ export default function InputForm() {
   const [requestMessage, setRequestMessage] = useState("");
   const [queryInProgress, setQueryInProgress] = useState(false);
   const [_, setQueryError] = useState(null);
-  const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
+  const currentChatRoomId = useSelector(selectCurrentChatRoomId);
   const activeKey = useSelector(selectActiveKey);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,7 +35,7 @@ export default function InputForm() {
   };
 
   async function handleSendMessage() {
-    if (queryInProgress || !currentChatRoomInfo || !messageRef.current) {
+    if (queryInProgress || !currentChatRoomId || !messageRef.current) {
       return;
     }
 
@@ -46,7 +46,7 @@ export default function InputForm() {
     messageRef.current.value = "";
 
     const userInputMessage = {
-        chatRoomId: currentChatRoomInfo.id,
+        chatRoomId: currentChatRoomId,
         role: userMessage.role,
         newMessage: userMessage.content,
       }
@@ -61,10 +61,11 @@ export default function InputForm() {
         );
         const actionPayload = dispatchedAction.payload;
         const postChatArgs = {
-          chatRoomId: currentChatRoomInfo.id,
+          chatRoomId: currentChatRoomId,
           role: actionPayload.role,
           newMessage: actionPayload.content,
         };
+
         await postChat(postChatArgs);
       }
     } catch (err: any) {

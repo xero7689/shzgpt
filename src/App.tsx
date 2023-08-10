@@ -27,7 +27,7 @@ import { getDesignTokens } from "./theme";
 import {
   fetchChatRoom,
   selectCurrentChatSession,
-  selectCurrentChatRoomInfo,
+  selectCurrentChatRoomId,
   initChatRoomState,
 } from "./features/chatRoomSlice";
 import { useSelector } from "react-redux";
@@ -63,7 +63,7 @@ function App() {
 
   const dispatch: ThunkDispatch<RootState, null, Action> = useDispatch();
   const chatSession = useSelector(selectCurrentChatSession);
-  const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
+  const currentChatRoomId = useSelector(selectCurrentChatRoomId);
   const userIsLogin = useSelector(selectUserIsLogin);
   const userInfo = useSelector(selectChatUserData);
   const userModalIsOpen = useSelector(selectChatUserModalIsOpen);
@@ -96,7 +96,7 @@ function App() {
 
   useEffect(() => {}, [chatSession]);
 
-  useEffect(() => {}, [currentChatRoomInfo]);
+  useEffect(() => {}, [currentChatRoomId]);
 
   const [toggleItemId, setToggleItemid] = useState<number|null>(null);
   const naviDrawerItems = [

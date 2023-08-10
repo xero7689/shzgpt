@@ -1,7 +1,8 @@
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchChatSession,
-  selectCurrentChatRoomInfo,
+  selectCurrentChatRoomId,
+  selectChatRoomById,
   selectSessionHistoryNext,
   selectSessionHistoryPrev,
   sessionHistoryNextPop,
@@ -15,33 +16,34 @@ import IconButton from "@mui/material/IconButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useEffect } from "react";
-import { AppDispatch } from "../app/store";
+import { AppDispatch, RootState } from "../app/store";
 
 export const ChatSessionControlBar = () => {
   const dispatch = useDispatch() as AppDispatch;
-  const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
+  const currentChatRoomId = useSelector(selectCurrentChatRoomId);
+  const currentChatRoom = useSelector(state => selectChatRoomById(state as RootState, currentChatRoomId));
   const sessionHistoryPrev = useSelector(selectSessionHistoryPrev);
   const sessionHistoryNext = useSelector(selectSessionHistoryNext);
 
   const handlePreviousSessionClick = () => {
     if (sessionHistoryPrev.length !== 0) {
       dispatch(sessionHistoryPrevPop());
-      dispatch(sessionHistoryNextPush(currentChatRoomInfo));
+      dispatch(sessionHistoryNextPush(currentChatRoomId));
     }
   };
 
   const handleNextSessionClick = () => {
     if (sessionHistoryNext.length !== 0) {
-      dispatch(sessionHistoryPrevPush(currentChatRoomInfo));
+      dispatch(sessionHistoryPrevPush(currentChatRoomId));
       dispatch(sessionHistoryNextPop());
     }
   };
 
   useEffect(() => {
-    if (currentChatRoomInfo) {
-      dispatch(fetchChatSession({roomId: currentChatRoomInfo.id}));
+    if (currentChatRoomId) {
+      dispatch(fetchChatSession({roomId: currentChatRoomId}));
     }
-  }, [dispatch, currentChatRoomInfo]);
+  }, [dispatch, currentChatRoomId]);
 
   return (
     <Box
@@ -62,7 +64,7 @@ export const ChatSessionControlBar = () => {
         pl={2}
         color="primary.contrastText"
       >
-        {currentChatRoomInfo ? currentChatRoomInfo.name : "[Anonymouse ChatRoom]"}
+        {currentChatRoomId && currentChatRoom ? `${currentChatRoom.name}` : "[Anonymouse ChatRoom]"}
       </Typography>
       <IconButton onClick={handleNextSessionClick}>
         <ArrowForwardIcon

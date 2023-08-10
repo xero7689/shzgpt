@@ -3,11 +3,11 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   addNewChatRoom,
   currentChatRoomUpdated,
-  fetchChatSession,
   fetchChatRoom,
   selectAllChatRooms,
-  selectCurrentChatRoomInfo,
+  selectCurrentChatRoomId,
   sessionHistoryPrevPush,
+  initChatRoomSession,
 } from "../features/chatRoomSlice";
 
 import Box from "@mui/material/Box";
@@ -35,6 +35,8 @@ import { postChat } from "../fetchers/storage";
 
 import { ChatCompletionRequestMessageRoleEnum } from "openai";
 
+import { formatShzGPTMessage } from "../formatter/MessageFormatter";
+
 type ChatRoomManageProps = {
   toggle: boolean;
 };
@@ -47,7 +49,7 @@ const ChatRoomsManage = (props: ChatRoomManageProps) => {
   const [newChatRoomNameInput, setNewChatRoomNameInput] = useState("");
 
   const chatRooms = useSelector(selectAllChatRooms);
-  const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
+  const currentChatRoomId = useSelector(selectCurrentChatRoomId);
   const dispatch = useDispatch() as AppDispatch;
 
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -62,7 +64,7 @@ const ChatRoomsManage = (props: ChatRoomManageProps) => {
   };
 
   useEffect(() => {}, [chatRooms]);
-  useEffect(() => {}, [currentChatRoomInfo]);
+  useEffect(() => {}, [currentChatRoomId]);
 
   const handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNewChatRoomNameInput(event.target.value);
@@ -70,28 +72,27 @@ const ChatRoomsManage = (props: ChatRoomManageProps) => {
 
   const handleSubmitNewChatRoom = async () => {
     const response = await dispatch(addNewChatRoom(newChatRoomNameInput));
-    const chatRoomInfo = response.payload;
+    const newChatRoomInfo = response.payload;
 
     const initMessage = {
-      chatRoomId: chatRoomInfo.id,
+      chatRoomId: newChatRoomInfo.id,
       role: ChatCompletionRequestMessageRoleEnum.System,
       newMessage: "You're a helpful assistance.",
     };
     await postChat(initMessage);
 
+    // Init ChatRoom Sessions Here.
+    const payload = {chatRoomId: newChatRoomInfo.id, initMessage: formatShzGPTMessage("You're a helpful assistance", ChatCompletionRequestMessageRoleEnum.System)}
+    dispatch(initChatRoomSession(payload));
+
     dispatch(fetchChatRoom());
-    dispatch(currentChatRoomUpdated(chatRoomInfo));
+    dispatch(currentChatRoomUpdated(newChatRoomInfo.id));
     setAnchorEl(null);
   };
 
   const handleOnClickRoom = async (roomInfo: ChatRoomObject) => {
-    dispatch(sessionHistoryPrevPush(currentChatRoomInfo));
-
-    const newChatRoomInfo = {
-      id: roomInfo.id,
-      name: roomInfo.name,
-    };
-    dispatch(currentChatRoomUpdated(newChatRoomInfo));
+    dispatch(sessionHistoryPrevPush(currentChatRoomId));
+    dispatch(currentChatRoomUpdated(roomInfo.id));
   };
 
   return (
@@ -192,17 +193,19 @@ const ChatRoomsManage = (props: ChatRoomManageProps) => {
       <Box flexGrow={1} sx={{ overflow: "auto" }}>
         <nav aria-label="secondary mailbox folders">
           <List>
-            {chatRooms.map((item, index) => {
+            {Object.keys(chatRooms).map((chatRoomIdStr: string, index) => {
+              const chatRoomId = parseInt(chatRoomIdStr, 10);
+              const chatRoom = chatRooms[chatRoomId];
               return (
                 <ListItem disablePadding key={index}>
-                  <ListItemButton onClick={() => handleOnClickRoom(item)}>
+                  <ListItemButton onClick={() => handleOnClickRoom(chatRoom)}>
                     <ListItemText
                       primary={
                         <Typography
                           color="primary.contrastText"
                           fontSize="small"
                         >
-                          {item.name}
+                          {chatRoom.name}
                         </Typography>
                       }
                     />

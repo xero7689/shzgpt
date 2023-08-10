@@ -13,6 +13,7 @@ const fetchMessage = async (messages: ChatCompletionRequestMessage[], apiKey: st
     model: "gpt-3.5-turbo",
     messages: messages,
   });
+
   return response;
 };
 
