@@ -1,13 +1,13 @@
 import { useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { AnyAction } from "@reduxjs/toolkit";
 
 import { formatUserMessage } from "../formatter/MessageFormatter";
 
 import {
   addSessionMessage,
-  postNewMessage,
   fetchGPTMessage,
-  selectCurrentChatRoomInfo,
+  selectCurrentChatRoomId,
 } from "../features/chatRoomSlice";
 
 import { Box, Button, TextField } from "@mui/material";
@@ -17,6 +17,8 @@ import { selectActiveKey } from "../features/apiKeySlice";
 
 import { AppDispatch } from "../app/store";
 
+import { postChat } from "../fetchers/storage";
+
 export default function InputForm() {
   const theme = useTheme();
 
@@ -25,7 +27,7 @@ export default function InputForm() {
   const [requestMessage, setRequestMessage] = useState("");
   const [queryInProgress, setQueryInProgress] = useState(false);
   const [_, setQueryError] = useState(null);
-  const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
+  const currentChatRoomId = useSelector(selectCurrentChatRoomId);
   const activeKey = useSelector(selectActiveKey);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,7 +35,7 @@ export default function InputForm() {
   };
 
   async function handleSendMessage() {
-    if (queryInProgress || !currentChatRoomInfo || !messageRef.current) {
+    if (queryInProgress || !currentChatRoomId || !messageRef.current) {
       return;
     }
 
@@ -43,18 +45,28 @@ export default function InputForm() {
 
     messageRef.current.value = "";
 
-    dispatch(
-      postNewMessage({
-        chatRoomId: currentChatRoomInfo.id,
+    const userInputMessage = {
+        chatRoomId: currentChatRoomId,
         role: userMessage.role,
         newMessage: userMessage.content,
-      })
-    );
+      }
+
+    await postChat(userInputMessage);
 
     try {
       setQueryInProgress(true);
       if (activeKey) {
-        await dispatch(fetchGPTMessage({ activeKey }));
+        const dispatchedAction: AnyAction = await dispatch(
+          fetchGPTMessage({ activeKey })
+        );
+        const actionPayload = dispatchedAction.payload;
+        const postChatArgs = {
+          chatRoomId: currentChatRoomId,
+          role: actionPayload.role,
+          newMessage: actionPayload.content,
+        };
+
+        await postChat(postChatArgs);
       }
     } catch (err: any) {
       setQueryError(err);

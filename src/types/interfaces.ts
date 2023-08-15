@@ -1,9 +1,19 @@
 import { CreateChatCompletionResponse, ChatCompletionRequestMessageRoleEnum } from "openai";
 
-export interface UserInfo {
+export interface BaseResponse {
+  status: string;
+  detail: string;
+  data: object;
+}
+
+export interface ChatUserData {
   id: number | null;
   name: string;
   created_at: string;
+}
+
+export interface ChatRoomSession {
+  [timestamp: number]: ShzGPTMessage;
 }
 
 export interface ChatRoomObject {
@@ -11,6 +21,7 @@ export interface ChatRoomObject {
   name: string;
   created_at: string;
   last_used_time: string;
+  sessions:  ShzGPTMessage[];
 }
 
 // Calling chatroom status is a little wierd
@@ -20,15 +31,24 @@ export interface ChatRoomStatus {
     fetchGPTErrorMessage: string;
     fetchChatRoomStatus: string;
     fetchChatSessionStatus: string;
+    addNewChatRoomStatus: string;
 }
 
+export interface ChatRooms {
+  [id: number]: ChatRoomObject;
+}
+
+
 export interface ChatRoomState {
-    currentChatRoomInfo: ChatRoomObject | null;
-    currentChatRoomSession: ShzGPTMessage[];
+    currentChatRoomId: number | undefined;
     nextChatHistoryPagination: number;
-    sessionHistoryPrev: ChatRoomObject[];
-    sessionHistoryNext: ChatRoomObject[];
-    chatRooms: ChatRoomObject[];
+    sessionHistoryPrev: number[];
+    sessionHistoryNext: number[];
+    //chatRooms: ChatRoomObject[];
+
+    currentChatRoom: number | undefined;
+    newChatRooms: ChatRooms;
+
     status: ChatRoomStatus;
     maxCompleteTokenLength: number;
 }

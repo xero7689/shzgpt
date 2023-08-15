@@ -14,9 +14,19 @@ export function formatUserMessage(userMessage: string): ShzGPTMessage {
   };
 }
 
+export function formatShzGPTMessage(message: string, role: ChatCompletionRequestMessageRoleEnum): ShzGPTMessage {
+  const timestamp = Date.now();
+  return {
+    timestamp: timestamp,
+    role: role,
+    content: message
+  };
+}
+
+
 export function formatResponseMessage(
   responseData: CreateChatCompletionResponse
-) {
+): ShzGPTMessage {
   const timestamp = Date.now();
   let content = "[System Message] Response choices message not exists";
 

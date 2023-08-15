@@ -1,7 +1,9 @@
 import { useSelector } from "react-redux";
 
 import {
+  selectCurrentChatRoomId,
   selectCurrentChatSession,
+  selectChatRoomSessionsById,
   selectFetchGPTStatus,
 } from "./chatRoomSlice";
 
@@ -12,6 +14,8 @@ import LoadingBox from "../components/LoadingBox";
 import { useEffect, useRef, useState } from "react";
 
 import { isMobile } from "react-device-detect";
+
+import { RootState } from "../app/store";
 
 const AlwaysScrollToBottom = () => {
   const elementRef = useRef<HTMLDivElement>(null);
@@ -34,7 +38,9 @@ export const ChatSession = (props: ChatSessionArgs) => {
   const { colorMode } = props;
   const [queryInProgress, setQueryInProgress] = useState(false);
 
-  const chatSession = useSelector(selectCurrentChatSession);
+  const currentChatRoomId = useSelector(selectCurrentChatRoomId);
+  const chatSessions = useSelector(state => selectChatRoomSessionsById(state as RootState, currentChatRoomId));
+
   const queryStatus = useSelector(selectFetchGPTStatus);
 
   const tmpContentRef = useRef(null);
@@ -64,7 +70,7 @@ export const ChatSession = (props: ChatSessionArgs) => {
             },
           }}
         >
-          {chatSession.map((item) => {
+          {chatSessions && (chatSessions.map((item) => {
             return (
               <MessageBox
                 key={item.timestamp}
@@ -74,7 +80,7 @@ export const ChatSession = (props: ChatSessionArgs) => {
                 colorMode={colorMode}
               ></MessageBox>
             );
-          })}
+          }))}
           <LoadingBox queryInProgress={queryInProgress} />
           <AlwaysScrollToBottom></AlwaysScrollToBottom>
         </Box>
