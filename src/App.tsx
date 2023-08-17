@@ -51,10 +51,11 @@ import { RootState } from "./app/store";
 
 import { PaletteMode } from "@mui/material";
 
+import { useGetUserQuery } from "./features/api/apiSlice";
+
 function App() {
   const [toggleSidePanel, setToggleSidePanel] = useState<boolean>(true);
   const [colorMode, setColorMode] = useState<PaletteMode>("light");
-
 
   const theme = React.useMemo(
     () => createTheme(getDesignTokens(colorMode)),
@@ -67,6 +68,23 @@ function App() {
   const userIsLogin = useSelector(selectUserIsLogin);
   const userInfo = useSelector(selectChatUserData);
   const userModalIsOpen = useSelector(selectChatUserModalIsOpen);
+
+  const {
+    data: user,
+    isLoading,
+    isSuccess,
+    isError,
+    error,
+  } = useGetUserQuery();
+
+  if (isLoading) {
+    console.log("is loading chat user data from rtk query");
+  } else if (isSuccess) {
+    console.log(user);
+  } else if (isError) {
+    console.log("Error while loading from rtk query");
+    console.log(error.toString());
+  }
 
   const { chatInterfaceHeight, appBarRef, chatInterfaceRef, chatContentRef } =
     useAppEffect();
@@ -98,7 +116,7 @@ function App() {
 
   useEffect(() => {}, [currentChatRoomId]);
 
-  const [toggleItemId, setToggleItemid] = useState<number|null>(null);
+  const [toggleItemId, setToggleItemid] = useState<number | null>(null);
   const naviDrawerItems = [
     { component: ChatRoomsManage, icon: <ChatIcon /> },
     { component: PromptManage, icon: <TextFieldsIcon /> },

@@ -9,6 +9,8 @@ import settingsReducer from "../features/settingsSlice";
 import chatUserReducer from "../features/chatUserSlice";
 import apiKeySlice from "../features/apiKeySlice";
 
+import { apiSlice } from "../features/api/apiSlice";
+
 const loggerMiddleware: Middleware = (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => {
   console.group(action.type);
   console.log("dispatching", action);
@@ -28,8 +30,9 @@ export const store = configureStore({
     settings: settingsReducer,
     chatUser: chatUserReducer,
     apiKey: apiKeySlice,
+    [apiSlice.reducerPath]: apiSlice.reducer
   },
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(loggerMiddleware)
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(apiSlice.middleware)
 });
 
 export type RootState = ReturnType<typeof store.getState>;
