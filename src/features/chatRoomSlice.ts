@@ -24,7 +24,7 @@ import {
 } from "../types/interfaces";
 
 const initialState = {
-  currentChatRoomId: undefined,
+  currentChatRoomId: 0,
 
   nextChatHistoryPagination: 0,
   sessionHistoryPrev: [],
@@ -168,7 +168,7 @@ const chatRoomSlice = createSlice({
   initialState,
   reducers: {
     initChatRoomState(state) {
-      state.currentChatRoomId = undefined;
+      state.currentChatRoomId = 0;
       state.nextChatHistoryPagination = 0;
       state.sessionHistoryPrev = [];
 
@@ -186,10 +186,20 @@ const chatRoomSlice = createSlice({
       state.newChatRooms[chatRoomId].sessions = [initMessage];
     },
     addSessionMessage(state, action) {
+      /*
       if (state.currentChatRoomId) {
-        state.newChatRooms[state.currentChatRoomId].sessions.push(
-          action.payload
-        );
+        if (state.newChatRooms[state.currentChatRoomId].sessions) {
+          state.newChatRooms[state.currentChatRoomId].sessions.push(
+            action.payload
+          );
+        }
+      }
+      */
+      const chatroom_id = action.payload.chatroomId;
+      const { timestamp, role, content } = action.payload;
+      const message = { timestamp, role, content };
+      if (state.newChatRooms[chatroom_id].sessions) {
+        state.newChatRooms[chatroom_id].sessions.push(message);
       }
     },
     newChatRoomUpdated(state, action) {

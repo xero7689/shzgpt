@@ -77,6 +77,7 @@ function App() {
     error,
   } = useGetUserQuery();
 
+  /*
   if (isLoading) {
     console.log("is loading chat user data from rtk query");
   } else if (isSuccess) {
@@ -85,6 +86,7 @@ function App() {
     console.log("Error while loading from rtk query");
     console.log(error.toString());
   }
+  */
 
   const { chatInterfaceHeight, appBarRef, chatInterfaceRef, chatContentRef } =
     useAppEffect();

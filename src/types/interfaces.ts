@@ -40,7 +40,7 @@ export interface ChatRooms {
 
 
 export interface ChatRoomState {
-    currentChatRoomId: number | undefined;
+    currentChatRoomId: number;
     nextChatHistoryPagination: number;
     sessionHistoryPrev: number[];
     sessionHistoryNext: number[];
