@@ -1,6 +1,6 @@
 import { ShzGPTMessage, ShzGPTChatHistoryResponseObject } from "../types/interfaces";
 
-export function convertDjangoChatHistory(data: ShzGPTChatHistoryResponseObject[]): ShzGPTMessage[] {
+export function convertDjangoChatHistory(data: ShzGPTChatHistoryResponseObject[], chatroomId: number): ShzGPTMessage[] {
     if (data.length === 0) return [];
 
     return data.map(({ role, content, created_at }) => {
@@ -11,6 +11,7 @@ export function convertDjangoChatHistory(data: ShzGPTChatHistoryResponseObject[]
             timestamp,
             role,
             content,
+            chatroomId,
         };
     }).sort((a, b) => a.timestamp - b.timestamp);;
 }

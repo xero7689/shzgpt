@@ -1,4 +1,5 @@
 import { apiSlice } from "./apiSlice";
+import { RootState } from "../../app/store";
 
 import webSocketManager from "../../lib/socketHelpers";
 
@@ -21,14 +22,11 @@ export const extendedApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getChatMessages: builder.query<Context, void>({
       query: () => `/chat-socket-init/`,
-      transformResponse: (response: Context) => {
-        return response;
-      },
       async onCacheEntryAdded(
         arg,
         { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
       ) {
-        const ws = webSocketManager.connect(`/ws/async-chat/`);
+        const ws = webSocketManager.getConnection(`/ws/async-chat/`);
 
         try {
           await cacheDataLoaded;

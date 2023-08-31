@@ -19,6 +19,8 @@ import { useGetChatMessagesQuery } from "../features/api/socketSlice";
 
 import { useSendMessageMutation } from "../features/api/socketSlice";
 
+import { selectUserIsLogin } from "../features/chatUserSlice";
+
 export default function InputForm() {
   const theme = useTheme();
 
@@ -26,19 +28,27 @@ export default function InputForm() {
   const dispatch = useDispatch() as AppDispatch;
   const [requestMessage, setRequestMessage] = useState("");
   const currentChatRoomId = useSelector(selectCurrentChatRoomId);
+  const userIsLogin = useSelector(selectUserIsLogin);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRequestMessage(event.target.value);
   };
+
+  const [skip, setSkip] = useState(true);
 
   const {
     data: chatMessageData,
     isLoading: isGetChatloading,
     isError: isGetChatError,
     error,
-  } = useGetChatMessagesQuery() || {};
+  } = useGetChatMessagesQuery(undefined, { skip }) || {};
 
   useEffect(() => {
+    setSkip(userIsLogin == false);
+  }, [userIsLogin]);
+
+  useEffect(() => {
+    console.log(`[InputForm][chatMessage]: ${chatMessageData}`);
     if (chatMessageData) {
       dispatch(addSessionMessage(chatMessageData));
     }
@@ -47,7 +57,7 @@ export default function InputForm() {
   const [sendChat, { isLoading: isSendChatLoading }] = useSendMessageMutation();
 
   async function handleSubmit() {
-    const userMessage = formatUserMessage(requestMessage);
+    const userMessage = formatUserMessage(requestMessage, currentChatRoomId);
 
     // addSessionMessage use current room Id in the async thunk
     // You should use the sendChatResponse belowing to decided the chatroom Id

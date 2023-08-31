@@ -72,6 +72,7 @@ export interface ShzGPTMessage {
   timestamp: number;
   role: ChatCompletionRequestMessageRoleEnum;
   content: string;
+  chatroomId: number;
 }
 
 export interface ShzGPTPrompt {

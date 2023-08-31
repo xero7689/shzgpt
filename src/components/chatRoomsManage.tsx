@@ -82,7 +82,7 @@ const ChatRoomsManage = (props: ChatRoomManageProps) => {
     await postChat(initMessage);
 
     // Init ChatRoom Sessions Here.
-    const payload = {chatRoomId: newChatRoomInfo.id, initMessage: formatShzGPTMessage("You're a helpful assistance", ChatCompletionRequestMessageRoleEnum.System)}
+    const payload = {chatRoomId: newChatRoomInfo.id, initMessage: formatShzGPTMessage("You're a helpful assistance", ChatCompletionRequestMessageRoleEnum.System, newChatRoomInfo.id)}
     dispatch(initChatRoomSession(payload));
 
     dispatch(fetchChatRoom());

@@ -51,7 +51,7 @@ import { RootState } from "./app/store";
 
 import { PaletteMode } from "@mui/material";
 
-import { useGetUserQuery } from "./features/api/apiSlice";
+import webSocketManager from "./lib/socketHelpers";
 
 function App() {
   const [toggleSidePanel, setToggleSidePanel] = useState<boolean>(true);
@@ -69,25 +69,6 @@ function App() {
   const userInfo = useSelector(selectChatUserData);
   const userModalIsOpen = useSelector(selectChatUserModalIsOpen);
 
-  const {
-    data: user,
-    isLoading,
-    isSuccess,
-    isError,
-    error,
-  } = useGetUserQuery();
-
-  /*
-  if (isLoading) {
-    console.log("is loading chat user data from rtk query");
-  } else if (isSuccess) {
-    console.log(user);
-  } else if (isError) {
-    console.log("Error while loading from rtk query");
-    console.log(error.toString());
-  }
-  */
-
   const { chatInterfaceHeight, appBarRef, chatInterfaceRef, chatContentRef } =
     useAppEffect();
 
@@ -98,6 +79,7 @@ function App() {
         dispatch(fetchAPIKey());
       }
       dispatch(fetchChatRoom());
+      webSocketManager.connect(`/ws/async-chat/`);
     } else {
       if (!userModalIsOpen) {
         // Only allowed close modal if user is login
