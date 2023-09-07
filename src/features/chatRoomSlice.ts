@@ -188,12 +188,9 @@ const chatRoomSlice = createSlice({
       state.newChatRooms[chatRoomId].sessions = [initMessage];
     },
     addSessionMessage(state, action) {
-      console.log("[addSessionMessage]");
-      console.log(action.payload);
       const chatMessage = action.payload;
 
       if (isInitChatMessage(chatMessage)) {
-        console.log("Found init message");
         return;
       }
 

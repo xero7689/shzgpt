@@ -48,7 +48,6 @@ export default function InputForm() {
   }, [userIsLogin]);
 
   useEffect(() => {
-    console.log(`[InputForm][chatMessage]: ${chatMessageData}`);
     if (chatMessageData) {
       dispatch(addSessionMessage(chatMessageData));
     }

@@ -7,10 +7,12 @@ import {
   PostNewMessageArgs,
 } from "../../types/interfaces";
 
+let envBaseUrl = process.env.REACT_APP_DJANGO_STORAGE_API_ENDPOINT;
+
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
-    baseUrl: "/chat",
+    baseUrl: `${envBaseUrl}/chat`,
     prepareHeaders: (headers, { getState }) => {
       const csrftoken = Cookies.get("csrftoken");
 

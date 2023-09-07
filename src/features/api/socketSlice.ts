@@ -18,10 +18,12 @@ interface SendMessageArgs {
   chatroomId: number;
 }
 
+let envBaseUrl = process.env.REACT_APP_DJANGO_STORAGE_API_ENDPOINT;
+
 export const extendedApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getChatMessages: builder.query<Context, void>({
-      query: () => `/chat-socket-init/`,
+      query: () => `${envBaseUrl}/chat/chat-socket-init/`,
       async onCacheEntryAdded(
         arg,
         { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
