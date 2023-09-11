@@ -86,7 +86,6 @@ export const extendedApi = apiSlice.injectEndpoints({
        */
       queryFn: (args: SendMessageArgs) => {
         const { chatMessageContent, chatroomId } = args;
-        const socket = webSocketManager.getConnection(`/ws/async-chat/`);
         const ts = new Date();
         const payload = {
           context: {
@@ -98,6 +97,7 @@ export const extendedApi = apiSlice.injectEndpoints({
         };
         return new Promise((resolve, rejects) => {
           const bytesRequest = ChatRequest.encode(payload).finish();
+          const socket = webSocketManager.getConnection(`/ws/async-chat/`);
           socket.send(bytesRequest);
           return resolve({
             data: {

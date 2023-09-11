@@ -79,7 +79,6 @@ function App() {
         dispatch(fetchAPIKey());
       }
       dispatch(fetchChatRoom());
-      webSocketManager.connect(`/ws/async-chat/`);
     } else {
       if (!userModalIsOpen) {
         // Only allowed close modal if user is login

@@ -21,21 +21,39 @@ class WebSocketManager {
     console.log(this.connections);
   }
 
-  connect(urlPath: string) {
+  connect(urlPath: string): WebSocket {
     const url = new URL(urlPath, this.baseUrl);
-    const socket = new WebSocket(url.href);
+    let socket: WebSocket;
+
+    if (urlPath in this.connections) {
+      return this.getConnection(urlPath)
+    }
+
+    socket = new WebSocket(url.href);
+
+    socket.addEventListener('open', (event) => {
+      this.connections[urlPath] = socket;
+    })
+
+    socket.addEventListener('close', (event) => {
+      socket.close();
+      delete this.connections.urlPath;
+    })
 
     socket.addEventListener("error", (event) => {
       console.log("[Websocket Manager]: ", event);
     });
 
-    this.connections[urlPath] = socket;
 
     return socket;
   }
 
-  getConnection(urlPath: string) {
-    return this.connections[urlPath];
+  getConnection(urlPath: string): WebSocket {
+    if (urlPath in this.connections) {
+      return this.connections[urlPath];
+    } else {
+      return this.connect(urlPath);
+    }
   }
 
   disconnect(urlPath: string) {

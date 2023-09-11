@@ -67,6 +67,9 @@ export default function InputForm() {
       chatroomId: currentChatRoomId,
       chatMessageContent: userMessage.content,
     });
+
+    // Remove the input field;
+    messageRef.current!.value = "";
   }
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
