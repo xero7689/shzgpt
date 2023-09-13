@@ -1,23 +1,25 @@
+import { useEffect } from "react";
 import { useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { AnyAction } from "@reduxjs/toolkit";
 
 import { formatUserMessage } from "../formatter/MessageFormatter";
 
 import {
   addSessionMessage,
-  fetchGPTMessage,
   selectCurrentChatRoomId,
 } from "../features/chatRoomSlice";
 
 import { Box, Button, TextField } from "@mui/material";
 import { useTheme } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
-import { selectActiveKey } from "../features/apiKeySlice";
 
 import { AppDispatch } from "../app/store";
 
-import { postChat } from "../fetchers/storage";
+import { useGetChatMessagesQuery } from "../features/api/socketSlice";
+
+import { useSendMessageMutation } from "../features/api/socketSlice";
+
+import { selectUserIsLogin } from "../features/chatUserSlice";
 
 export default function InputForm() {
   const theme = useTheme();
@@ -25,57 +27,49 @@ export default function InputForm() {
   const messageRef = useRef<HTMLInputElement>();
   const dispatch = useDispatch() as AppDispatch;
   const [requestMessage, setRequestMessage] = useState("");
-  const [queryInProgress, setQueryInProgress] = useState(false);
-  const [_, setQueryError] = useState(null);
   const currentChatRoomId = useSelector(selectCurrentChatRoomId);
-  const activeKey = useSelector(selectActiveKey);
+  const userIsLogin = useSelector(selectUserIsLogin);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRequestMessage(event.target.value);
   };
 
-  async function handleSendMessage() {
-    if (queryInProgress || !currentChatRoomId || !messageRef.current) {
-      return;
+  const [skip, setSkip] = useState(true);
+
+  const {
+    data: chatMessageData,
+    isLoading: isGetChatloading,
+    isError: isGetChatError,
+    error,
+  } = useGetChatMessagesQuery(undefined, { skip }) || {};
+
+  useEffect(() => {
+    setSkip(userIsLogin == false);
+  }, [userIsLogin]);
+
+  useEffect(() => {
+    if (chatMessageData) {
+      dispatch(addSessionMessage(chatMessageData));
     }
+  }, [dispatch, chatMessageData]);
 
-    const userMessage = formatUserMessage(requestMessage);
+  const [sendChat, { isLoading: isSendChatLoading }] = useSendMessageMutation();
 
+  async function handleSubmit() {
+    const userMessage = formatUserMessage(requestMessage, currentChatRoomId);
+
+    // addSessionMessage use current room Id in the async thunk
+    // You should use the sendChatResponse belowing to decided the chatroom Id
     dispatch(addSessionMessage(userMessage));
 
-    messageRef.current.value = "";
+    // Testing for websocket sendMessage
+    await sendChat({
+      chatroomId: currentChatRoomId,
+      chatMessageContent: userMessage.content,
+    });
 
-    const userInputMessage = {
-        chatRoomId: currentChatRoomId,
-        role: userMessage.role,
-        newMessage: userMessage.content,
-      }
-
-    await postChat(userInputMessage);
-
-    try {
-      setQueryInProgress(true);
-      if (activeKey) {
-        const dispatchedAction: AnyAction = await dispatch(
-          fetchGPTMessage({ activeKey })
-        );
-        const actionPayload = dispatchedAction.payload;
-        const postChatArgs = {
-          chatRoomId: currentChatRoomId,
-          role: actionPayload.role,
-          newMessage: actionPayload.content,
-        };
-
-        await postChat(postChatArgs);
-      }
-    } catch (err: any) {
-      setQueryError(err);
-    }
-    setQueryInProgress(false);
-  }
-
-  function handleSubmit(event: React.ChangeEvent<HTMLFormElement>) {
-    event.preventDefault();
+    // Remove the input field;
+    messageRef.current!.value = "";
   }
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -87,7 +81,7 @@ export default function InputForm() {
         if (!messageRef.current || messageRef.current.value.trim() === "") {
           return;
         }
-        handleSendMessage();
+        handleSubmit();
       }
     }
   };
@@ -131,7 +125,7 @@ export default function InputForm() {
           backgroundColor: theme.palette.secondary.main,
           color: theme.palette.secondary.contrastText,
         }}
-        onClick={handleSendMessage}
+        onClick={handleSubmit}
       >
         Send
       </Button>

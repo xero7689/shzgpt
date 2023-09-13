@@ -40,7 +40,7 @@ export interface ChatRooms {
 
 
 export interface ChatRoomState {
-    currentChatRoomId: number | undefined;
+    currentChatRoomId: number;
     nextChatHistoryPagination: number;
     sessionHistoryPrev: number[];
     sessionHistoryNext: number[];
@@ -72,6 +72,7 @@ export interface ShzGPTMessage {
   timestamp: number;
   role: ChatCompletionRequestMessageRoleEnum;
   content: string;
+  chatroomId: number;
 }
 
 export interface ShzGPTPrompt {

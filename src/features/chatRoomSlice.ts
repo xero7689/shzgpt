@@ -23,8 +23,10 @@ import {
   ShzGPTMessage,
 } from "../types/interfaces";
 
+import { isInitChatMessage } from "../lib/utils";
+
 const initialState = {
-  currentChatRoomId: undefined,
+  currentChatRoomId: 0,
 
   nextChatHistoryPagination: 0,
   sessionHistoryPrev: [],
@@ -71,22 +73,22 @@ export const fetchGPTMessage = createAsyncThunk<
   }, 0);
 
   const response = await fetchMessage(finalHistory.reverse(), activeKey);
-  return formatResponseMessage(response.data);
+  return formatResponseMessage(response.data, state.chatRooms.currentChatRoomId);
 });
 
 export const fetchChatSession = createAsyncThunk<
   ShzGPTMessage[] | undefined,
-  { roomId: number }
+  { chatroomId: number }
 >(
   "chatRoom/fetchChatSession",
-  async ({ roomId }, { dispatch, getState, rejectWithValue }) => {
+  async ({ chatroomId }, { dispatch, getState, rejectWithValue }) => {
     const state = getState() as RootState;
 
     // If there is already have session then skip the api fetching
     // Remenber to write the chat completemanuly to state instead reading from the server
-    if (state.chatRooms.newChatRooms[roomId].sessions === undefined) {
-      const response = await getChatHistory(roomId);
-      return convertDjangoChatHistory(response);
+    if (state.chatRooms.newChatRooms[chatroomId].sessions === undefined) {
+      const response = await getChatHistory(chatroomId);
+      return convertDjangoChatHistory(response, chatroomId);
     } else {
       return undefined;
     }
@@ -124,7 +126,7 @@ export const fetchChatRoom = createAsyncThunk(
       });
       if (latest_used_chatroom.id) {
         dispatch(currentChatRoomUpdated(latest_used_chatroom.id));
-        dispatch(fetchChatSession({ roomId: latest_used_chatroom.id }));
+        dispatch(fetchChatSession({ chatroomId: latest_used_chatroom.id }));
       }
     }
 
@@ -168,7 +170,7 @@ const chatRoomSlice = createSlice({
   initialState,
   reducers: {
     initChatRoomState(state) {
-      state.currentChatRoomId = undefined;
+      state.currentChatRoomId = 0;
       state.nextChatHistoryPagination = 0;
       state.sessionHistoryPrev = [];
 
@@ -186,10 +188,19 @@ const chatRoomSlice = createSlice({
       state.newChatRooms[chatRoomId].sessions = [initMessage];
     },
     addSessionMessage(state, action) {
-      if (state.currentChatRoomId) {
-        state.newChatRooms[state.currentChatRoomId].sessions.push(
-          action.payload
-        );
+      const chatMessage = action.payload;
+
+      if (isInitChatMessage(chatMessage)) {
+        return;
+      }
+
+      const { timestamp, role, content, chatroomId } = action.payload;
+      const message = { timestamp, role, content, chatroomId };
+      if (
+        state.newChatRooms[chatroomId] &&
+        state.newChatRooms[chatroomId].sessions
+      ) {
+        state.newChatRooms[chatroomId].sessions.push(message);
       }
     },
     newChatRoomUpdated(state, action) {

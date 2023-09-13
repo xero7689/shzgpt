@@ -5,27 +5,29 @@ import {
   CreateChatCompletionResponse,
 } from "openai";
 
-export function formatUserMessage(userMessage: string): ShzGPTMessage {
+export function formatUserMessage(userMessage: string, chatRoomId: number): ShzGPTMessage {
   const timestamp = Date.now();
   return {
+    chatroomId: chatRoomId,
     timestamp: timestamp,
     role: "user",
     content: userMessage,
   };
 }
 
-export function formatShzGPTMessage(message: string, role: ChatCompletionRequestMessageRoleEnum): ShzGPTMessage {
+export function formatShzGPTMessage(message: string, role: ChatCompletionRequestMessageRoleEnum, chatroomId: number): ShzGPTMessage {
   const timestamp = Date.now();
   return {
     timestamp: timestamp,
     role: role,
-    content: message
+    content: message,
+    chatroomId: chatroomId
   };
 }
 
 
 export function formatResponseMessage(
-  responseData: CreateChatCompletionResponse
+  responseData: CreateChatCompletionResponse, chatroomId: number
 ): ShzGPTMessage {
   const timestamp = Date.now();
   let content = "[System Message] Response choices message not exists";
@@ -43,6 +45,7 @@ export function formatResponseMessage(
     timestamp: timestamp,
     role: ChatCompletionRequestMessageRoleEnum["Assistant"],
     content: content,
+    chatroomId: chatroomId
   };
 }
 
