@@ -114,7 +114,7 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box display="flex" maxHeight="100vh" maxWidth="100vw">
+      <Box display="flex" maxHeight="100vh" maxWidth="100vw" overflow="hidden">
         <Box
           id="sidepanel-wrapper"
           display={toggleSidePanel ? "flex" : "none"}
