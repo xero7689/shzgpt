@@ -10,6 +10,7 @@ import {
   ListItem,
   ListItemButton,
   ListItemIcon,
+  SwipeableDrawer,
 } from "@mui/material";
 
 import ChatIcon from "@mui/icons-material/Chat";
@@ -115,51 +116,51 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <Box display="flex" maxHeight="100vh" maxWidth="100vw" overflow="hidden">
-        <Box
+        <SwipeableDrawer
           id="sidepanel-wrapper"
-          display={toggleSidePanel ? "flex" : "none"}
-          sx={{
-            backgroundColor: "primary.main",
-            borderRight: "1px solid",
-            borderColor: "primary.border",
-          }}
+          anchor="left"
+          open={toggleSidePanel}
+          onClose={() => setToggleSidePanel(false)}
+          onOpen={() => setToggleSidePanel(true)}
         >
-          <Box
-            id="navigation-drawer"
-            display="flex"
-            flexDirection="column"
-            sx={{
-              borderRight: "1px solid",
-              borderColor: "primary.border",
-            }}
-          >
-            <List>
-              {naviDrawerItems.map((item, index) => (
-                <ListItem
-                  key={index}
-                  disablePadding
-                  onClick={() => handleNaviDrawerItemClick(index)}
-                >
-                  <ListItemButton>
-                    <ListItemIcon
-                      sx={{ minWidth: 0, color: "primary.contrastText" }}
-                    >
-                      {item.icon}
-                    </ListItemIcon>
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-          </Box>
           <Box display="flex">
-            {naviDrawerItems.map((item, index) => (
-              <item.component
-                key={index}
-                toggle={toggleItemId === index ? true : false}
-              ></item.component>
-            ))}
+            <Box
+              id="navigation-drawer"
+              display="flex"
+              flexDirection="column"
+              sx={{
+                borderRight: "1px solid",
+                borderColor: "primary.border",
+              }}
+            >
+              <List>
+                {naviDrawerItems.map((item, index) => (
+                  <ListItem
+                    key={index}
+                    disablePadding
+                    onClick={() => handleNaviDrawerItemClick(index)}
+                  >
+                    <ListItemButton>
+                      <ListItemIcon
+                        sx={{ minWidth: 0, color: "primary.contrastText" }}
+                      >
+                        {item.icon}
+                      </ListItemIcon>
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+            </Box>
+            <Box display="flex">
+              {naviDrawerItems.map((item, index) => (
+                <item.component
+                  key={index}
+                  toggle={toggleItemId === index ? true : false}
+                ></item.component>
+              ))}
+            </Box>
           </Box>
-        </Box>
+        </SwipeableDrawer>
         <Box flexGrow={1} display="flex" height="100%" flexDirection="column">
           <GPTAppBar
             ref={appBarRef}
