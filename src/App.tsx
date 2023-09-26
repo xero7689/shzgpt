@@ -55,7 +55,7 @@ import { PaletteMode } from "@mui/material";
 import webSocketManager from "./lib/socketHelpers";
 
 function App() {
-  const [toggleSidePanel, setToggleSidePanel] = useState<boolean>(true);
+  const [toggleSidePanel, setToggleSidePanel] = useState<boolean>(false);
   const [colorMode, setColorMode] = useState<PaletteMode>("light");
 
   const theme = React.useMemo(
@@ -100,17 +100,13 @@ function App() {
 
   useEffect(() => {}, [currentChatRoomId]);
 
-  const [toggleItemId, setToggleItemid] = useState<number | null>(null);
+  const [toggleItemId, setToggleItemid] = useState<number>(0);
   const naviDrawerItems = [
     { component: ChatRoomsManage, icon: <ChatIcon /> },
     { component: PromptManage, icon: <TextFieldsIcon /> },
   ];
-  const handleNaviDrawerItemClick = (index: number | null) => {
-    if (toggleItemId === index) {
-      setToggleItemid(null);
-    } else {
+  const handleNaviDrawerItemClick = (index: number) => {
       setToggleItemid(index);
-    }
   };
 
   return (
