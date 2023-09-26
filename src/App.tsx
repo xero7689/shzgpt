@@ -106,7 +106,7 @@ function App() {
     { component: PromptManage, icon: <TextFieldsIcon /> },
   ];
   const handleNaviDrawerItemClick = (index: number) => {
-      setToggleItemid(index);
+    setToggleItemid(index);
   };
 
   return (
@@ -157,7 +157,13 @@ function App() {
         </Box>
       </SwipeableDrawer>
       <Box display="flex" maxHeight="100vh" maxWidth="100vw" overflow="hidden">
-        <Box flexGrow={1} display="flex" height="100%" flexDirection="column">
+        <Box
+          height="100%"
+          width="100%"
+          flexGrow={1}
+          display="flex"
+          flexDirection="column"
+        >
           <GPTAppBar
             ref={appBarRef}
             setColorMode={setColorMode}
