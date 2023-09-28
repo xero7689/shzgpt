@@ -10,6 +10,7 @@ import {
   ListItem,
   ListItemButton,
   ListItemIcon,
+  SwipeableDrawer,
 } from "@mui/material";
 
 import ChatIcon from "@mui/icons-material/Chat";
@@ -54,7 +55,7 @@ import { PaletteMode } from "@mui/material";
 import webSocketManager from "./lib/socketHelpers";
 
 function App() {
-  const [toggleSidePanel, setToggleSidePanel] = useState<boolean>(true);
+  const [toggleSidePanel, setToggleSidePanel] = useState<boolean>(false);
   const [colorMode, setColorMode] = useState<PaletteMode>("light");
 
   const theme = React.useMemo(
@@ -99,31 +100,25 @@ function App() {
 
   useEffect(() => {}, [currentChatRoomId]);
 
-  const [toggleItemId, setToggleItemid] = useState<number | null>(null);
+  const [toggleItemId, setToggleItemid] = useState<number>(0);
   const naviDrawerItems = [
     { component: ChatRoomsManage, icon: <ChatIcon /> },
     { component: PromptManage, icon: <TextFieldsIcon /> },
   ];
-  const handleNaviDrawerItemClick = (index: number | null) => {
-    if (toggleItemId === index) {
-      setToggleItemid(null);
-    } else {
-      setToggleItemid(index);
-    }
+  const handleNaviDrawerItemClick = (index: number) => {
+    setToggleItemid(index);
   };
 
   return (
     <ThemeProvider theme={theme}>
-      <Box display="flex" maxHeight="100vh" maxWidth="100vw">
-        <Box
-          id="sidepanel-wrapper"
-          display={toggleSidePanel ? "flex" : "none"}
-          sx={{
-            backgroundColor: "primary.main",
-            borderRight: "1px solid",
-            borderColor: "primary.border",
-          }}
-        >
+      <SwipeableDrawer
+        id="sidepanel-wrapper"
+        anchor="left"
+        open={toggleSidePanel}
+        onClose={() => setToggleSidePanel(false)}
+        onOpen={() => setToggleSidePanel(true)}
+      >
+        <Box display="flex">
           <Box
             id="navigation-drawer"
             display="flex"
@@ -160,7 +155,15 @@ function App() {
             ))}
           </Box>
         </Box>
-        <Box flexGrow={1} display="flex" height="100%" flexDirection="column">
+      </SwipeableDrawer>
+      <Box display="flex" maxHeight="100vh" maxWidth="100vw" overflow="hidden">
+        <Box
+          height="100%"
+          width="100%"
+          flexGrow={1}
+          display="flex"
+          flexDirection="column"
+        >
           <GPTAppBar
             ref={appBarRef}
             setColorMode={setColorMode}

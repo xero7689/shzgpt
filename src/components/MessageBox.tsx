@@ -51,7 +51,7 @@ function ParseContent(props: ParseContentProps) {
   const blocks = useMemo(() => separateCodeBlocks(content), [content]);
 
   return (
-    <Box sx={{ overflow: "auto" }} display="flex" flexDirection="column">
+    <Box display="flex" flexDirection="column">
       {blocks.map((block, index) => {
         if (block.type === "code") {
           return (
@@ -130,6 +130,7 @@ const MessageBox = React.memo(function MessageBox(props: MessageBoxProps) {
         },
       }}
       gap={1}
+      width="fit-content%"
     >
       <Box
         onContextMenu={handleOnContextMenu}
