@@ -28,7 +28,7 @@ export const extendedApi = apiSlice.injectEndpoints({
         arg,
         { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
       ) {
-        const ws = webSocketManager.getConnection(`/ws/async-chat/`);
+        const ws = await webSocketManager.getConnection(`/ws/async-chat/`);
 
         try {
           await cacheDataLoaded;
@@ -97,8 +97,8 @@ export const extendedApi = apiSlice.injectEndpoints({
         };
         return new Promise((resolve, rejects) => {
           const bytesRequest = ChatRequest.encode(payload).finish();
-          const socket = webSocketManager.getConnection(`/ws/async-chat/`);
-          socket.send(bytesRequest);
+          //const socket = webSocketManager.getConnection(`/ws/async-chat/`);
+          webSocketManager.safeSend('/ws/async-chat/', bytesRequest);
           return resolve({
             data: {
               chatroomId: chatroomId,
@@ -109,6 +109,10 @@ export const extendedApi = apiSlice.injectEndpoints({
           });
         });
       },
+      async onQueryStarted() {
+        console.log("On send message started..")
+        const socket = await webSocketManager.getConnection('/ws/async-chat/');
+      }
     }),
   }),
 });

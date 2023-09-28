@@ -21,34 +21,41 @@ class WebSocketManager {
     console.log(this.connections);
   }
 
-  connect(urlPath: string): WebSocket {
-    const url = new URL(urlPath, this.baseUrl);
-    let socket: WebSocket;
+  connect(urlPath: string): Promise<WebSocket> {
+    console.log("[WebSocket Manager] connect() trigger..");
 
+    const url = new URL(urlPath, this.baseUrl);
     if (urlPath in this.connections) {
-      return this.getConnection(urlPath)
+      return Promise.resolve(this.getConnection(urlPath));
     }
 
-    socket = new WebSocket(url.href);
+    return new Promise((resolve, reject) => {
+      let socket: WebSocket;
 
-    socket.addEventListener('open', (event) => {
-      this.connections[urlPath] = socket;
-    })
+      socket = new WebSocket(url.href);
 
-    socket.addEventListener('close', (event) => {
-      socket.close();
-      delete this.connections.urlPath;
-    })
+      socket.addEventListener("open", (event) => {
+        this.connections[urlPath] = socket;
+        console.log("[WebSocket Manager] connection resolve");
+        resolve(socket);
+      });
 
-    socket.addEventListener("error", (event) => {
-      console.log("[Websocket Manager]: ", event);
+      socket.addEventListener("close", (event) => {
+        console.log("[Websocket Manager]: Get connection closed event");
+        delete this.connections[urlPath];
+        socket.close();
+      });
+
+      socket.addEventListener("error", (event) => {
+        console.log("[Websocket Manager]: ", event);
+        reject(event);
+      });
     });
-
-
-    return socket;
   }
 
-  getConnection(urlPath: string): WebSocket {
+  async getConnection(urlPath: string): Promise<WebSocket> {
+    console.log(this.connections);
+    let socket = this.connections[urlPath];
     if (urlPath in this.connections) {
       return this.connections[urlPath];
     } else {
@@ -70,6 +77,18 @@ class WebSocketManager {
     });
 
     this.connections = {};
+  }
+
+  async safeSend(urlPath: string, request: Uint8Array) {
+    console.log("[WebSocket Manager][Safe Send]");
+    let socket = this.connections[urlPath];
+
+    if (socket.readyState == 3) {
+      console.log("Socket state is not OPEN, trying reconnect");
+      delete this.connections[urlPath];
+      socket = await this.connect(urlPath);
+    }
+    socket.send(request);
   }
 }
 
