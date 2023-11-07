@@ -3,6 +3,7 @@ import {
   ShzGPTPromptArgs,
   PostNewMessageArgs,
   ShzGPTChatHistoryResponseObject,
+  BaseResponse
 } from "../types/interfaces";
 
 const STORAGE_API_ENDPOINT = process.env.REACT_APP_DJANGO_STORAGE_API_ENDPOINT;
@@ -24,7 +25,13 @@ export const login = async (username: string, password: string) => {
     .then((response) => {
       return response.json();
     })
-    .catch((error) => console.log(error));
+    .catch((error) => { 
+      return {
+        'status': 'failed',
+        'detail': `${error.message}`,
+        'data': {}
+      } as BaseResponse;
+    });
   return response;
 };
 
@@ -40,7 +47,13 @@ export const logout = async () => {
 
   const response = await fetch(endpoint, requestOptions)
     .then((response) => response.json())
-    .catch((error) => console.log(error));
+    .catch((error) => {
+      return {
+        'status': 'failed',
+        'detail': `${error.message}`,
+        'data': {}
+      } as BaseResponse;
+    });
   return response;
 };
 
@@ -94,7 +107,7 @@ export const getChatRoom = async (pageNum = null) => {
 export const getChatHistory = async (
   roomId: number
 ): Promise<ShzGPTChatHistoryResponseObject[]> => {
-  let endpoint = `${STORAGE_API_ENDPOINT}/chat/chat-history/${roomId}`;
+  let endpoint = `${STORAGE_API_ENDPOINT}/chat/chat-history/${roomId}/`;
   const requestOptions: RequestInit = {
     method: "GET",
     credentials: "include",

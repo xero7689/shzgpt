@@ -10,6 +10,7 @@ import {
   ListItem,
   ListItemButton,
   ListItemIcon,
+  SwipeableDrawer,
 } from "@mui/material";
 
 import ChatIcon from "@mui/icons-material/Chat";
@@ -27,7 +28,7 @@ import { getDesignTokens } from "./theme";
 import {
   fetchChatRoom,
   selectCurrentChatSession,
-  selectCurrentChatRoomInfo,
+  selectCurrentChatRoomId,
   initChatRoomState,
 } from "./features/chatRoomSlice";
 import { useSelector } from "react-redux";
@@ -37,8 +38,8 @@ import SettingsModal from "./features/settingsModal";
 import ChatUserModal from "./features/chatUserModal";
 
 import {
-  getUserInfo,
-  selectUserInfo,
+  getChatUserData,
+  selectChatUserData,
   selectUserIsLogin,
   selectChatUserModalIsOpen,
   toggleChatUserModal,
@@ -51,10 +52,11 @@ import { RootState } from "./app/store";
 
 import { PaletteMode } from "@mui/material";
 
-function App() {
-  const [toggleSidePanel, setToggleSidePanel] = useState<boolean>(true);
-  const [colorMode, setColorMode] = useState<PaletteMode>("light");
+import webSocketManager from "./lib/socketHelpers";
 
+function App() {
+  const [toggleSidePanel, setToggleSidePanel] = useState<boolean>(false);
+  const [colorMode, setColorMode] = useState<PaletteMode>("light");
 
   const theme = React.useMemo(
     () => createTheme(getDesignTokens(colorMode)),
@@ -63,9 +65,9 @@ function App() {
 
   const dispatch: ThunkDispatch<RootState, null, Action> = useDispatch();
   const chatSession = useSelector(selectCurrentChatSession);
-  const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
+  const currentChatRoomId = useSelector(selectCurrentChatRoomId);
   const userIsLogin = useSelector(selectUserIsLogin);
-  const userInfo = useSelector(selectUserInfo);
+  const userInfo = useSelector(selectChatUserData);
   const userModalIsOpen = useSelector(selectChatUserModalIsOpen);
 
   const { chatInterfaceHeight, appBarRef, chatInterfaceRef, chatContentRef } =
@@ -74,7 +76,7 @@ function App() {
   useEffect(() => {
     if (userIsLogin) {
       if (Object.keys(userInfo).length === 0) {
-        dispatch(getUserInfo());
+        dispatch(getChatUserData());
         dispatch(fetchAPIKey());
       }
       dispatch(fetchChatRoom());
@@ -96,33 +98,27 @@ function App() {
 
   useEffect(() => {}, [chatSession]);
 
-  useEffect(() => {}, [currentChatRoomInfo]);
+  useEffect(() => {}, [currentChatRoomId]);
 
-  const [toggleItemId, setToggleItemid] = useState<number|null>(null);
+  const [toggleItemId, setToggleItemid] = useState<number>(0);
   const naviDrawerItems = [
     { component: ChatRoomsManage, icon: <ChatIcon /> },
     { component: PromptManage, icon: <TextFieldsIcon /> },
   ];
-  const handleNaviDrawerItemClick = (index: number | null) => {
-    if (toggleItemId === index) {
-      setToggleItemid(null);
-    } else {
-      setToggleItemid(index);
-    }
+  const handleNaviDrawerItemClick = (index: number) => {
+    setToggleItemid(index);
   };
 
   return (
     <ThemeProvider theme={theme}>
-      <Box display="flex" maxHeight="100vh" maxWidth="100vw">
-        <Box
-          id="sidepanel-wrapper"
-          display={toggleSidePanel ? "flex" : "none"}
-          sx={{
-            backgroundColor: "primary.main",
-            borderRight: "1px solid",
-            borderColor: "primary.border",
-          }}
-        >
+      <SwipeableDrawer
+        id="sidepanel-wrapper"
+        anchor="left"
+        open={toggleSidePanel}
+        onClose={() => setToggleSidePanel(false)}
+        onOpen={() => setToggleSidePanel(true)}
+      >
+        <Box display="flex">
           <Box
             id="navigation-drawer"
             display="flex"
@@ -159,7 +155,15 @@ function App() {
             ))}
           </Box>
         </Box>
-        <Box flexGrow={1} display="flex" height="100%" flexDirection="column">
+      </SwipeableDrawer>
+      <Box display="flex" maxHeight="100vh" maxWidth="100vw" overflow="hidden">
+        <Box
+          height="100%"
+          width="100%"
+          flexGrow={1}
+          display="flex"
+          flexDirection="column"
+        >
           <GPTAppBar
             ref={appBarRef}
             setColorMode={setColorMode}

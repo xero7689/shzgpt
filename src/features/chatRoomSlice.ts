@@ -3,7 +3,6 @@ import { RootState } from "../app/store";
 import fetchMessage from "../fetchers/gpt";
 import {
   getChatHistory,
-  postChat,
   getChatRoom,
   createChatRoom,
 } from "../fetchers/storage";
@@ -17,78 +16,82 @@ import { encode } from "gpt-tokenizer";
 
 import { ChatCompletionRequestMessage } from "openai";
 
-import { ChatRoomObject, ChatRoomState } from "../types/interfaces";
+import {
+  ChatRoomObject,
+  ChatRoomState,
+  ChatRooms,
+  ShzGPTMessage,
+} from "../types/interfaces";
 
-import { PostNewMessageArgs } from "../types/interfaces";
+import { isInitChatMessage } from "../lib/utils";
 
 const initialState = {
-  currentChatRoomInfo: null,
-  currentChatRoomSession: [],
+  currentChatRoomId: 0,
+
   nextChatHistoryPagination: 0,
   sessionHistoryPrev: [],
   sessionHistoryNext: [],
-  chatRooms: [],
+
+  currentChatRoom: undefined,
+  newChatRooms: {},
+
   maxCompleteTokenLength: 1024,
   status: {
-    fetchGPTStatus: "idle",
+    fetchGPTStatus: "pending",
     fetchGPTErrorMessage: "",
-    fetchChatRoomStatus: "idle",
-    fetchChatSessionStatus: "idle",
+    fetchChatRoomStatus: "pending",
+    fetchChatSessionStatus: "pending",
+    addNewChatRoomStatus: "pending",
   },
 } as ChatRoomState;
 
-export const fetchGPTMessage = createAsyncThunk<void, { activeKey: string }>(
-  "chatRoom/fetchGPTMessage",
-  async ({ activeKey }, { dispatch, getState }) => {
+export const fetchGPTMessage = createAsyncThunk<
+  ShzGPTMessage,
+  { activeKey: string }
+>("chatRoom/fetchGPTMessage", async ({ activeKey }, { getState }) => {
+  const state = getState() as RootState;
+
+  if (!state.chatRooms.currentChatRoomId) {
+    state.chatRooms.status.fetchGPTStatus = "Error";
+    state.chatRooms.status.fetchGPTErrorMessage = "Currnet Chatroom not exists";
+    throw new Error("Current Chat Room doesn't Exist");
+  }
+  const history = formatChatHistory(
+    state.chatRooms.newChatRooms[state.chatRooms.currentChatRoomId].sessions
+  );
+
+  const fetchHistory = history;
+
+  let finalHistory: ChatCompletionRequestMessage[] = [];
+  fetchHistory.reduceRight((accumulator, item) => {
+    const token = encode(item.content);
+    accumulator += token.length;
+    if (accumulator < state.chatRooms.maxCompleteTokenLength) {
+      finalHistory.push(item);
+    }
+    return accumulator;
+  }, 0);
+
+  const response = await fetchMessage(finalHistory.reverse(), activeKey);
+  return formatResponseMessage(response.data, state.chatRooms.currentChatRoomId);
+});
+
+export const fetchChatSession = createAsyncThunk<
+  ShzGPTMessage[] | undefined,
+  { chatroomId: number }
+>(
+  "chatRoom/fetchChatSession",
+  async ({ chatroomId }, { dispatch, getState, rejectWithValue }) => {
     const state = getState() as RootState;
 
-    if (!state.chatRooms.currentChatRoomInfo) {
-      state.chatRooms.status.fetchGPTStatus = "Error";
-      state.chatRooms.status.fetchGPTErrorMessage =
-        "Currnet Chatroom not exists";
-      return;
+    // If there is already have session then skip the api fetching
+    // Remenber to write the chat completemanuly to state instead reading from the server
+    if (state.chatRooms.newChatRooms[chatroomId].sessions === undefined) {
+      const response = await getChatHistory(chatroomId);
+      return convertDjangoChatHistory(response, chatroomId);
+    } else {
+      return undefined;
     }
-    const history = formatChatHistory(state.chatRooms.currentChatRoomSession);
-
-    const fetchHistory = history;
-
-    let finalHistory: ChatCompletionRequestMessage[] = [];
-    fetchHistory.reduceRight((accumulator, item) => {
-      const token = encode(item.content);
-      accumulator += token.length;
-      if (accumulator < state.chatRooms.maxCompleteTokenLength) {
-        finalHistory.push(item);
-      }
-      return accumulator;
-    }, 0);
-
-    const response = await fetchMessage(finalHistory.reverse(), activeKey);
-    const formatedResponse = formatResponseMessage(response.data);
-    dispatch(addSessionMessage(formatedResponse));
-
-    const postChatArgs = {
-      chatRoomId: state.chatRooms.currentChatRoomInfo.id,
-      role: formatedResponse.role,
-      newMessage: formatedResponse.content,
-    };
-    dispatch(postNewMessage(postChatArgs));
-  }
-);
-
-export const postNewMessage = createAsyncThunk(
-  "chatRoom/addNewMessage",
-  async (args: PostNewMessageArgs) => {
-    const response = await postChat(args);
-    return response;
-  }
-);
-
-export const fetchChatSession = createAsyncThunk(
-  "chatRoom/fetchChatSession",
-  async (roomId: number, { dispatch }) => {
-    const response = await getChatHistory(roomId);
-    dispatch(historyUpdated(convertDjangoChatHistory(response)));
-    return response;
   }
 );
 
@@ -109,7 +112,7 @@ export const fetchChatRoom = createAsyncThunk(
     let results = response.results as ChatRoomObject[];
 
     // Initialize current chatroom
-    if (!state.chatRooms.currentChatRoomInfo) {
+    if (!state.chatRooms.currentChatRoomId) {
       //The `reduce` function expects the provided callback function to always return a valid `ChatRoomObject`, but in some cases, it may return `undefined`.
       //An initial value for the `reduce` function to ensure that it always returns a valid `ChatRoomObject` is necessary.
       const latest_used_chatroom = results.reduce((prev, current) => {
@@ -122,11 +125,20 @@ export const fetchChatRoom = createAsyncThunk(
         return prev;
       });
       if (latest_used_chatroom.id) {
-        dispatch(currentChatRoomUpdated(latest_used_chatroom));
-        dispatch(fetchChatSession(latest_used_chatroom.id));
+        dispatch(currentChatRoomUpdated(latest_used_chatroom.id));
+        dispatch(fetchChatSession({ chatroomId: latest_used_chatroom.id }));
       }
     }
-    dispatch(chatRoomsUpdated(response.results));
+
+    // Missing the first ChatRooms
+    const newChatRooms = response.results.reduce(
+      (acc: ChatRooms, obj: ChatRoomObject) => {
+        acc[obj.id] = obj;
+        return acc;
+      },
+      {}
+    );
+    dispatch(newChatRoomsUpdated(newChatRooms));
 
     // Continue Fetch Remaing ChatRooms
     const regex = /\/\?page=(.*)/; // regular expression to match "/?" and capture the query string
@@ -137,7 +149,15 @@ export const fetchChatRoom = createAsyncThunk(
         if (match) {
           const pageNum = match[1];
           response = await getChatRoom(pageNum);
-          dispatch(chatRoomsUpdated(response.results));
+
+          const newChatRooms = response.results.reduce(
+            (acc: ChatRooms, obj: ChatRoomObject) => {
+              acc[obj.id] = obj;
+              return acc;
+            },
+            {}
+          );
+          dispatch(newChatRoomsUpdated(newChatRooms));
         }
       }
     }
@@ -150,55 +170,55 @@ const chatRoomSlice = createSlice({
   initialState,
   reducers: {
     initChatRoomState(state) {
-      state.currentChatRoomInfo = null;
-      state.currentChatRoomSession = [];
+      state.currentChatRoomId = 0;
       state.nextChatHistoryPagination = 0;
       state.sessionHistoryPrev = [];
 
       state.sessionHistoryNext = [];
-      state.chatRooms = [];
       state.status = {
-        fetchGPTStatus: "idle",
+        fetchGPTStatus: "pending",
         fetchGPTErrorMessage: "",
-        fetchChatRoomStatus: "idle",
-        fetchChatSessionStatus: "idle",
+        fetchChatRoomStatus: "pending",
+        fetchChatSessionStatus: "pending",
+        addNewChatRoomStatus: "pending",
       };
     },
-    historyUpdated(state, action) {
-      state.currentChatRoomSession = action.payload;
+    initChatRoomSession(state, action) {
+      const { chatRoomId, initMessage } = action.payload;
+      state.newChatRooms[chatRoomId].sessions = [initMessage];
     },
     addSessionMessage(state, action) {
-      state.currentChatRoomSession.push(action.payload);
+      const chatMessage = action.payload;
+
+      if (isInitChatMessage(chatMessage)) {
+        return;
+      }
+
+      const { timestamp, role, content, chatroomId } = action.payload;
+      const message = { timestamp, role, content, chatroomId };
+      if (
+        state.newChatRooms[chatroomId] &&
+        state.newChatRooms[chatroomId].sessions
+      ) {
+        state.newChatRooms[chatroomId].sessions.push(message);
+      }
     },
-    chatRoomsUpdated(state, action) {
-      const chatRoomSet = new Set(
-        state.chatRooms.map((chatRoom) => chatRoom.id)
-      );
-
-      const uniqueChatRooms = action.payload.filter(
-        (chatRoom: ChatRoomObject) => !chatRoomSet.has(chatRoom.id)
-      );
-
-      uniqueChatRooms.sort((a: ChatRoomObject, b: ChatRoomObject) => {
-        if (a.last_used_time && b.last_used_time) {
-          return new Date(b.last_used_time) > new Date(a.last_used_time);
-        }
-      });
-
-      state.chatRooms = [...state.chatRooms, ...uniqueChatRooms];
-      state.chatRooms.sort((a, b) => {
-        if (a.last_used_time && b.last_used_time) {
-          return (
-            new Date(b.last_used_time).getTime() -
-            new Date(a.last_used_time).getTime()
-          );
-        } else {
-          return 0; // Handle the case if last_used_time not exists
-        }
-      });
+    newChatRoomUpdated(state, action) {
+      const payload = action.payload;
+      state.newChatRooms[payload.id] = payload;
+    },
+    newChatRoomsUpdated(state, action) {
+      const payload = action.payload;
+      for (let key in payload) {
+        const chatRoomInfo = state.newChatRooms[payload[key].id];
+        state.newChatRooms[payload[key].id] = {
+          ...chatRoomInfo,
+          ...payload[key],
+        };
+      }
     },
     currentChatRoomUpdated(state, action) {
-      state.currentChatRoomInfo = action.payload;
+      state.currentChatRoomId = action.payload as number;
     },
     sessionHistoryPrevPush(state, action) {
       state.sessionHistoryPrev.push(action.payload);
@@ -207,7 +227,7 @@ const chatRoomSlice = createSlice({
       if (state.sessionHistoryPrev.length !== 0) {
         const prevSession = state.sessionHistoryPrev.pop();
         if (prevSession) {
-          state.currentChatRoomInfo = prevSession;
+          state.currentChatRoomId = prevSession;
         }
       }
     },
@@ -215,11 +235,11 @@ const chatRoomSlice = createSlice({
       state.sessionHistoryNext.push(action.payload);
     },
     sessionHistoryNextPop(state) {
-      if (state.sessionHistoryNext.length !== 0 && state.currentChatRoomInfo) {
-        state.sessionHistoryPrev.push(state.currentChatRoomInfo);
+      if (state.sessionHistoryNext.length !== 0 && state.currentChatRoomId) {
+        state.sessionHistoryPrev.push(state.currentChatRoomId);
         const nextSession = state.sessionHistoryNext.pop();
         if (nextSession) {
-          state.currentChatRoomInfo = nextSession;
+          state.currentChatRoomId = nextSession;
         }
       }
     },
@@ -233,8 +253,13 @@ const chatRoomSlice = createSlice({
       .addCase(fetchGPTMessage.pending, (state) => {
         state.status.fetchGPTStatus = "loading";
       })
-      .addCase(fetchGPTMessage.fulfilled, (state) => {
+      .addCase(fetchGPTMessage.fulfilled, (state, action) => {
         state.status.fetchGPTStatus = "succeeded";
+        if (state.currentChatRoomId) {
+          state.newChatRooms[state.currentChatRoomId].sessions.push(
+            action.payload
+          );
+        }
       })
       .addCase(fetchGPTMessage.rejected, (state, action) => {
         state.status.fetchGPTStatus = "failed";
@@ -242,12 +267,19 @@ const chatRoomSlice = createSlice({
           state.status.fetchGPTErrorMessage = action.error.message;
         }
       })
+
       // Chat History Status
       .addCase(fetchChatSession.pending, (state) => {
         state.status.fetchChatSessionStatus = "loading";
       })
-      .addCase(fetchChatSession.fulfilled, (state) => {
+      .addCase(fetchChatSession.fulfilled, (state, action) => {
         state.status.fetchChatSessionStatus = "succeeded";
+        if (action.payload) {
+          if (state.currentChatRoomId) {
+            state.newChatRooms[state.currentChatRoomId].sessions =
+              action.payload;
+          }
+        }
       })
       .addCase(fetchChatSession.rejected, (state, action) => {
         state.status.fetchChatSessionStatus = "failed";
@@ -268,14 +300,28 @@ const chatRoomSlice = createSlice({
         if (action.error.message) {
           state.status.fetchGPTErrorMessage = action.error.message;
         }
+      })
+
+      // Add New ChatRoom Status
+      .addCase(addNewChatRoom.pending, (state) => {
+        state.status.addNewChatRoomStatus = "loading";
+      })
+      .addCase(addNewChatRoom.fulfilled, (state, action) => {
+        state.status.addNewChatRoomStatus = "succeeded";
+        const payload = action.payload;
+        state.newChatRooms[payload.id] = payload;
+      })
+      .addCase(addNewChatRoom.rejected, (state, action) => {
+        state.status.addNewChatRoomStatus = "failed";
       });
   },
 });
 
 export const {
-  historyUpdated,
   initChatRoomState,
-  chatRoomsUpdated,
+  newChatRoomUpdated,
+  newChatRoomsUpdated,
+  initChatRoomSession,
   addSessionMessage,
   currentChatRoomUpdated,
   sessionHistoryPrevPush,
@@ -287,18 +333,55 @@ export const {
 
 export default chatRoomSlice.reducer;
 
-export const selectCurrentChatSession = (state: RootState) =>
-  state.chatRooms.currentChatRoomSession;
+export const selectCurrentChatSession = (state: RootState) => {
+  if (state.chatRooms.currentChatRoomId) {
+    const currentChatRoom =
+      state.chatRooms.newChatRooms[state.chatRooms.currentChatRoomId];
+    if ("sessions" in currentChatRoom) {
+      return currentChatRoom.sessions;
+    }
+    return [];
+  } else {
+    return undefined;
+  }
+};
+
+export const selectChatRoomSessionsById = (
+  state: RootState,
+  id: number | undefined
+) => {
+  if (id && id in state.chatRooms.newChatRooms) {
+    return state.chatRooms.newChatRooms[id].sessions;
+  } else {
+    return [];
+  }
+};
+
+export const selectChatRoomById = (
+  state: RootState,
+  id: number | undefined
+) => {
+  if (id && id in state.chatRooms.newChatRooms) {
+    return state.chatRooms.newChatRooms[id];
+  } else {
+    return undefined;
+  }
+};
 
 export const selectLastRoleOfHistory = (state: RootState) => {
-  const lastSession = state.chatRooms.currentChatRoomSession.slice(-1);
-  if (lastSession) {
-    return lastSession[0].role;
+  if (state.chatRooms.currentChatRoomId) {
+    const lastSession =
+      state.chatRooms.newChatRooms[
+        state.chatRooms.currentChatRoomId
+      ].sessions.slice(-1);
+    if (lastSession) {
+      return lastSession[0].role;
+    }
   }
 };
 
 export const selectAllChatRooms = (state: RootState) =>
-  state.chatRooms.chatRooms;
+  state.chatRooms.newChatRooms;
 
 export const selectFetchGPTStatus = (state: RootState) =>
   state.chatRooms.status.fetchGPTStatus;
@@ -306,8 +389,8 @@ export const selectFetchGPTStatus = (state: RootState) =>
 export const selectChatHistoryStatus = (state: RootState) =>
   state.chatRooms.status.fetchChatSessionStatus;
 
-export const selectCurrentChatRoomInfo = (state: RootState) =>
-  state.chatRooms.currentChatRoomInfo;
+export const selectCurrentChatRoomId = (state: RootState) =>
+  state.chatRooms.currentChatRoomId;
 
 export const selectSessionHistoryPrev = (state: RootState) =>
   state.chatRooms.sessionHistoryPrev;

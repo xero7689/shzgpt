@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -5,17 +6,20 @@ import { formatUserMessage } from "../formatter/MessageFormatter";
 
 import {
   addSessionMessage,
-  postNewMessage,
-  fetchGPTMessage,
-  selectCurrentChatRoomInfo,
+  selectCurrentChatRoomId,
 } from "../features/chatRoomSlice";
 
 import { Box, Button, TextField } from "@mui/material";
 import { useTheme } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
-import { selectActiveKey } from "../features/apiKeySlice";
 
 import { AppDispatch } from "../app/store";
+
+import { useGetChatMessagesQuery } from "../features/api/socketSlice";
+
+import { useSendMessageMutation } from "../features/api/socketSlice";
+
+import { selectUserIsLogin } from "../features/chatUserSlice";
 
 export default function InputForm() {
   const theme = useTheme();
@@ -23,47 +27,49 @@ export default function InputForm() {
   const messageRef = useRef<HTMLInputElement>();
   const dispatch = useDispatch() as AppDispatch;
   const [requestMessage, setRequestMessage] = useState("");
-  const [queryInProgress, setQueryInProgress] = useState(false);
-  const [_, setQueryError] = useState(null);
-  const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
-  const activeKey = useSelector(selectActiveKey);
+  const currentChatRoomId = useSelector(selectCurrentChatRoomId);
+  const userIsLogin = useSelector(selectUserIsLogin);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRequestMessage(event.target.value);
   };
 
-  async function handleSendMessage() {
-    if (queryInProgress || !currentChatRoomInfo || !messageRef.current) {
-      return;
+  const [skip, setSkip] = useState(true);
+
+  const {
+    data: chatMessageData,
+    isLoading: isGetChatloading,
+    isError: isGetChatError,
+    error,
+  } = useGetChatMessagesQuery(undefined, { skip }) || {};
+
+  useEffect(() => {
+    setSkip(userIsLogin == false);
+  }, [userIsLogin]);
+
+  useEffect(() => {
+    if (chatMessageData) {
+      dispatch(addSessionMessage(chatMessageData));
     }
+  }, [dispatch, chatMessageData]);
 
-    const userMessage = formatUserMessage(requestMessage);
+  const [sendChat, { isLoading: isSendChatLoading }] = useSendMessageMutation();
 
+  async function handleSubmit() {
+    const userMessage = formatUserMessage(requestMessage, currentChatRoomId);
+
+    // addSessionMessage use current room Id in the async thunk
+    // You should use the sendChatResponse belowing to decided the chatroom Id
     dispatch(addSessionMessage(userMessage));
 
-    messageRef.current.value = "";
+    // Testing for websocket sendMessage
+    await sendChat({
+      chatroomId: currentChatRoomId,
+      chatMessageContent: userMessage.content,
+    });
 
-    dispatch(
-      postNewMessage({
-        chatRoomId: currentChatRoomInfo.id,
-        role: userMessage.role,
-        newMessage: userMessage.content,
-      })
-    );
-
-    try {
-      setQueryInProgress(true);
-      if (activeKey) {
-        await dispatch(fetchGPTMessage({ activeKey }));
-      }
-    } catch (err: any) {
-      setQueryError(err);
-    }
-    setQueryInProgress(false);
-  }
-
-  function handleSubmit(event: React.ChangeEvent<HTMLFormElement>) {
-    event.preventDefault();
+    // Remove the input field;
+    messageRef.current!.value = "";
   }
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -75,7 +81,7 @@ export default function InputForm() {
         if (!messageRef.current || messageRef.current.value.trim() === "") {
           return;
         }
-        handleSendMessage();
+        handleSubmit();
       }
     }
   };
@@ -119,7 +125,7 @@ export default function InputForm() {
           backgroundColor: theme.palette.secondary.main,
           color: theme.palette.secondary.contrastText,
         }}
-        onClick={handleSendMessage}
+        onClick={handleSubmit}
       >
         Send
       </Button>

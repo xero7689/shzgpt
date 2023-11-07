@@ -20,7 +20,7 @@ type CodeBlockProps = {
 const CodeBlock = (props: CodeBlockProps) => {
   const { codeString, language, colorMode } = props;
 
-  const [ _, setCopySuccess] = useState(false);
+  const [_, setCopySuccess] = useState(false);
 
   const handleCopyClick = () => {
     navigator.clipboard.writeText(codeString);
@@ -33,7 +33,6 @@ const CodeBlock = (props: CodeBlockProps) => {
         display="flex"
         justifyContent="space-between"
         alignItems="center"
-        overflow="auto"
         sx={{
           backgroundColor: "info.main",
           borderRadius: "4px",
@@ -59,24 +58,20 @@ const CodeBlock = (props: CodeBlockProps) => {
           </Typography>
         </Button>
       </Box>
-      <Box sx={{ overflow: "auto" }}>
-        {isMobileOnly ? (
-          <Box>{codeString}</Box>
-        ) : (
-          <SyntaxHighlighter
-            language={language}
-            style={colorMode === "light" ? tomorrow : gruvboxDark}
-            showLineNumbers
-            customStyle={{
-              margin: 0,
-              paddingTop: "24px",
-              paddingBottom: "24px",
-            }}
-            wrapLines={true}
-          >
-            {codeString}
-          </SyntaxHighlighter>
-        )}
+      <Box>
+        <SyntaxHighlighter
+          language={language}
+          style={colorMode === "light" ? tomorrow : gruvboxDark}
+          showLineNumbers
+          customStyle={{
+            margin: 0,
+            paddingTop: "24px",
+            paddingBottom: "24px",
+          }}
+          wrapLines={true}
+        >
+          {codeString}
+        </SyntaxHighlighter>
       </Box>
     </Box>
   );

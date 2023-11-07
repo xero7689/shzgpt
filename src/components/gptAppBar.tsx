@@ -21,9 +21,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { toggleSettingsModal } from "../features/settingsSlice";
 import { toggleChatUserModal } from "../features/chatUserSlice";
 import {
-  fetchChatSession,
   selectAllChatRooms,
-  selectCurrentChatRoomInfo,
+  selectCurrentChatRoomId,
   sessionHistoryPrevPush,
   currentChatRoomUpdated,
 } from "../features/chatRoomSlice";
@@ -55,14 +54,16 @@ function GPTAppBar(props: GPTAppBarProps, ref: any) {
   const { setToggleSidePanel, setColorMode } = props;
   const theme = useTheme();
   const dispatch = useDispatch() as AppDispatch;
-  const allChatRooms = useSelector(selectAllChatRooms);
+  let allChatRooms = useSelector(selectAllChatRooms);
 
   // Search Bar state
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [chatroomSearchResult, setChatroomSearchResult] = useState<ChatRoomObject[]>([]);
+  const [chatroomSearchResult, setChatroomSearchResult] = useState<
+    ChatRoomObject[]
+  >([]);
   const [selectedIndex, _] = useState(1);
-  const currentChatRoomInfo = useSelector(selectCurrentChatRoomInfo);
+  const currentChatRoomId = useSelector(selectCurrentChatRoomId);
 
   const handleClick = () => {
     setToggleSidePanel((toggle: boolean) => !toggle);
@@ -99,10 +100,12 @@ function GPTAppBar(props: GPTAppBarProps, ref: any) {
     return filteredChatRooms;
   };
 
-  const handleSearchBarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchBarChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const keyword = event.target.value;
     setSearchKeyword(keyword);
-    const matchRooms = searchChatRooms(allChatRooms, keyword);
+    const matchRooms = searchChatRooms(Object.values(allChatRooms), keyword);
     setChatroomSearchResult(matchRooms);
     if (!isSearching && searchKeyword) {
       setIsSearching(true);
@@ -117,14 +120,12 @@ function GPTAppBar(props: GPTAppBarProps, ref: any) {
     }
   }, [isSearching, searchKeyword]);
 
-  const handleListItemClick = (_: React.MouseEvent, chatRoomInfo: ChatRoomObject) => {
-    dispatch(sessionHistoryPrevPush(currentChatRoomInfo));
-    dispatch(fetchChatSession(chatRoomInfo.id));
-    const newChatRoomInfo = {
-      id: chatRoomInfo.id,
-      name: chatRoomInfo.name,
-    };
-    dispatch(currentChatRoomUpdated(newChatRoomInfo));
+  const handleListItemClick = (
+    _: React.MouseEvent,
+    chatRoomInfo: ChatRoomObject
+  ) => {
+    dispatch(sessionHistoryPrevPush(currentChatRoomId));
+    dispatch(currentChatRoomUpdated(chatRoomInfo.id));
   };
 
   return (
