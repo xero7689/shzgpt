@@ -4,60 +4,77 @@ if (!envBaseUrl) {
   envBaseUrl = "ws://localhost:8000";
 }
 
-interface ShzGPTWebSocketConnectinos {
-  [key: string]: WebSocket;
+interface ShzGPTWebSocketItem {
+  socket: WebSocket;
+  onMessageEventListener: boolean;
+}
+
+interface ShzGPTWebSocketConnections {
+  [key: string]: ShzGPTWebSocketItem;
 }
 
 class WebSocketManager {
   baseUrl: string;
-  connections: ShzGPTWebSocketConnectinos;
+  connections: ShzGPTWebSocketConnections;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
     this.connections = {};
   }
 
-  list() {
-    console.log(this.connections);
-  }
-
-  connect(urlPath: string): WebSocket {
+  connect(urlPath: string): Promise<WebSocket> {
     const url = new URL(urlPath, this.baseUrl);
-    let socket: WebSocket;
 
-    if (urlPath in this.connections) {
-      return this.getConnection(urlPath)
-    }
+    return new Promise((resolve, reject) => {
+      let socket: WebSocket;
 
-    socket = new WebSocket(url.href);
+      socket = new WebSocket(url.href);
 
-    socket.addEventListener('open', (event) => {
-      this.connections[urlPath] = socket;
-    })
+      socket.addEventListener("open", (event) => {
+        this.connections[urlPath] = {
+          socket: socket,
+          onMessageEventListener: false,
+        };
+      });
 
-    socket.addEventListener('close', (event) => {
-      socket.close();
-      delete this.connections.urlPath;
-    })
+      socket.addEventListener("close", (event) => {
+        delete this.connections[urlPath];
+        socket.close();
+      });
 
-    socket.addEventListener("error", (event) => {
-      console.log("[Websocket Manager]: ", event);
+      socket.addEventListener("error", (event) => {
+        reject(event);
+      });
+      resolve(socket);
     });
-
-
-    return socket;
   }
 
-  getConnection(urlPath: string): WebSocket {
-    if (urlPath in this.connections) {
-      return this.connections[urlPath];
-    } else {
-      return this.connect(urlPath);
+  async getAndReConnect(urlPath: string): Promise<ShzGPTWebSocketItem> {
+    if (!(urlPath in this.connections)) {
+      let socket = await this.connect(urlPath);
+      await new Promise((resolve) => {
+        const interval = setInterval(() => {
+          if (socket.readyState === WebSocket.OPEN) {
+            clearInterval(interval);
+            resolve(socket);
+          } else {
+          }
+        }, 500);
+      });
     }
+    return this.connections[urlPath];
+  }
+
+  getConnection(urlPath: string) {
+    return this.connections[urlPath];
+  }
+
+  hasConnection(urlPath: string) {
+    return this.connections[urlPath] !== undefined;
   }
 
   disconnect(urlPath: string) {
-    const socket = this.connections[urlPath];
+    const socket = this.connections[urlPath].socket;
     if (socket) {
       socket.close();
       delete this.connections[urlPath];
@@ -65,11 +82,18 @@ class WebSocketManager {
   }
 
   disconnectAll() {
-    Object.values(this.connections).forEach((socket) => {
-      socket.close();
+    Object.values(this.connections).forEach((item) => {
+      item.socket.close();
     });
 
     this.connections = {};
+  }
+
+  async safeSend(urlPath: string, request: Uint8Array) {
+    let socket = this.connections[urlPath].socket;
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.send(request);
+    } 
   }
 }
 

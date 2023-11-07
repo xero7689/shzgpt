@@ -10,7 +10,6 @@ import {
   StatusCode,
 } from "../../common/pb/message";
 
-
 import { Context } from "../../common/pb/message";
 
 interface SendMessageArgs {
@@ -28,7 +27,10 @@ export const extendedApi = apiSlice.injectEndpoints({
         arg,
         { getState, updateCachedData, cacheDataLoaded, cacheEntryRemoved }
       ) {
-        const ws = webSocketManager.getConnection(`/ws/async-chat/`);
+        const webSocketItem = await webSocketManager.getAndReConnect(
+          `/ws/async-chat/`
+        );
+        const ws = webSocketItem.socket;
 
         try {
           await cacheDataLoaded;
@@ -43,13 +45,13 @@ export const extendedApi = apiSlice.injectEndpoints({
 
                 switch (response.context!.role) {
                   case ChatRoleType.SYSTEM:
-                    role = 'system';
+                    role = "system";
                     break;
                   case ChatRoleType.USER:
-                    role = 'user';
+                    role = "user";
                     break;
                   case ChatRoleType.ASSISTANT:
-                    role = 'assistant';
+                    role = "assistant";
                     break;
                 }
 
@@ -62,7 +64,7 @@ export const extendedApi = apiSlice.injectEndpoints({
                         content: response.context.content,
                         role: role,
                         timestamp: timestamp,
-                      }
+                      };
                       Object.assign(draft, newDraft);
                     }
                   });
@@ -73,6 +75,7 @@ export const extendedApi = apiSlice.injectEndpoints({
           };
 
           ws.addEventListener("message", listener);
+          webSocketItem.onMessageEventListener = true;
         } catch {}
         await cacheEntryRemoved;
         ws.close();
@@ -84,7 +87,23 @@ export const extendedApi = apiSlice.injectEndpoints({
        * The Promise object should return the request value originally to
        * indicate that the send action is success.
        */
-      queryFn: (args: SendMessageArgs) => {
+      queryFn: async (args: SendMessageArgs) => {
+        /*
+         * Wait for connection Open here since await getConnection statement
+         * in onQueryStarted doesnt really block the process there.
+         */
+        webSocketManager.hasConnection("/ws/async-chat/");
+
+        await new Promise((resolve) => {
+          const interval = setInterval(() => {
+            if (webSocketManager.hasConnection("/ws/async-chat/")) {
+              clearInterval(interval);
+              resolve("Has Connection");
+            } else {
+            }
+          }, 2000);
+        });
+
         const { chatMessageContent, chatroomId } = args;
         const ts = new Date();
         const payload = {
@@ -97,8 +116,8 @@ export const extendedApi = apiSlice.injectEndpoints({
         };
         return new Promise((resolve, rejects) => {
           const bytesRequest = ChatRequest.encode(payload).finish();
-          const socket = webSocketManager.getConnection(`/ws/async-chat/`);
-          socket.send(bytesRequest);
+          //const socket = webSocketManager.getConnection(`/ws/async-chat/`);
+          webSocketManager.safeSend("/ws/async-chat/", bytesRequest);
           return resolve({
             data: {
               chatroomId: chatroomId,
@@ -108,6 +127,69 @@ export const extendedApi = apiSlice.injectEndpoints({
             },
           });
         });
+      },
+      async onQueryStarted({}, { dispatch }) {
+        // Await Websocket manager wont stop onQueryStarted here
+        // The code will wait for the connection and also do queryFn at same time.
+        // which means the event listener will append later?!
+        const socketItem = await webSocketManager.getAndReConnect(
+          "/ws/async-chat/"
+        );
+
+        if (!socketItem.onMessageEventListener) {
+          const listener = (event: MessageEvent) => {
+            const reader = new FileReader();
+            reader.addEventListener("loadend", () => {
+              const result = reader.result as ArrayBuffer;
+              if (result) {
+                const uiArray = new Uint8Array(result);
+                const response = ChatResponse.decode(uiArray);
+                let role: string;
+
+                switch (response.context!.role) {
+                  case ChatRoleType.SYSTEM:
+                    role = "system";
+                    break;
+                  case ChatRoleType.USER:
+                    role = "user";
+                    break;
+                  case ChatRoleType.ASSISTANT:
+                    role = "assistant";
+                    break;
+                }
+
+                if (response.statusCode === StatusCode.SUCCESS) {
+                  dispatch(
+                    extendedApi.util.updateQueryData(
+                      "getChatMessages",
+                      undefined,
+                      (draft) => {
+                        if (response.context) {
+                          const timestamp =
+                            response.context!.timestamp!.getTime();
+                          const newDraft = {
+                            chatroomId: response.context.chatroomId,
+                            content: response.context.content,
+                            role: role,
+                            timestamp: timestamp,
+                          };
+                          Object.assign(draft, newDraft);
+                        }
+                      }
+                    )
+                  );
+                } else {
+                  console.log(
+                    "[onMessageEventListener] GPT Server Response Failed"
+                  );
+                }
+              }
+            });
+            reader.readAsArrayBuffer(event.data);
+          };
+          socketItem.socket.addEventListener("message", listener);
+          socketItem.onMessageEventListener = true;
+        }
       },
     }),
   }),
