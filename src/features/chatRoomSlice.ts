@@ -246,6 +246,25 @@ const chatRoomSlice = createSlice({
     updateMaxCompleteTokenLength(state, action) {
       state.maxCompleteTokenLength = action.payload;
     },
+    addFixedPromptToCurrentChatRoom(state, action) {
+      if (state.currentChatRoomId) {
+        const currentChatRoom = state.chatRooms[state.currentChatRoomId];
+        if (!currentChatRoom.fixedPrompts) {
+          currentChatRoom.fixedPrompts = [action.payload];
+        } else {
+          if (!currentChatRoom.fixedPrompts.includes(action.payload)) {
+            currentChatRoom.fixedPrompts.push(action.payload);
+          }
+        }
+      }
+    },
+    removeFixedPromptFromCurrentChatRoom(state, action) {
+      if (state.currentChatRoomId) {
+        const currentChatRoom = state.chatRooms[state.currentChatRoomId];
+        const index = currentChatRoom.fixedPrompts.indexOf(action.payload);
+        currentChatRoom.fixedPrompts.splice(index, 1);
+      }
+    },
   },
   extraReducers(builder) {
     builder
@@ -328,6 +347,8 @@ export const {
   sessionHistoryNextPush,
   sessionHistoryNextPop,
   updateMaxCompleteTokenLength,
+  addFixedPromptToCurrentChatRoom,
+  removeFixedPromptFromCurrentChatRoom,
 } = chatRoomSlice.actions;
 
 export default chatRoomSlice.reducer;
@@ -398,3 +419,15 @@ export const selectSessionHistoryNext = (state: RootState) =>
 
 export const selectMaxCompleteTokenLength = (state: RootState) =>
   state.chatRooms.maxCompleteTokenLength;
+
+export const selectAllFixedPromptsFromCurrnetChatRoom = (state: RootState) => {
+  const currentChatRoom =
+    state.chatRooms.chatRooms[state.chatRooms.currentChatRoomId];
+  if (!currentChatRoom) return [];
+  if (currentChatRoom.hasOwnProperty("fixedPrompts")) {
+    return state.chatRooms.chatRooms[state.chatRooms.currentChatRoomId]
+      .fixedPrompts;
+  } else {
+    return [];
+  }
+};

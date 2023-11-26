@@ -25,6 +25,7 @@ export interface ChatRoomObject {
   created_at: string;
   last_used_time: string;
   sessions: ShzGPTMessage[];
+  fixedPrompts: number[];
 }
 
 // Calling chatroom status is a little wierd

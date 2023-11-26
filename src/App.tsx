@@ -21,6 +21,7 @@ import { useAppEffect } from "./effects/appEffect";
 import GPTAppBar from "./components/gptAppBar";
 import ChatRoomsManage from "./components/chatRoomsManage";
 import InputForm from "./components/InputForm";
+import FixedPromptsList from "./features/FixedPromptList";
 import { ChatSession } from "./features/chatSession";
 import { ChatSessionControlBar } from "./features/chatSessionControlBar";
 
@@ -198,6 +199,7 @@ function App() {
                 colorMode={colorMode}
                 chatContentRef={chatContentRef}
               ></ChatSession>
+              <FixedPromptsList />
               <InputForm />
             </Box>
           </Box>

@@ -2,9 +2,11 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { selectAllPrompts, fetchPrompts } from "./promptsSlice";
+import { addFixedPromptToCurrentChatRoom } from "./chatRoomSlice";
 import { fetchPromptTopic } from "./promptTopicSlice";
 import {
   Box,
+  IconButton,
   Divider,
   Typography,
   List,
@@ -12,6 +14,7 @@ import {
   ListItemButton,
   CircularProgress,
 } from "@mui/material";
+import AddCommentIcon from "@mui/icons-material/AddComment";
 
 import { RootState, AppDispatch } from "../app/store";
 import { ShzGPTPrompt } from "../types/interfaces";
@@ -22,6 +25,7 @@ interface PromptItemArgs {
 }
 
 const PromptItem = (props: PromptItemArgs) => {
+  const dispatch = useDispatch() as AppDispatch;
   const [showContent, setShowContent] = useState(false);
   const { prompt } = props;
 
@@ -37,6 +41,10 @@ const PromptItem = (props: PromptItemArgs) => {
     return await navigator.clipboard.writeText(prompt.content);
   };
 
+  const handleAddFixedPrompt = () => {
+    dispatch(addFixedPromptToCurrentChatRoom(prompt.id));
+  };
+
   return (
     <ListItem
       key="index"
@@ -50,6 +58,7 @@ const PromptItem = (props: PromptItemArgs) => {
         <Typography fontSize="small" color="primary.contrastText">
           {prompt.name}
         </Typography>
+
         {showContent && (
           <Box
             sx={{
@@ -71,6 +80,10 @@ const PromptItem = (props: PromptItemArgs) => {
           </Box>
         )}
       </ListItemButton>
+
+      <IconButton size="small" onClick={handleAddFixedPrompt}>
+        <AddCommentIcon></AddCommentIcon>
+      </IconButton>
     </ListItem>
   );
 };
