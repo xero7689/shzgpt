@@ -48,7 +48,7 @@ export interface ChatRoomState {
   sessionHistoryNext: number[];
 
   currentChatRoom: number | undefined;
-  ChatRooms: ChatRooms;
+  chatRooms: ChatRooms;
 
   status: ChatRoomStatus;
   maxCompleteTokenLength: number;

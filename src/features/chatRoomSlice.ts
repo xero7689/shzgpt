@@ -33,7 +33,7 @@ const initialState = {
   sessionHistoryNext: [],
 
   currentChatRoom: undefined,
-  ChatRooms: {},
+  chatRooms: {},
 
   maxCompleteTokenLength: 1024,
   status: {
@@ -57,7 +57,7 @@ export const fetchGPTMessage = createAsyncThunk<
     throw new Error("Current Chat Room doesn't Exist");
   }
   const history = formatChatHistory(
-    state.chatRooms.ChatRooms[state.chatRooms.currentChatRoomId].sessions
+    state.chatRooms.chatRooms[state.chatRooms.currentChatRoomId].sessions
   );
 
   const fetchHistory = history;
@@ -89,7 +89,7 @@ export const fetchChatSession = createAsyncThunk<
 
     // If there is already have session then skip the api fetching
     // Remenber to write the chat completemanuly to state instead reading from the server
-    if (state.chatRooms.ChatRooms[chatroomId].sessions === undefined) {
+    if (state.chatRooms.chatRooms[chatroomId].sessions === undefined) {
       const response = await getChatHistory(chatroomId);
       return convertDjangoChatHistory(response, chatroomId);
     } else {
@@ -188,7 +188,7 @@ const chatRoomSlice = createSlice({
     },
     initChatRoomSession(state, action) {
       const { chatRoomId, initMessage } = action.payload;
-      state.ChatRooms[chatRoomId].sessions = [initMessage];
+      state.chatRooms[chatRoomId].sessions = [initMessage];
     },
     addSessionMessage(state, action) {
       const chatMessage = action.payload;
@@ -199,19 +199,19 @@ const chatRoomSlice = createSlice({
 
       const { timestamp, role, content, chatroomId } = action.payload;
       const message = { timestamp, role, content, chatroomId };
-      if (state.ChatRooms[chatroomId] && state.ChatRooms[chatroomId].sessions) {
-        state.ChatRooms[chatroomId].sessions.push(message);
+      if (state.chatRooms[chatroomId] && state.chatRooms[chatroomId].sessions) {
+        state.chatRooms[chatroomId].sessions.push(message);
       }
     },
     newChatRoomUpdated(state, action) {
       const payload = action.payload;
-      state.ChatRooms[payload.id] = payload;
+      state.chatRooms[payload.id] = payload;
     },
     ChatRoomsUpdated(state, action) {
       const payload = action.payload;
       for (let key in payload) {
-        const chatRoomInfo = state.ChatRooms[payload[key].id];
-        state.ChatRooms[payload[key].id] = {
+        const chatRoomInfo = state.chatRooms[payload[key].id];
+        state.chatRooms[payload[key].id] = {
           ...chatRoomInfo,
           ...payload[key],
         };
@@ -256,7 +256,7 @@ const chatRoomSlice = createSlice({
       .addCase(fetchGPTMessage.fulfilled, (state, action) => {
         state.status.fetchGPTStatus = "succeeded";
         if (state.currentChatRoomId) {
-          state.ChatRooms[state.currentChatRoomId].sessions.push(
+          state.chatRooms[state.currentChatRoomId].sessions.push(
             action.payload
           );
         }
@@ -276,7 +276,7 @@ const chatRoomSlice = createSlice({
         state.status.fetchChatSessionStatus = "succeeded";
         if (action.payload) {
           if (state.currentChatRoomId) {
-            state.ChatRooms[state.currentChatRoomId].sessions = action.payload;
+            state.chatRooms[state.currentChatRoomId].sessions = action.payload;
           }
         }
       })
@@ -308,7 +308,7 @@ const chatRoomSlice = createSlice({
       .addCase(addChatRoom.fulfilled, (state, action) => {
         state.status.addChatRoomStatus = "succeeded";
         const payload = action.payload;
-        state.ChatRooms[payload.id] = payload;
+        state.chatRooms[payload.id] = payload;
       })
       .addCase(addChatRoom.rejected, (state, action) => {
         state.status.addChatRoomStatus = "failed";
@@ -335,7 +335,7 @@ export default chatRoomSlice.reducer;
 export const selectCurrentChatSession = (state: RootState) => {
   if (state.chatRooms.currentChatRoomId) {
     const currentChatRoom =
-      state.chatRooms.ChatRooms[state.chatRooms.currentChatRoomId];
+      state.chatRooms.chatRooms[state.chatRooms.currentChatRoomId];
     if ("sessions" in currentChatRoom) {
       return currentChatRoom.sessions;
     }
@@ -349,8 +349,8 @@ export const selectChatRoomSessionsById = (
   state: RootState,
   id: number | undefined
 ) => {
-  if (id && id in state.chatRooms.ChatRooms) {
-    return state.chatRooms.ChatRooms[id].sessions;
+  if (id && id in state.chatRooms.chatRooms) {
+    return state.chatRooms.chatRooms[id].sessions;
   } else {
     return [];
   }
@@ -360,8 +360,8 @@ export const selectChatRoomById = (
   state: RootState,
   id: number | undefined
 ) => {
-  if (id && id in state.chatRooms.ChatRooms) {
-    return state.chatRooms.ChatRooms[id];
+  if (id && id in state.chatRooms.chatRooms) {
+    return state.chatRooms.chatRooms[id];
   } else {
     return undefined;
   }
@@ -370,7 +370,7 @@ export const selectChatRoomById = (
 export const selectLastRoleOfHistory = (state: RootState) => {
   if (state.chatRooms.currentChatRoomId) {
     const lastSession =
-      state.chatRooms.ChatRooms[
+      state.chatRooms.chatRooms[
         state.chatRooms.currentChatRoomId
       ].sessions.slice(-1);
     if (lastSession) {
@@ -380,7 +380,7 @@ export const selectLastRoleOfHistory = (state: RootState) => {
 };
 
 export const selectAllChatRooms = (state: RootState) =>
-  state.chatRooms.ChatRooms;
+  state.chatRooms.chatRooms;
 
 export const selectFetchGPTStatus = (state: RootState) =>
   state.chatRooms.status.fetchGPTStatus;
