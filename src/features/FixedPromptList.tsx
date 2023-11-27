@@ -52,7 +52,7 @@ export default function FixedPromptsList() {
   });
   return (
     <Box>
-      <List sx={{ paddingY: "0" }}>{renderedFixedPrompts}</List>
+      <List>{renderedFixedPrompts}</List>
     </Box>
   );
 }
