@@ -203,10 +203,6 @@ const chatRoomSlice = createSlice({
         state.chatRooms[chatroomId].sessions.push(message);
       }
     },
-    newChatRoomUpdated(state, action) {
-      const payload = action.payload;
-      state.chatRooms[payload.id] = payload;
-    },
     ChatRoomsUpdated(state, action) {
       const payload = action.payload;
       for (let key in payload) {
@@ -337,7 +333,6 @@ const chatRoomSlice = createSlice({
 
 export const {
   initChatRoomState,
-  newChatRoomUpdated,
   ChatRoomsUpdated,
   initChatRoomSession,
   addSessionMessage,
