@@ -85,14 +85,14 @@ export default function InputForm() {
     // You should use the sendChatResponse belowing to decided the chatroom Id
     dispatch(addSessionMessage(userMessage));
 
+    // Remove the input field;
+    messageRef.current!.value = "";
+
     // Testing for websocket sendMessage
-    await sendChat({
+    sendChat({
       chatroomId: currentChatRoomId,
       chatMessageContent: userMessage.content,
     });
-
-    // Remove the input field;
-    messageRef.current!.value = "";
   }
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
