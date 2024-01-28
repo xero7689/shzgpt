@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 import {
   ChatUserData,
   ShzGPTChatHistoryResponseObject,
-  PostNewMessageArgs,
+  PostMessageArgs,
 } from "../../types/interfaces";
 
 let envBaseUrl = process.env.REACT_APP_DJANGO_STORAGE_API_ENDPOINT;
@@ -38,17 +38,17 @@ export const apiSlice = createApi({
     }),
     addNewChat: builder.mutation<
       ShzGPTChatHistoryResponseObject,
-      PostNewMessageArgs
+      PostMessageArgs
     >({
       query: (initialChat) => {
-        const { chatRoomId, role, newMessage } = initialChat;
+        const { chatRoomId, role, message } = initialChat;
         return {
           url: "/chat/",
           method: "POST",
           body: {
             chatroom: chatRoomId,
             role: role,
-            content: newMessage,
+            content: message,
           },
         };
       },

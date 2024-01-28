@@ -33,7 +33,7 @@ const initialState = {
   sessionHistoryNext: [],
 
   currentChatRoom: undefined,
-  newChatRooms: {},
+  chatRooms: {},
 
   maxCompleteTokenLength: 1024,
   status: {
@@ -41,7 +41,7 @@ const initialState = {
     fetchGPTErrorMessage: "",
     fetchChatRoomStatus: "pending",
     fetchChatSessionStatus: "pending",
-    addNewChatRoomStatus: "pending",
+    addChatRoomStatus: "pending",
   },
 } as ChatRoomState;
 
@@ -57,7 +57,7 @@ export const fetchGPTMessage = createAsyncThunk<
     throw new Error("Current Chat Room doesn't Exist");
   }
   const history = formatChatHistory(
-    state.chatRooms.newChatRooms[state.chatRooms.currentChatRoomId].sessions
+    state.chatRooms.chatRooms[state.chatRooms.currentChatRoomId].sessions
   );
 
   const fetchHistory = history;
@@ -73,7 +73,10 @@ export const fetchGPTMessage = createAsyncThunk<
   }, 0);
 
   const response = await fetchMessage(finalHistory.reverse(), activeKey);
-  return formatResponseMessage(response.data, state.chatRooms.currentChatRoomId);
+  return formatResponseMessage(
+    response.data,
+    state.chatRooms.currentChatRoomId
+  );
 });
 
 export const fetchChatSession = createAsyncThunk<
@@ -86,7 +89,7 @@ export const fetchChatSession = createAsyncThunk<
 
     // If there is already have session then skip the api fetching
     // Remenber to write the chat completemanuly to state instead reading from the server
-    if (state.chatRooms.newChatRooms[chatroomId].sessions === undefined) {
+    if (state.chatRooms.chatRooms[chatroomId].sessions === undefined) {
       const response = await getChatHistory(chatroomId);
       return convertDjangoChatHistory(response, chatroomId);
     } else {
@@ -95,8 +98,8 @@ export const fetchChatSession = createAsyncThunk<
   }
 );
 
-export const addNewChatRoom = createAsyncThunk(
-  "chatRoom/addNewChatRoom",
+export const addChatRoom = createAsyncThunk(
+  "chatRoom/addChatRoom",
   async (newChatRoomName: string) => {
     const response = await createChatRoom(newChatRoomName);
     return response;
@@ -131,14 +134,14 @@ export const fetchChatRoom = createAsyncThunk(
     }
 
     // Missing the first ChatRooms
-    const newChatRooms = response.results.reduce(
+    const ChatRooms = response.results.reduce(
       (acc: ChatRooms, obj: ChatRoomObject) => {
         acc[obj.id] = obj;
         return acc;
       },
       {}
     );
-    dispatch(newChatRoomsUpdated(newChatRooms));
+    dispatch(ChatRoomsUpdated(ChatRooms));
 
     // Continue Fetch Remaing ChatRooms
     const regex = /\/\?page=(.*)/; // regular expression to match "/?" and capture the query string
@@ -150,14 +153,14 @@ export const fetchChatRoom = createAsyncThunk(
           const pageNum = match[1];
           response = await getChatRoom(pageNum);
 
-          const newChatRooms = response.results.reduce(
+          const ChatRooms = response.results.reduce(
             (acc: ChatRooms, obj: ChatRoomObject) => {
               acc[obj.id] = obj;
               return acc;
             },
             {}
           );
-          dispatch(newChatRoomsUpdated(newChatRooms));
+          dispatch(ChatRoomsUpdated(ChatRooms));
         }
       }
     }
@@ -180,12 +183,12 @@ const chatRoomSlice = createSlice({
         fetchGPTErrorMessage: "",
         fetchChatRoomStatus: "pending",
         fetchChatSessionStatus: "pending",
-        addNewChatRoomStatus: "pending",
+        addChatRoomStatus: "pending",
       };
     },
     initChatRoomSession(state, action) {
       const { chatRoomId, initMessage } = action.payload;
-      state.newChatRooms[chatRoomId].sessions = [initMessage];
+      state.chatRooms[chatRoomId].sessions = [initMessage];
     },
     addSessionMessage(state, action) {
       const chatMessage = action.payload;
@@ -196,22 +199,15 @@ const chatRoomSlice = createSlice({
 
       const { timestamp, role, content, chatroomId } = action.payload;
       const message = { timestamp, role, content, chatroomId };
-      if (
-        state.newChatRooms[chatroomId] &&
-        state.newChatRooms[chatroomId].sessions
-      ) {
-        state.newChatRooms[chatroomId].sessions.push(message);
+      if (state.chatRooms[chatroomId] && state.chatRooms[chatroomId].sessions) {
+        state.chatRooms[chatroomId].sessions.push(message);
       }
     },
-    newChatRoomUpdated(state, action) {
-      const payload = action.payload;
-      state.newChatRooms[payload.id] = payload;
-    },
-    newChatRoomsUpdated(state, action) {
+    ChatRoomsUpdated(state, action) {
       const payload = action.payload;
       for (let key in payload) {
-        const chatRoomInfo = state.newChatRooms[payload[key].id];
-        state.newChatRooms[payload[key].id] = {
+        const chatRoomInfo = state.chatRooms[payload[key].id];
+        state.chatRooms[payload[key].id] = {
           ...chatRoomInfo,
           ...payload[key],
         };
@@ -246,6 +242,25 @@ const chatRoomSlice = createSlice({
     updateMaxCompleteTokenLength(state, action) {
       state.maxCompleteTokenLength = action.payload;
     },
+    addFixedPromptToCurrentChatRoom(state, action) {
+      if (state.currentChatRoomId) {
+        const currentChatRoom = state.chatRooms[state.currentChatRoomId];
+        if (!currentChatRoom.fixedPrompts) {
+          currentChatRoom.fixedPrompts = [action.payload];
+        } else {
+          if (!currentChatRoom.fixedPrompts.includes(action.payload)) {
+            currentChatRoom.fixedPrompts.push(action.payload);
+          }
+        }
+      }
+    },
+    removeFixedPromptFromCurrentChatRoom(state, action) {
+      if (state.currentChatRoomId) {
+        const currentChatRoom = state.chatRooms[state.currentChatRoomId];
+        const index = currentChatRoom.fixedPrompts.indexOf(action.payload);
+        currentChatRoom.fixedPrompts.splice(index, 1);
+      }
+    },
   },
   extraReducers(builder) {
     builder
@@ -256,7 +271,7 @@ const chatRoomSlice = createSlice({
       .addCase(fetchGPTMessage.fulfilled, (state, action) => {
         state.status.fetchGPTStatus = "succeeded";
         if (state.currentChatRoomId) {
-          state.newChatRooms[state.currentChatRoomId].sessions.push(
+          state.chatRooms[state.currentChatRoomId].sessions.push(
             action.payload
           );
         }
@@ -276,8 +291,7 @@ const chatRoomSlice = createSlice({
         state.status.fetchChatSessionStatus = "succeeded";
         if (action.payload) {
           if (state.currentChatRoomId) {
-            state.newChatRooms[state.currentChatRoomId].sessions =
-              action.payload;
+            state.chatRooms[state.currentChatRoomId].sessions = action.payload;
           }
         }
       })
@@ -303,24 +317,23 @@ const chatRoomSlice = createSlice({
       })
 
       // Add New ChatRoom Status
-      .addCase(addNewChatRoom.pending, (state) => {
-        state.status.addNewChatRoomStatus = "loading";
+      .addCase(addChatRoom.pending, (state) => {
+        state.status.addChatRoomStatus = "loading";
       })
-      .addCase(addNewChatRoom.fulfilled, (state, action) => {
-        state.status.addNewChatRoomStatus = "succeeded";
+      .addCase(addChatRoom.fulfilled, (state, action) => {
+        state.status.addChatRoomStatus = "succeeded";
         const payload = action.payload;
-        state.newChatRooms[payload.id] = payload;
+        state.chatRooms[payload.id] = payload;
       })
-      .addCase(addNewChatRoom.rejected, (state, action) => {
-        state.status.addNewChatRoomStatus = "failed";
+      .addCase(addChatRoom.rejected, (state, action) => {
+        state.status.addChatRoomStatus = "failed";
       });
   },
 });
 
 export const {
   initChatRoomState,
-  newChatRoomUpdated,
-  newChatRoomsUpdated,
+  ChatRoomsUpdated,
   initChatRoomSession,
   addSessionMessage,
   currentChatRoomUpdated,
@@ -329,6 +342,8 @@ export const {
   sessionHistoryNextPush,
   sessionHistoryNextPop,
   updateMaxCompleteTokenLength,
+  addFixedPromptToCurrentChatRoom,
+  removeFixedPromptFromCurrentChatRoom,
 } = chatRoomSlice.actions;
 
 export default chatRoomSlice.reducer;
@@ -336,7 +351,7 @@ export default chatRoomSlice.reducer;
 export const selectCurrentChatSession = (state: RootState) => {
   if (state.chatRooms.currentChatRoomId) {
     const currentChatRoom =
-      state.chatRooms.newChatRooms[state.chatRooms.currentChatRoomId];
+      state.chatRooms.chatRooms[state.chatRooms.currentChatRoomId];
     if ("sessions" in currentChatRoom) {
       return currentChatRoom.sessions;
     }
@@ -350,8 +365,8 @@ export const selectChatRoomSessionsById = (
   state: RootState,
   id: number | undefined
 ) => {
-  if (id && id in state.chatRooms.newChatRooms) {
-    return state.chatRooms.newChatRooms[id].sessions;
+  if (id && id in state.chatRooms.chatRooms) {
+    return state.chatRooms.chatRooms[id].sessions;
   } else {
     return [];
   }
@@ -361,8 +376,8 @@ export const selectChatRoomById = (
   state: RootState,
   id: number | undefined
 ) => {
-  if (id && id in state.chatRooms.newChatRooms) {
-    return state.chatRooms.newChatRooms[id];
+  if (id && id in state.chatRooms.chatRooms) {
+    return state.chatRooms.chatRooms[id];
   } else {
     return undefined;
   }
@@ -371,7 +386,7 @@ export const selectChatRoomById = (
 export const selectLastRoleOfHistory = (state: RootState) => {
   if (state.chatRooms.currentChatRoomId) {
     const lastSession =
-      state.chatRooms.newChatRooms[
+      state.chatRooms.chatRooms[
         state.chatRooms.currentChatRoomId
       ].sessions.slice(-1);
     if (lastSession) {
@@ -381,7 +396,7 @@ export const selectLastRoleOfHistory = (state: RootState) => {
 };
 
 export const selectAllChatRooms = (state: RootState) =>
-  state.chatRooms.newChatRooms;
+  state.chatRooms.chatRooms;
 
 export const selectFetchGPTStatus = (state: RootState) =>
   state.chatRooms.status.fetchGPTStatus;
@@ -399,3 +414,15 @@ export const selectSessionHistoryNext = (state: RootState) =>
 
 export const selectMaxCompleteTokenLength = (state: RootState) =>
   state.chatRooms.maxCompleteTokenLength;
+
+export const selectAllFixedPromptsFromCurrnetChatRoom = (state: RootState) => {
+  const currentChatRoom =
+    state.chatRooms.chatRooms[state.chatRooms.currentChatRoomId];
+  if (!currentChatRoom) return [];
+  if (currentChatRoom.hasOwnProperty("fixedPrompts")) {
+    return state.chatRooms.chatRooms[state.chatRooms.currentChatRoomId]
+      .fixedPrompts;
+  } else {
+    return [];
+  }
+};

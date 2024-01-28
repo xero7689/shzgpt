@@ -21,6 +21,10 @@ import { useSendMessageMutation } from "../features/api/socketSlice";
 
 import { selectUserIsLogin } from "../features/chatUserSlice";
 
+import { selectAllFixedPromptsFromCurrnetChatRoom } from "../features/chatRoomSlice";
+import { selectPromptByIds } from "../features/promptsSlice";
+import { RootState } from "../app/store";
+
 export default function InputForm() {
   const theme = useTheme();
 
@@ -29,6 +33,11 @@ export default function InputForm() {
   const [requestMessage, setRequestMessage] = useState("");
   const currentChatRoomId = useSelector(selectCurrentChatRoomId);
   const userIsLogin = useSelector(selectUserIsLogin);
+  const fixedPromptIds = useSelector(selectAllFixedPromptsFromCurrnetChatRoom);
+
+  let fixedPrompts = useSelector((state) =>
+    selectPromptByIds(state as RootState, fixedPromptIds)
+  );
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRequestMessage(event.target.value);
@@ -53,23 +62,37 @@ export default function InputForm() {
     }
   }, [dispatch, chatMessageData]);
 
+  useEffect(() => {}, [fixedPrompts]);
+
   const [sendChat, { isLoading: isSendChatLoading }] = useSendMessageMutation();
 
   async function handleSubmit() {
-    const userMessage = formatUserMessage(requestMessage, currentChatRoomId);
+    let prefixPromptString = "";
+    if (fixedPrompts) {
+      for (const prompt of fixedPrompts) {
+        if (prompt) {
+          prefixPromptString += prompt.content + "\n";
+        }
+      }
+    }
+
+    const userMessage = formatUserMessage(
+      prefixPromptString + requestMessage,
+      currentChatRoomId
+    );
 
     // addSessionMessage use current room Id in the async thunk
     // You should use the sendChatResponse belowing to decided the chatroom Id
     dispatch(addSessionMessage(userMessage));
 
+    // Remove the input field;
+    messageRef.current!.value = "";
+
     // Testing for websocket sendMessage
-    await sendChat({
+    sendChat({
       chatroomId: currentChatRoomId,
       chatMessageContent: userMessage.content,
     });
-
-    // Remove the input field;
-    messageRef.current!.value = "";
   }
 
   const handleKeyDown = (event: React.KeyboardEvent) => {

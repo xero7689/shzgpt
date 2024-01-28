@@ -2,7 +2,11 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getPromptsList, postNewPrompt } from "../fetchers/storage";
 import { RootState } from "../app/store";
 
-import { PromptSliceState, ShzGPTPrompt, ShzGPTPromptArgs } from "../types/interfaces";
+import {
+  PromptSliceState,
+  ShzGPTPrompt,
+  ShzGPTPromptArgs,
+} from "../types/interfaces";
 
 const initialState: PromptSliceState = {
   prompts: [] as ShzGPTPrompt[],
@@ -68,3 +72,13 @@ export const selectAllPrompts = (state: RootState) => state.prompts.prompts;
 
 export const selectPromptById = (state: RootState, promptId: number) =>
   state.prompts.prompts.find((prompt) => prompt.id === promptId);
+
+export const selectPromptByIds = (state: RootState, promptIdList: number[]) => {
+  const promptList = [];
+  for (let i = 0; i < promptIdList.length; i++) {
+    promptList.push(
+      state.prompts.prompts.find((prompt) => prompt.id === promptIdList[i])
+    );
+  }
+  return promptList;
+};
