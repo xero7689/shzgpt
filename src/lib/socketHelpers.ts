@@ -1,3 +1,5 @@
+import { ChatRequest } from "./../types/chatTypes";
+
 let envBaseUrl = process.env.REACT_APP_DJANGO_ASGI_API_ENDPOINT;
 
 if (!envBaseUrl) {
@@ -89,10 +91,10 @@ class WebSocketManager {
     this.connections = {};
   }
 
-  async safeSend(urlPath: string, request: Uint8Array) {
+  async safeSend(urlPath: string, request: ChatRequest) {
     let socket = this.connections[urlPath].socket;
     if (socket.readyState === WebSocket.OPEN) {
-      socket.send(request);
+      socket.send(JSON.stringify(request));
     } 
   }
 }
