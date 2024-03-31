@@ -51,7 +51,7 @@ function ParseContent(props: ParseContentProps) {
   const blocks = useMemo(() => separateCodeBlocks(content), [content]);
 
   return (
-    <Box display="flex" flexDirection="column">
+    <Box display="flex" flexDirection="column" fontSize="18px">
       {blocks.map((block, index) => {
         if (block.type === "code") {
           return (
@@ -65,7 +65,7 @@ function ParseContent(props: ParseContentProps) {
         }
         return (
           <Box key={index}>
-            <Typography sx={{ lineHeight: "1.75", maxWidth: "79ch" }}>
+            <Typography sx={{ lineHeight: "1.75", maxWidth: "79ch", fontSize: "18px" }}>
               {isUser ? block.content.trim() : block.content}
             </Typography>
           </Box>
