@@ -129,7 +129,7 @@ export default function InputForm() {
         autoCorrect="off"
         label="Send a message..."
         multiline
-        maxRows={4}
+        maxRows={12}
         InputLabelProps={{
           style: { color: theme.palette.primary.contrastText },
         }}
