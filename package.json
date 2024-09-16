@@ -1,6 +1,6 @@
 {
   "name": "shzgpt",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
   "proxy": "http://0.0.0.0:8000",
   "main": "main.js",
