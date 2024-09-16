@@ -11,7 +11,7 @@ export interface BaseResponse {
 
 export interface ChatUserData {
   id: number | null;
-  name: string;
+  username: string;
   created_at: string;
 }
 

@@ -76,7 +76,7 @@ function App() {
 
   useEffect(() => {
     if (userIsLogin) {
-      if (Object.keys(userInfo).length === 0) {
+      if (!userInfo) {
         dispatch(getChatUserData());
         dispatch(fetchAPIKey());
       }

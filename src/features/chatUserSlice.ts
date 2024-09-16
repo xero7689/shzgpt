@@ -23,11 +23,13 @@ export const loginStorageServer = createAsyncThunk<
   "chatUser/loginStorageServer",
   async ({ username, password }, { dispatch, rejectWithValue }) => {
     const response = await login(username, password);
+    console.log(response);
 
-    if (response["status"] === "succeeded") {
-      return response;
-    } else {
+    // If member_id not in response, then reject
+    if (!response["member_id"]) {
       return rejectWithValue(response);
+    } else {
+      return response;
     }
   }
 );
@@ -37,11 +39,10 @@ export const logoutStorageServer = createAsyncThunk<BaseResponse>(
   async (_, { dispatch, rejectWithValue }) => {
     const response = await logout();
 
-    if (response["status"] === "succeeded") {
-      return response;
-    } else {
+    if (response["status"] === "failed") {
       return rejectWithValue(response);
     }
+    return response;
   }
 );
 
@@ -96,7 +97,7 @@ export const chatUserSlice = createSlice({
       .addCase(logoutStorageServer.fulfilled, (state, action) => {
         state.ChatUserData = {
           id: null,
-          name: "",
+          username: "",
           created_at: "",
         };
         state.loginStatus = "pending";
@@ -111,7 +112,7 @@ export const chatUserSlice = createSlice({
         const payload = action.payload as BaseResponse;
         state.logoutStatus = payload["status"];
         state.logoutDetail = payload["detail"];
-      })
+      });
   },
 });
 

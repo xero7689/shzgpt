@@ -9,7 +9,7 @@ import {
 const STORAGE_API_ENDPOINT = process.env.REACT_APP_DJANGO_STORAGE_API_ENDPOINT;
 
 export const login = async (username: string, password: string) => {
-  let endpoint = `${STORAGE_API_ENDPOINT}/chat/login/`;
+  let endpoint = `${STORAGE_API_ENDPOINT}/api/members/login/`;
   const csrftoken = Cookies.get("csrftoken");
 
   const requestOptions: RequestInit = {
@@ -36,7 +36,7 @@ export const login = async (username: string, password: string) => {
 };
 
 export const logout = async () => {
-  let endpoint = `${STORAGE_API_ENDPOINT}/chat/logout/`;
+  let endpoint = `${STORAGE_API_ENDPOINT}/api/members/logout/`;
   const csrftoken = Cookies.get("csrftoken");
 
   const requestOptions: RequestInit = {
@@ -58,7 +58,7 @@ export const logout = async () => {
 };
 
 export const getUser = async () => {
-  let endpoint = `${STORAGE_API_ENDPOINT}/chat/user/`;
+  let endpoint = `${STORAGE_API_ENDPOINT}/api/members/whoami/`;
 
   const requestOptions: RequestInit = {
     method: "GET",
@@ -156,7 +156,7 @@ export const postChat = async (args: PostMessageArgs) => {
   };
 
   const response = await fetch(
-    `${STORAGE_API_ENDPOINT}/chat/chat/`,
+    `${STORAGE_API_ENDPOINT}/chat/messages/`,
     requestOptions
   )
     .then((response) => response.json())

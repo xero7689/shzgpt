@@ -141,7 +141,7 @@ export default function ChatUserModal() {
               color: "primary.contrastText",
             }}
           >
-            Hello, {ChatUserData.name}
+            {userIsLogin ? "Welcome Back!" : "Welcome!"}
           </Typography>
           <Box>
             <Typography sx={{ color: "error.main" }} fontWeight="bold" textAlign="center">
