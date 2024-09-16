@@ -1,4 +1,7 @@
-import { CreateChatCompletionResponse, ChatCompletionRequestMessageRoleEnum } from "openai";
+import {
+  CreateChatCompletionResponse,
+  ChatCompletionRequestMessageRoleEnum,
+} from "openai";
 
 export interface BaseResponse {
   status: string;
@@ -8,7 +11,7 @@ export interface BaseResponse {
 
 export interface ChatUserData {
   id: number | null;
-  name: string;
+  username: string;
   created_at: string;
 }
 
@@ -21,52 +24,51 @@ export interface ChatRoomObject {
   name: string;
   created_at: string;
   last_used_time: string;
-  sessions:  ShzGPTMessage[];
+  sessions: ShzGPTMessage[];
+  fixedPrompts: number[];
 }
 
 // Calling chatroom status is a little wierd
 // since this is the status corresponding to fetch() api
 export interface ChatRoomStatus {
-    fetchGPTStatus: string;
-    fetchGPTErrorMessage: string;
-    fetchChatRoomStatus: string;
-    fetchChatSessionStatus: string;
-    addNewChatRoomStatus: string;
+  fetchGPTStatus: string;
+  fetchGPTErrorMessage: string;
+  fetchChatRoomStatus: string;
+  fetchChatSessionStatus: string;
+  addChatRoomStatus: string;
 }
 
 export interface ChatRooms {
   [id: number]: ChatRoomObject;
 }
 
-
 export interface ChatRoomState {
-    currentChatRoomId: number;
-    nextChatHistoryPagination: number;
-    sessionHistoryPrev: number[];
-    sessionHistoryNext: number[];
-    //chatRooms: ChatRoomObject[];
+  currentChatRoomId: number;
+  nextChatHistoryPagination: number;
+  sessionHistoryPrev: number[];
+  sessionHistoryNext: number[];
 
-    currentChatRoom: number | undefined;
-    newChatRooms: ChatRooms;
+  currentChatRoom: number | undefined;
+  chatRooms: ChatRooms;
 
-    status: ChatRoomStatus;
-    maxCompleteTokenLength: number;
+  status: ChatRoomStatus;
+  maxCompleteTokenLength: number;
 }
 
-export interface PostNewMessageArgs {
+export interface PostMessageArgs {
   chatRoomId: number | null;
   role: ChatCompletionRequestMessageRoleEnum;
-  newMessage: string;
+  message: string;
 }
 
 export type ShzGPTChatHistoryResponseObject = {
-    id: number,
-    role: ChatCompletionRequestMessageRoleEnum,
-    content: string,
-    chatroom: number,
-    tokens: number,
-    created_at: string
-}
+  id: number;
+  role: ChatCompletionRequestMessageRoleEnum;
+  content: string;
+  chatroom: number;
+  tokens: number;
+  created_at: string;
+};
 
 export interface ShzGPTMessage {
   timestamp: number;
@@ -86,7 +88,6 @@ export interface ShzGPTPromptTopic {
   id: number;
   name: string;
 }
-
 
 export interface ShzGPTPromptArgs {
   name: string;

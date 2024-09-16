@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  addNewChatRoom,
+  addChatRoom,
   currentChatRoomUpdated,
   fetchChatRoom,
   selectAllChatRooms,
@@ -45,8 +45,8 @@ const ChatRoomsManage = (props: ChatRoomManageProps) => {
   const { toggle = false } = props;
   const theme = useTheme();
 
-  const newChatRoomRef = useRef();
-  const [newChatRoomNameInput, setNewChatRoomNameInput] = useState("");
+  const ChatRoomRef = useRef();
+  const [ChatRoomNameInput, setChatRoomNameInput] = useState("");
 
   const chatRooms = useSelector(selectAllChatRooms);
   const currentChatRoomId = useSelector(selectCurrentChatRoomId);
@@ -67,26 +67,33 @@ const ChatRoomsManage = (props: ChatRoomManageProps) => {
   useEffect(() => {}, [currentChatRoomId]);
 
   const handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNewChatRoomNameInput(event.target.value);
+    setChatRoomNameInput(event.target.value);
   };
 
-  const handleSubmitNewChatRoom = async () => {
-    const response = await dispatch(addNewChatRoom(newChatRoomNameInput));
-    const newChatRoomInfo = response.payload;
+  const handleSubmitChatRoom = async () => {
+    const response = await dispatch(addChatRoom(ChatRoomNameInput));
+    const ChatRoomInfo = response.payload;
 
     const initMessage = {
-      chatRoomId: newChatRoomInfo.id,
+      chatRoomId: ChatRoomInfo.id,
       role: ChatCompletionRequestMessageRoleEnum.System,
-      newMessage: "You're a helpful assistance.",
+      message: "You're a helpful assistance.",
     };
     await postChat(initMessage);
 
     // Init ChatRoom Sessions Here.
-    const payload = {chatRoomId: newChatRoomInfo.id, initMessage: formatShzGPTMessage("You're a helpful assistance", ChatCompletionRequestMessageRoleEnum.System, newChatRoomInfo.id)}
+    const payload = {
+      chatRoomId: ChatRoomInfo.id,
+      initMessage: formatShzGPTMessage(
+        "You're a helpful assistance",
+        ChatCompletionRequestMessageRoleEnum.System,
+        ChatRoomInfo.id
+      ),
+    };
     dispatch(initChatRoomSession(payload));
 
     dispatch(fetchChatRoom());
-    dispatch(currentChatRoomUpdated(newChatRoomInfo.id));
+    dispatch(currentChatRoomUpdated(ChatRoomInfo.id));
     setAnchorEl(null);
   };
 
@@ -156,7 +163,7 @@ const ChatRoomsManage = (props: ChatRoomManageProps) => {
             </Typography>
             <TextField
               size="small"
-              inputRef={newChatRoomRef}
+              inputRef={ChatRoomRef}
               onChange={handleOnChange}
               InputLabelProps={{
                 style: { color: theme.palette.primary.contrastText },
@@ -176,7 +183,7 @@ const ChatRoomsManage = (props: ChatRoomManageProps) => {
               sx={{
                 bgcolor: "secondary.main",
               }}
-              onClick={handleSubmitNewChatRoom}
+              onClick={handleSubmitChatRoom}
             >
               <Typography
                 fontSize={14}

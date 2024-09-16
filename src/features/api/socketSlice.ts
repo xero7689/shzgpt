@@ -6,11 +6,11 @@ import webSocketManager from "../../lib/socketHelpers";
 import {
   ChatRequest,
   ChatResponse,
-  ChatRoleType,
-  StatusCode,
-} from "../../common/pb/message";
+  ChatRole,
+  ChatStatus,
+} from "../../types/chatTypes";
 
-import { Context } from "../../common/pb/message";
+import { ChatContext } from "../../types/chatTypes";
 
 interface SendMessageArgs {
   chatMessageContent: string;
@@ -21,7 +21,7 @@ let envBaseUrl = process.env.REACT_APP_DJANGO_STORAGE_API_ENDPOINT;
 
 export const extendedApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getChatMessages: builder.query<Context, void>({
+    getChatMessages: builder.query<ChatContext, void>({
       query: () => `${envBaseUrl}/chat/chat-socket-init/`,
       async onCacheEntryAdded(
         arg,
@@ -35,43 +35,36 @@ export const extendedApi = apiSlice.injectEndpoints({
         try {
           await cacheDataLoaded;
           const listener = (event: MessageEvent) => {
-            const reader = new FileReader();
-            reader.addEventListener("loadend", () => {
-              const result = reader.result as ArrayBuffer;
-              if (result) {
-                const uiArray = new Uint8Array(result);
-                const response = ChatResponse.decode(uiArray);
-                let role: string;
+            const response: ChatResponse = JSON.parse(event.data);
 
-                switch (response.context!.role) {
-                  case ChatRoleType.SYSTEM:
-                    role = "system";
-                    break;
-                  case ChatRoleType.USER:
-                    role = "user";
-                    break;
-                  case ChatRoleType.ASSISTANT:
-                    role = "assistant";
-                    break;
-                }
+            let role: string;
 
-                if (response.statusCode === StatusCode.SUCCESS) {
-                  updateCachedData((draft) => {
-                    if (response.context) {
-                      const timestamp = response.context!.timestamp!.getTime();
-                      const newDraft = {
-                        chatroomId: response.context.chatroomId,
-                        content: response.context.content,
-                        role: role,
-                        timestamp: timestamp,
-                      };
-                      Object.assign(draft, newDraft);
-                    }
-                  });
+            switch (response.context.role) {
+              case ChatRole.SYSTEM:
+                role = "system";
+                break;
+              case ChatRole.USER:
+                role = "user";
+                break;
+              case ChatRole.ASSISTANT:
+                role = "assistant";
+                break;
+            }
+
+            if (response.status === ChatStatus.SUCCESS) {
+              updateCachedData((draft) => {
+                if (response.context) {
+                  const timestamp = new Date(response.timestamp).getTime();
+                  const newDraft = {
+                    chatroomId: response.context.chatroom_id,
+                    content: response.context.content,
+                    role: role,
+                    timestamp: timestamp,
+                  };
+                  Object.assign(draft, newDraft);
                 }
-              }
-            });
-            reader.readAsArrayBuffer(event.data);
+              });
+            }
           };
 
           ws.addEventListener("message", listener);
@@ -106,22 +99,21 @@ export const extendedApi = apiSlice.injectEndpoints({
 
         const { chatMessageContent, chatroomId } = args;
         const ts = new Date();
-        const payload = {
+        const payload: ChatRequest = {
           context: {
-            chatroomId: chatroomId,
-            role: ChatRoleType.USER,
+            chatroom_id: chatroomId,
+            role: ChatRole.USER,
             content: chatMessageContent,
-            timestamp: ts,
           },
+          timestamp: ts.getTime(),
         };
         return new Promise((resolve, rejects) => {
-          const bytesRequest = ChatRequest.encode(payload).finish();
           //const socket = webSocketManager.getConnection(`/ws/async-chat/`);
-          webSocketManager.safeSend("/ws/async-chat/", bytesRequest);
+          webSocketManager.safeSend("/ws/async-chat/", payload);
           return resolve({
             data: {
               chatroomId: chatroomId,
-              role: ChatRoleType.USER,
+              role: ChatRole.USER,
               content: chatMessageContent,
               timestamp: ts.getTime(),
             },
@@ -138,54 +130,45 @@ export const extendedApi = apiSlice.injectEndpoints({
 
         if (!socketItem.onMessageEventListener) {
           const listener = (event: MessageEvent) => {
-            const reader = new FileReader();
-            reader.addEventListener("loadend", () => {
-              const result = reader.result as ArrayBuffer;
-              if (result) {
-                const uiArray = new Uint8Array(result);
-                const response = ChatResponse.decode(uiArray);
-                let role: string;
+            const response = JSON.parse(event.data) as ChatResponse;
+            let role: string;
 
-                switch (response.context!.role) {
-                  case ChatRoleType.SYSTEM:
-                    role = "system";
-                    break;
-                  case ChatRoleType.USER:
-                    role = "user";
-                    break;
-                  case ChatRoleType.ASSISTANT:
-                    role = "assistant";
-                    break;
-                }
+            switch (response.context!.role) {
+              case ChatRole.SYSTEM:
+                role = "system";
+                break;
+              case ChatRole.USER:
+                role = "user";
+                break;
+              case ChatRole.ASSISTANT:
+                role = "assistant";
+                break;
+            }
 
-                if (response.statusCode === StatusCode.SUCCESS) {
-                  dispatch(
-                    extendedApi.util.updateQueryData(
-                      "getChatMessages",
-                      undefined,
-                      (draft) => {
-                        if (response.context) {
-                          const timestamp =
-                            response.context!.timestamp!.getTime();
-                          const newDraft = {
-                            chatroomId: response.context.chatroomId,
-                            content: response.context.content,
-                            role: role,
-                            timestamp: timestamp,
-                          };
-                          Object.assign(draft, newDraft);
-                        }
-                      }
-                    )
-                  );
-                } else {
-                  console.log(
-                    "[onMessageEventListener] GPT Server Response Failed"
-                  );
-                }
-              }
-            });
-            reader.readAsArrayBuffer(event.data);
+            if (response.status === ChatStatus.SUCCESS) {
+              dispatch(
+                extendedApi.util.updateQueryData(
+                  "getChatMessages",
+                  undefined,
+                  (draft) => {
+                    if (response.context) {
+                      const timestamp = response.timestamp;
+                      const newDraft = {
+                        chatroomId: response.context.chatroom_id,
+                        content: response.context.content,
+                        role: role,
+                        timestamp: timestamp,
+                      };
+                      Object.assign(draft, newDraft);
+                    }
+                  }
+                )
+              );
+            } else {
+              console.log(
+                "[onMessageEventListener] GPT Server Response Failed"
+              );
+            }
           };
           socketItem.socket.addEventListener("message", listener);
           socketItem.onMessageEventListener = true;

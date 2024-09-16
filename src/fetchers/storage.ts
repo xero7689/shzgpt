@@ -1,15 +1,15 @@
 import Cookies from "js-cookie";
 import {
   ShzGPTPromptArgs,
-  PostNewMessageArgs,
+  PostMessageArgs,
   ShzGPTChatHistoryResponseObject,
-  BaseResponse
+  BaseResponse,
 } from "../types/interfaces";
 
 const STORAGE_API_ENDPOINT = process.env.REACT_APP_DJANGO_STORAGE_API_ENDPOINT;
 
 export const login = async (username: string, password: string) => {
-  let endpoint = `${STORAGE_API_ENDPOINT}/chat/login/`;
+  let endpoint = `${STORAGE_API_ENDPOINT}/api/members/login/`;
   const csrftoken = Cookies.get("csrftoken");
 
   const requestOptions: RequestInit = {
@@ -25,18 +25,18 @@ export const login = async (username: string, password: string) => {
     .then((response) => {
       return response.json();
     })
-    .catch((error) => { 
+    .catch((error) => {
       return {
-        'status': 'failed',
-        'detail': `${error.message}`,
-        'data': {}
+        status: "failed",
+        detail: `${error.message}`,
+        data: {},
       } as BaseResponse;
     });
   return response;
 };
 
 export const logout = async () => {
-  let endpoint = `${STORAGE_API_ENDPOINT}/chat/logout/`;
+  let endpoint = `${STORAGE_API_ENDPOINT}/api/members/logout/`;
   const csrftoken = Cookies.get("csrftoken");
 
   const requestOptions: RequestInit = {
@@ -49,16 +49,16 @@ export const logout = async () => {
     .then((response) => response.json())
     .catch((error) => {
       return {
-        'status': 'failed',
-        'detail': `${error.message}`,
-        'data': {}
+        status: "failed",
+        detail: `${error.message}`,
+        data: {},
       } as BaseResponse;
     });
   return response;
 };
 
 export const getUser = async () => {
-  let endpoint = `${STORAGE_API_ENDPOINT}/chat/user/`;
+  let endpoint = `${STORAGE_API_ENDPOINT}/api/members/whoami/`;
 
   const requestOptions: RequestInit = {
     method: "GET",
@@ -140,8 +140,8 @@ export const createChatRoom = async (newChatRoomNameInput: string) => {
   return response;
 };
 
-export const postChat = async (args: PostNewMessageArgs) => {
-  const { chatRoomId, role, newMessage } = args;
+export const postChat = async (args: PostMessageArgs) => {
+  const { chatRoomId, role, message } = args;
   const csrftoken = Cookies.get("csrftoken");
 
   const requestOptions: RequestInit = {
@@ -151,12 +151,12 @@ export const postChat = async (args: PostNewMessageArgs) => {
     body: JSON.stringify({
       chatroom: chatRoomId,
       role: role,
-      content: newMessage,
+      content: message,
     }),
   };
 
   const response = await fetch(
-    `${STORAGE_API_ENDPOINT}/chat/chat/`,
+    `${STORAGE_API_ENDPOINT}/chat/messages/`,
     requestOptions
   )
     .then((response) => response.json())
